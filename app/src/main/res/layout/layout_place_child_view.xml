@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:padding="8dp"
+    android:background="@color/colorPrimary"
+    android:layout_height="wrap_content">
+
+    <!--<ImageView-->
+        <!--android:padding="8dp"-->
+        <!--android:id="@+id/iconPlace"-->
+        <!--android:src="@drawable/ic_place"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content" />-->
+
+    <!--<TextView-->
+        <!--app:theme="@style/TextStyle"-->
+        <!--android:id="@+id/tvAddress"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignBottom="@+id/iconPlace"-->
+        <!--android:layout_toRightOf="@id/iconPlace"-->
+        <!--android:text="Address" />-->
+
+    <!--<LinearLayout-->
+        <!--android:padding="2dp"-->
+        <!--android:layout_below="@id/iconPlace"-->
+        <!--android:orientation="horizontal"-->
+        <!--android:id="@+id/llTimeRadiusHolder"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content">-->
+        <!--<ImageView-->
+            <!--android:id="@+id/iconTime"-->
+            <!--android:padding="8dp"-->
+            <!--android:layout_weight="1"-->
+            <!--android:src="@drawable/ic_time"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content" />-->
+        <!--<TextView-->
+            <!--android:id="@+id/tvTimeChild"-->
+            <!--android:layout_weight="4"-->
+            <!--app:theme="@style/TextStyle"-->
+            <!--android:text="Duration"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content" />-->
+
+        <!--<ImageView-->
+            <!--android:id="@+id/iconRadius"-->
+            <!--android:padding="8dp"-->
+            <!--android:layout_weight="1"-->
+            <!--android:src="@drawable/ic_radius"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content" />-->
+        <!--<TextView-->
+            <!--android:id="@+id/tvRadius"-->
+            <!--android:layout_weight="4"-->
+            <!--app:theme="@style/TextStyle"-->
+            <!--android:text="Radius"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content" />-->
+    <!--</LinearLayout>-->
+
+    <!--<ImageView-->
+        <!--android:id="@+id/iconGroup"-->
+        <!--android:padding="8dp"-->
+        <!--android:src="@drawable/ic_group"-->
+        <!--android:layout_below="@id/llTimeRadiusHolder"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content" />-->
+    <!--<TextView-->
+        <!--android:id="@+id/tvContactGroup"-->
+        <!--app:theme="@style/TextStyle"-->
+        <!--android:layout_below="@id/llTimeRadiusHolder"-->
+        <!--android:layout_toRightOf="@id/iconGroup"-->
+        <!--android:text="All Contacts"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content" />-->
+    <!--<View-->
+        <!--android:id="@+id/childDivider"-->
+        <!--android:layout_below="@id/iconGroup"-->
+        <!--android:background="@android:color/white"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="1.5dp"/>-->
+
+    <!--<LinearLayout-->
+        <!--android:layout_below="@id/childDivider"-->
+        <!--android:orientation="horizontal"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content">-->
+        <!--<ImageView-->
+            <!--android:padding="8dp"-->
+            <!--android:src="@drawable/ic_delete"-->
+            <!--android:layout_weight="1"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content" />-->
+        <!--<TextView-->
+            <!--android:id="@+id/tvDelete"-->
+            <!--android:layout_weight="8"-->
+            <!--app:theme="@style/TextStyle"-->
+            <!--android:text="Delete"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content" />-->
+        <!--<ImageView-->
+            <!--android:id="@+id/ivCollapse"-->
+            <!--android:padding="4dp"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:src="@drawable/ic_collapse"-->
+            <!--android:layout_weight="1"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content" />-->
+    <!--</LinearLayout>-->
+
+</RelativeLayout>
