@@ -1,4 +1,4 @@
-package com.example.thelimitbreaker.foco
+package com.pervysage.thelimitbreaker.foco
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4

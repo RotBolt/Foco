@@ -7,6 +7,8 @@
     tools:context=".MainActivity">
 
     <LinearLayout
+        android:elevation="5dp"
+        android:background="@android:color/white"
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,15 +22,25 @@
             android:layout_weight="1"
             android:padding="7dp"
             android:text="Work Places"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="21sp" />
+            android:textColor="@color/colorGenDark"
+            android:textSize="28sp" />
 
         <ImageView
+            android:id="@+id/ivAction"
+            android:layout_width="0dp"
+            android:padding="11dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="0.2"
+            android:src="@drawable/ic_add_place" />
+
+        <ImageView
+            android:padding="11dp"
             android:id="@+id/ivSettings"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_weight="0.1"
+            android:layout_weight="0.2"
             android:src="@drawable/ic_settings" />
     </LinearLayout>
 
@@ -39,7 +51,6 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="4dp"
         app:layout_constraintBottom_toTopOf="@id/tabContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -50,6 +61,7 @@
 
     <FrameLayout
         android:id="@+id/tabContainer"
+        android:elevation="7dp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
@@ -67,10 +79,10 @@
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
             android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
-            android:background="@color/colorPrimary">
+            android:layout_marginBottom="4dp">
 
         </android.support.design.widget.TabLayout>
     </FrameLayout>
+
 
 </android.support.constraint.ConstraintLayout>

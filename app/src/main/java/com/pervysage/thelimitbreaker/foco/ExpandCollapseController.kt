@@ -1,25 +1,23 @@
-package com.example.thelimitbreaker.foco
+package com.pervysage.thelimitbreaker.foco
 
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.content.Context
-import android.opengl.ETC1.getHeight
 import android.support.v4.content.ContextCompat
-import android.support.v7.view.menu.ActionMenuItemView
 import android.util.Log
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.*
-import kotlinx.android.synthetic.main.layout_place_prefs.view.*
+import com.pervysage.thelimitbreaker.foco.database.PlacePrefs
+import com.pervysage.thelimitbreaker.foco.database.Repository
 
 
-class ExpandCollapseController(private val listView: ListView, private val context: Context) {
+class ExpandCollapseController(private val listView: ListView, private val context: Context,private val repository: Repository) {
     private var mRemoveObserver = 0
     private var translateCoords = IntArray(2)
-
+    private val TAG= "ExpandCollapseControl"
     private val touchDisabler = View.OnTouchListener { _, _ -> true }
 
 
@@ -63,12 +61,14 @@ class ExpandCollapseController(private val listView: ListView, private val conte
         val tvTimeHead = itemView.findViewById<TextView>(R.id.tvTimeHead)
         val ivExpandMore = itemView.findViewById<ImageView>(R.id.ivExpand)
         val tvPlaceTitle = itemView.findViewById<TextView>(R.id.tvPlaceTitle)
+        val listDivider = itemView.findViewById<FrameLayout>(R.id.divideContainer)
 
         listView.setOnTouchListener(touchDisabler)
         itemView.setOnTouchListener(touchDisabler)
         var oldTop = 0
         var oldBottom = 0
         val oldCoordinates = HashMap<View, IntArray>()
+        bind()
         if(collapseOther!=null){
             with(collapseOther) {
                 setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
@@ -76,10 +76,12 @@ class ExpandCollapseController(private val listView: ListView, private val conte
                 val otherExtraContent = findViewById<RelativeLayout>(R.id.extraContent)
                 val otherTimeHead = findViewById<TextView>(R.id.tvTimeHead)
                 val otherExpand = findViewById<ImageView>(R.id.ivExpand)
-                otherTitle.setTextColor(ContextCompat.getColor(context, com.example.thelimitbreaker.foco.R.color.colorPrimaryDark))
+                val otherDivider = findViewById<FrameLayout>(R.id.divideContainer)
+                otherTitle.setTextColor(ContextCompat.getColor(context, R.color.colorTextDark))
                 otherExtraContent.visibility = View.GONE
                 otherTimeHead.visibility = View.VISIBLE
                 otherExpand.visibility = View.VISIBLE
+                otherDivider.visibility=View.VISIBLE
             }
         }else{
             mRemoveObserver=1
@@ -93,10 +95,12 @@ class ExpandCollapseController(private val listView: ListView, private val conte
             }
 
             itemView.background=ContextCompat.getDrawable(context,R.drawable.reg_background)
+            itemView.elevation=20.0f
             tvPlaceTitle.setTextColor(ContextCompat.getColor(context, android.R.color.white))
             extraContent.visibility = View.VISIBLE
             tvTimeHead.visibility = View.GONE
             ivExpandMore.visibility = View.GONE
+            listDivider.visibility=View.GONE
 
         }
 
@@ -120,10 +124,12 @@ class ExpandCollapseController(private val listView: ListView, private val conte
                             }
 
                             itemView.background=ContextCompat.getDrawable(context,R.drawable.reg_background)
+                            itemView.elevation=20.0f
                             tvPlaceTitle.setTextColor(ContextCompat.getColor(context, android.R.color.white))
                             extraContent.visibility = View.VISIBLE
                             tvTimeHead.visibility = View.GONE
                             ivExpandMore.visibility = View.GONE
+                            listDivider.visibility=View.GONE
                             listView.requestLayout()
                             false
                         }
@@ -135,7 +141,6 @@ class ExpandCollapseController(private val listView: ListView, private val conte
                             val newHeight = newBottom - newTop
                             val delta = newHeight - oldHeight
                             translateCoords = getExpandedTopBottom(oldTop, oldBottom, delta)
-                            bind()
                             listView.requestLayout()
                             false
                         }
@@ -219,11 +224,14 @@ class ExpandCollapseController(private val listView: ListView, private val conte
         })
     }
 
-    fun collapseView(itemView: View) {
+    fun collapseView(itemView: View,placePrefs: PlacePrefs) {
         val extraContent = itemView.findViewById<RelativeLayout>(R.id.extraContent)
         val tvTimeHead = itemView.findViewById<TextView>(R.id.tvTimeHead)
         val ivExpandMore = itemView.findViewById<ImageView>(R.id.ivExpand)
         val tvPlaceTitle = itemView.findViewById<TextView>(R.id.tvPlaceTitle)
+        val listDivider = itemView.findViewById<FrameLayout>(R.id.divideContainer)
+        placePrefs.isExpanded=false
+        placePrefs.radius+=100
 
         val oldTop = itemView.top
         val oldBottom = itemView.bottom
@@ -239,10 +247,11 @@ class ExpandCollapseController(private val listView: ListView, private val conte
         }
 
         itemView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
-        tvPlaceTitle.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryDark))
+        tvPlaceTitle.setTextColor(ContextCompat.getColor(context, R.color.colorTextDark))
         extraContent.visibility = View.GONE
         tvTimeHead.visibility = View.VISIBLE
         ivExpandMore.visibility = View.VISIBLE
+        listDivider.visibility=View.VISIBLE
 
         itemView.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
             override fun onPreDraw(): Boolean {
@@ -279,8 +288,9 @@ class ExpandCollapseController(private val listView: ListView, private val conte
                         v.bottom = oldTopBottom[1]
                     } else {
                         val delta = if (i > index) -yTranslateBottom else yTranslateTop
-                        v.top = v.top + delta
-                        v.bottom = v.bottom + delta
+                        Log.d(TAG,"top ${v.top}, bottom ${v.bottom} delta $delta")
+                        v.top = if(v.top<0) v.top - delta else v.top + delta
+                        v.bottom = if(v.top<0) v.bottom - delta else v.bottom + delta
                     }
                     if (v != itemView) {
 
@@ -325,6 +335,7 @@ class ExpandCollapseController(private val listView: ListView, private val conte
                     override fun onAnimationEnd(animation: Animator?) {
                         listView.setOnTouchListener(null)
                         itemView.setOnTouchListener(null)
+                        repository.update(placePrefs)
                     }
 
                     override fun onAnimationCancel(animation: Animator?) {// TODO Not Implemented

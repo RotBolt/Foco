@@ -1,11 +1,11 @@
-package com.example.thelimitbreaker.foco.adapters
+package com.pervysage.thelimitbreaker.foco.adapters
 
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentStatePagerAdapter
-import com.example.thelimitbreaker.foco.fragments.DriveModeFragment
-import com.example.thelimitbreaker.foco.fragments.MeTimeFragment
-import com.example.thelimitbreaker.foco.fragments.PlacesFragment
+import com.pervysage.thelimitbreaker.foco.fragments.DriveModeFragment
+import com.pervysage.thelimitbreaker.foco.fragments.MeTimeFragment
+import com.pervysage.thelimitbreaker.foco.fragments.PlacesFragment
 
 class PagerAdapter(fm: FragmentManager, private val numOfTabs: Int) : FragmentStatePagerAdapter(fm) {
     override fun getItem(p0: Int): Fragment? =

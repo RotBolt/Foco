@@ -1,4 +1,4 @@
-package com.example.thelimitbreaker.foco
+package com.pervysage.thelimitbreaker.foco
 
 import org.junit.Test
 
