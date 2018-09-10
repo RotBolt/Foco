@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="HEAD_KEY" type="id"/>
-    <item name="DETAILS_KEY" type="id"/>
+    <item name="BODY_KEY" type="id"/>
 </resources>

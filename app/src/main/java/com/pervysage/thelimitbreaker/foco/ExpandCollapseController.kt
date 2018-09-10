@@ -21,6 +21,7 @@ class ExpandCollapseController(private val listView: ListView, private val conte
     private val touchDisabler = View.OnTouchListener { _, _ -> true }
 
 
+
     private fun getAnimation(view: View, translateTop: Float, translateBottom: Float): Animator {
 
         val top = view.top
@@ -56,7 +57,7 @@ class ExpandCollapseController(private val listView: ListView, private val conte
         return intArrayOf(yTranslateTop, yTranslateBottom)
     }
 
-    fun expandView(itemView: View, bind: () -> Unit, collapseOther:View? = null) {
+    fun expandView(itemView: View, bind:()->Unit, collapseOther:View? = null) {
         val extraContent = itemView.findViewById<RelativeLayout>(R.id.extraContent)
         val tvTimeHead = itemView.findViewById<TextView>(R.id.tvTimeHead)
         val ivExpandMore = itemView.findViewById<ImageView>(R.id.ivExpand)
@@ -68,7 +69,28 @@ class ExpandCollapseController(private val listView: ListView, private val conte
         var oldTop = 0
         var oldBottom = 0
         val oldCoordinates = HashMap<View, IntArray>()
-        bind()
+
+        val prepareExpand={
+            mRemoveObserver=1
+            oldTop=itemView.top
+            oldBottom=itemView.bottom
+            val childCount = listView.childCount
+            for (i in 0 until childCount) {
+                val v = listView.getChildAt(i)
+
+                oldCoordinates[v] = intArrayOf(v.top, v.bottom)
+            }
+            bind()
+
+            itemView.background=ContextCompat.getDrawable(context,R.drawable.reg_background)
+            itemView.elevation=20.0f
+            tvPlaceTitle.setTextColor(ContextCompat.getColor(context, android.R.color.white))
+            extraContent.visibility = View.VISIBLE
+            tvTimeHead.visibility = View.GONE
+            ivExpandMore.visibility = View.GONE
+            listDivider.visibility=View.GONE
+        }
+
         if(collapseOther!=null){
             with(collapseOther) {
                 setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
@@ -84,24 +106,7 @@ class ExpandCollapseController(private val listView: ListView, private val conte
                 otherDivider.visibility=View.VISIBLE
             }
         }else{
-            mRemoveObserver=1
-            oldTop=itemView.top
-            oldBottom=itemView.bottom
-            val childCount = listView.childCount
-            for (i in 0 until childCount) {
-                val v = listView.getChildAt(i)
-
-                oldCoordinates[v] = intArrayOf(v.top, v.bottom)
-            }
-
-            itemView.background=ContextCompat.getDrawable(context,R.drawable.reg_background)
-            itemView.elevation=20.0f
-            tvPlaceTitle.setTextColor(ContextCompat.getColor(context, android.R.color.white))
-            extraContent.visibility = View.VISIBLE
-            tvTimeHead.visibility = View.GONE
-            ivExpandMore.visibility = View.GONE
-            listDivider.visibility=View.GONE
-
+            prepareExpand()
         }
 
 
@@ -112,24 +117,7 @@ class ExpandCollapseController(private val listView: ListView, private val conte
             override fun onPreDraw(): Boolean =
                     when (mRemoveObserver) {
                         0 -> {
-                            mRemoveObserver=1
-                             oldTop = itemView.top
-                             oldBottom = itemView.bottom
-
-                            val childCount = listView.childCount
-                            for (i in 0 until childCount) {
-                                val v = listView.getChildAt(i)
-
-                                oldCoordinates[v] = intArrayOf(v.top, v.bottom)
-                            }
-
-                            itemView.background=ContextCompat.getDrawable(context,R.drawable.reg_background)
-                            itemView.elevation=20.0f
-                            tvPlaceTitle.setTextColor(ContextCompat.getColor(context, android.R.color.white))
-                            extraContent.visibility = View.VISIBLE
-                            tvTimeHead.visibility = View.GONE
-                            ivExpandMore.visibility = View.GONE
-                            listDivider.visibility=View.GONE
+                            prepareExpand()
                             listView.requestLayout()
                             false
                         }

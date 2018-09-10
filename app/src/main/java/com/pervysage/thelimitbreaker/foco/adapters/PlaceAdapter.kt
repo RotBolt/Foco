@@ -23,7 +23,7 @@ class PlaceAdapter(private val context: Context,
     private var lastExpandedPos=-1
     private val TAG = "PlaceAdapter"
 
-    private val expandCollapseController = ExpandCollapseController(listView, context,repository)
+    private val expandCollapseController = ExpandCollapseController(listView,context,repository)
 
     fun updateList(newList:List<PlacePrefs>,isNew:Boolean){
         places=newList
@@ -63,8 +63,15 @@ class PlaceAdapter(private val context: Context,
 
     inner class CardHeadHolder(itemView: View) {
 
+
+
         private val tvPlaceTitle = itemView.findViewById<TextView>(R.id.tvPlaceTitle)
         private val tvTimeHead = itemView.findViewById<TextView>(R.id.tvTimeHead)
+        private val tvAddress = itemView.findViewById<TextView>(R.id.tvAddress)
+        private val tvTimeChild = itemView.findViewById<TextView>(R.id.tvTimeChild)
+        private val tvRadius = itemView.findViewById<TextView>(R.id.tvRadius)
+        private val tvContactGroup = itemView.findViewById<TextView>(R.id.tvContactGroup)
+        private val tvDelete = itemView.findViewById<TextView>(R.id.tvDelete)
         private val turnOnOff = itemView.findViewById<SwitchCompat>(R.id.turnOnOff)
         private val extraContent = itemView.findViewById<RelativeLayout>(R.id.extraContent)
         private val ivExpandMore = itemView.findViewById<ImageView>(R.id.ivExpand)
@@ -79,14 +86,10 @@ class PlaceAdapter(private val context: Context,
             turnOnOff.isChecked = placePref.active == 1
 
             val bindExtraData = {
-                Log.d(TAG,"bind extra data")
-                with(itemView) {
-                    tvAddress.text = placePref.address
-                    tvContactGroup.text = placePref.contactGroup
-                    tvTimeChild.text = "${placePref.hour} hr ${placePref.minutes} min"
-                    tvRadius.text = "${placePref.radius} m"
-
-                }
+                tvAddress.text = placePref.address
+                tvContactGroup.text = placePref.contactGroup
+                tvTimeChild.text = "${placePref.hour} hr ${placePref.minutes} min"
+                tvRadius.text = "${placePref.radius} m"
             }
 
             if (placePref.isExpanded) {
@@ -139,6 +142,8 @@ class PlaceAdapter(private val context: Context,
                 }
             }
         }
+
+
     }
 }
 
