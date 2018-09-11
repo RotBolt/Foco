@@ -3,15 +3,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:padding="8dp"
+    android:id="@+id/lvParent"
     android:layout_height="match_parent"
     tools:context=".fragments.PlacesFragment">
 
-    <ListView
+    <com.pervysage.thelimitbreaker.foco.MyListView
         android:animateLayoutChanges="true"
         android:id="@+id/lvPlaces"
+        android:paddingBottom="50dp"
+        android:clipToPadding="false"
+        android:scrollbarStyle="outsideOverlay"
         android:divider="@color/colorPrimary"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    </ListView>
+    </com.pervysage.thelimitbreaker.foco.MyListView>
 
 </FrameLayout>

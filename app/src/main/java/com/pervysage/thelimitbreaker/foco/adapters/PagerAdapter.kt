@@ -11,8 +11,7 @@ class PagerAdapter(fm: FragmentManager, private val numOfTabs: Int) : FragmentSt
     override fun getItem(p0: Int): Fragment? =
             when (p0) {
                 0 -> PlacesFragment()
-                1 -> MeTimeFragment()
-                2 -> DriveModeFragment()
+                1 -> DriveModeFragment()
                 else -> null
             }
 

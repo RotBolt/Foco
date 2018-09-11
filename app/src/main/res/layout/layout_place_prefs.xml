@@ -13,6 +13,7 @@
         android:text="Place name"
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="8dp"
+        android:layout_marginRight="21dp"
         android:textSize="21sp"
         android:textColor="@color/colorTextDark"
         android:layout_width="wrap_content"
@@ -20,7 +21,7 @@
 
     <android.support.v7.widget.SwitchCompat
         android:padding="8dp"
-        android:id="@+id/turnOnOff"
+        android:id="@+id/serviceSwitch"
         android:checked="true"
         android:focusable="false"
         android:layout_alignParentRight="true"
@@ -29,8 +30,8 @@
         android:layout_height="wrap_content" />
 
     <TextView
-        android:id="@+id/tvTimeHead"
-        android:text="Duration"
+        android:id="@+id/tvRadiusHead"
+        android:text="Radius"
         android:padding="8dp"
         android:layout_below="@id/tvPlaceTitle"
         android:layout_alignParentLeft="true"
@@ -42,7 +43,7 @@
 
     <ImageView
         android:id="@+id/ivExpand"
-        android:layout_below="@id/turnOnOff"
+        android:layout_below="@id/serviceSwitch"
         android:src="@drawable/ic_expand_more"
         android:layout_alignParentRight="true"
         android:layout_marginRight="8dp"
@@ -53,7 +54,7 @@
     <FrameLayout
         android:id="@+id/divideContainer"
         android:padding="8dp"
-        android:layout_below="@id/tvTimeHead"
+        android:layout_below="@id/tvRadiusHead"
         android:layout_marginLeft="8dp"
         android:layout_marginBottom="12dp"
         android:layout_width="wrap_content"
@@ -89,55 +90,32 @@
             android:layout_toRightOf="@id/iconPlace"
             android:text="Address" />
 
-        <LinearLayout
-            android:padding="2dp"
+        <ImageView
+            android:id="@+id/iconRadius"
+            android:padding="8dp"
             android:layout_below="@id/tvAddress"
-            android:orientation="horizontal"
-            android:id="@+id/llTimeRadiusHolder"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <ImageView
-                android:id="@+id/iconTime"
-                android:padding="8dp"
-                android:layout_weight="1"
-                android:src="@drawable/ic_time"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content" />
-            <TextView
-                android:id="@+id/tvTimeChild"
-                android:layout_weight="4"
-                app:theme="@style/TextStyle"
-                android:text="Duration"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content" />
-
-            <ImageView
-                android:id="@+id/iconRadius"
-                android:padding="8dp"
-                android:layout_weight="1"
-                android:src="@drawable/ic_radius"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content" />
-            <TextView
-                android:id="@+id/tvRadius"
-                android:layout_weight="4"
-                app:theme="@style/TextStyle"
-                android:text="Radius"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
+            android:src="@drawable/ic_radius"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tvRadiusChild"
+            android:layout_below="@id/tvAddress"
+            android:layout_toRightOf="@id/iconRadius"
+            app:theme="@style/TextStyle"
+            android:text="Radius"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
         <ImageView
             android:id="@+id/iconGroup"
             android:padding="8dp"
             android:src="@drawable/ic_group"
-            android:layout_below="@id/llTimeRadiusHolder"
+            android:layout_below="@id/iconRadius"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/tvContactGroup"
             app:theme="@style/TextStyle"
-            android:layout_below="@id/llTimeRadiusHolder"
+            android:layout_below="@id/iconRadius"
             android:layout_toRightOf="@id/iconGroup"
             android:text="All Contacts"
             android:layout_width="match_parent"

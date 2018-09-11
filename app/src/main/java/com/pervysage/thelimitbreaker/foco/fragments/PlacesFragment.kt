@@ -1,9 +1,7 @@
 package com.pervysage.thelimitbreaker.foco.fragments
 
 
-import android.app.Activity
 import android.arch.lifecycle.Observer
-import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -11,20 +9,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
-import com.google.android.gms.location.places.ui.PlacePicker
-
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.adapters.PlaceAdapter
-
 import com.pervysage.thelimitbreaker.foco.database.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.Repository
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_places.*
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
 /**
  * A simple [Fragment] subclass.
@@ -46,6 +36,8 @@ class PlacesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         repo=Repository.getInstance(activity!!.application)
+
+
 
         val places =repo.getAllPlacePrefs()
         var listSize = places.value?.size?:0

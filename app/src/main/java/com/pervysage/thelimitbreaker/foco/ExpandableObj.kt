@@ -1,3 +1,3 @@
 package com.pervysage.thelimitbreaker.foco
 
-open class ExpandableObj(var isExpanded:Boolean)
+open class ExpandableObj(open var isExpanded:Boolean)

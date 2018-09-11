@@ -6,43 +6,51 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <LinearLayout
-        android:elevation="5dp"
-        android:background="@android:color/white"
-        android:id="@+id/linearLayout"
+    <TextView
+        android:id="@+id/tvFragTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="7dp">
+        android:gravity="left"
+        android:background="@color/colorPrimaryDark"
+        android:elevation="7dp"
+        android:padding="16dp"
+        android:text="Work Places"
+        android:textColor="@android:color/white"
+        android:textSize="25sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/tvFragTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:padding="7dp"
-            android:text="Work Places"
-            android:textColor="@color/colorGenDark"
-            android:textSize="28sp" />
+    <!--<FrameLayout-->
+        <!--android:id="@+id/headerDivider"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginStart="8dp"-->
+        <!--android:padding="8dp"-->
+        <!--app:layout_constraintBottom_toBottomOf="@+id/tvFragTitle"-->
+        <!--app:layout_constraintStart_toStartOf="parent">-->
 
-        <ImageView
-            android:id="@+id/ivAction"
-            android:layout_width="0dp"
-            android:padding="11dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="0.2"
-            android:src="@drawable/ic_add_place" />
+        <!--<View-->
+            <!--android:layout_width="60dp"-->
+            <!--android:layout_height="3dp"-->
+            <!--android:background="@drawable/reg_background"-->
+            <!--android:padding="8dp" />-->
+    <!--</FrameLayout>-->
 
-        <ImageView
-            android:padding="11dp"
-            android:id="@+id/ivSettings"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="0.2"
-            android:src="@drawable/ic_settings" />
-    </LinearLayout>
+    <ImageView
+        android:id="@+id/ivAction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginEnd="8dp"
+        android:elevation="7dp"
+        android:padding="7dp"
+        android:scaleX="0.75"
+        android:scaleY="0.75"
+        android:src="@drawable/ic_add_place"
+        app:layout_constraintBottom_toBottomOf="@+id/tvFragTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <android.support.v4.view.ViewPager
         android:id="@+id/viewPager"
@@ -51,10 +59,11 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="8dp"
-        app:layout_constraintBottom_toTopOf="@id/tabContainer"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+        app:layout_constraintTop_toBottomOf="@+id/tvFragTitle">
 
     </android.support.v4.view.ViewPager>
 
@@ -64,10 +73,12 @@
         android:elevation="7dp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="100dp"
+        android:layout_marginEnd="100dp"
+        android:paddingRight="7dp"
+        android:paddingLeft="7dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/reg_background"
+        android:background="@drawable/tab_background"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -76,8 +87,8 @@
             android:id="@+id/tabLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="4dp">
 

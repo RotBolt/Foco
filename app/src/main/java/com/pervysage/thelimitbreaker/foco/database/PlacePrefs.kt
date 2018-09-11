@@ -2,7 +2,7 @@ package com.pervysage.thelimitbreaker.foco.database
 
 import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
-import android.arch.persistence.room.Ignore
+import com.pervysage.thelimitbreaker.foco.ExpandableObj
 
 
 @Entity(
@@ -18,10 +18,7 @@ data class PlacePrefs(
 
         @ColumnInfo(name="longitude")
         var longitude:Double,
-        var hour:Int,
-        var minutes:Int,
         var radius:Int,
         var active:Int,
-        var contactGroup:String,
-        var isExpanded:Boolean
-)
+        var contactGroup:String
+): ExpandableObj(false)

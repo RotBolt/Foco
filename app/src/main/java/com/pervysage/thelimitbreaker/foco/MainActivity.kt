@@ -1,7 +1,6 @@
 package com.pervysage.thelimitbreaker.foco
 
 import android.app.Activity
-import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
@@ -15,11 +14,9 @@ import android.content.pm.PackageManager
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
-import android.widget.DatePicker
-import android.widget.TimePicker
+import android.view.View
 import com.pervysage.thelimitbreaker.foco.database.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.Repository
-import com.pervysage.thelimitbreaker.foco.fragments.PlacesFragment
 
 
 class MainActivity : AppCompatActivity() {
@@ -38,14 +35,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val iconActions = arrayOf(
-                ContextCompat.getDrawable(this, R.drawable.ic_add_place),
-                ContextCompat.getDrawable(this, R.drawable.ic_clock_add)
+        val iconsTab = arrayOf(
+                ContextCompat.getDrawable(this, R.drawable.ic_place),
+                ContextCompat.getDrawable(this, R.drawable.ic_motorcycle)
         )
 
         with(tabLayout) {
             addTab(newTab().setIcon(R.drawable.ic_place))
-            addTab(newTab().setIcon(R.drawable.ic_timelapse))
             addTab(newTab().setIcon(R.drawable.ic_motorcycle))
         }
 
@@ -63,10 +59,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onTabSelected(p0: TabLayout.Tab?) {
-                currTabPos = p0!!.position
-                if (currTabPos < 2)
-                    ivAction.setImageDrawable(iconActions[currTabPos])
-                viewPager.setCurrentItem(p0.position, true)
+
+                viewPager.setCurrentItem(p0!!.position, true)
+                when(p0.position){
+                    0->tvFragTitle.text="Work Places"
+                    1->tvFragTitle.text="Drive Mode"
+                }
                 Log.d(TAG, "tab selected")
             }
 
@@ -115,22 +113,16 @@ class MainActivity : AppCompatActivity() {
             val lon = place.latLng.longitude
             val name = place.name
             val addr = place.address
-            val hour = 5
-            val min = 30
             val radius = 500
             val isOn = 1
-            val isExpanded = false
             val placePref = PlacePrefs(
                     name = name.toString(),
                     address = addr.toString(),
                     latitude = lat,
                     longitude = lon,
-                    hour = hour,
-                    minutes = min,
                     radius = radius,
                     active = isOn,
-                    contactGroup = "All Contacts",
-                    isExpanded = isExpanded
+                    contactGroup = "All Contacts"
             )
             val repo=Repository.getInstance(application)
             repo.insert(prefs = placePref)

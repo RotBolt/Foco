@@ -7,11 +7,12 @@ import android.animation.PropertyValuesHolder
 import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver
-import android.widget.ListView
+import android.widget.TextView
 
-abstract class ViewController<N, R, P>(private val listView: ListView) {
+abstract class ViewController<N, R, P>(private val listView: MyListView) {
 
-    private val touchDisabler = View.OnTouchListener { _, _ -> true }
+    private val TAG = "ViewController"
+
 
     private var mRemoveObserver = 0
 
@@ -25,7 +26,7 @@ abstract class ViewController<N, R, P>(private val listView: ListView) {
         onExpand = l
     }
 
-    fun onCollapseListener(l: () -> Unit) {
+    fun setOnCollapseListener(l: () -> Unit) {
         onCollapse = l
     }
 
@@ -40,7 +41,7 @@ abstract class ViewController<N, R, P>(private val listView: ListView) {
         val translationBottom = PropertyValuesHolder.ofInt("bottom", bottom, endBottom)
 
         val anim = ObjectAnimator.ofPropertyValuesHolder(view, translationTop, translationBottom)
-        anim.duration = 150
+        anim.duration = 250
         return anim
     }
 
@@ -51,12 +52,12 @@ abstract class ViewController<N, R, P>(private val listView: ListView) {
         val height = bottom - top
 
         val isOverTop = top < 0
-        val isBelowBottom = top + height + yDelta > listView.height
+        val isBelowBottom = top + height + yDelta > (listView.height-200)
         if (isOverTop) {
             yTranslateTop = top
             yTranslateBottom = yDelta - yTranslateTop
         } else if (isBelowBottom) {
-            val deltaBelow = top + height + yDelta - listView.height
+            val deltaBelow = top + height + yDelta - (listView.height-200)
             yTranslateTop = if (top - deltaBelow < 0) top else deltaBelow
             yTranslateBottom = yDelta - yTranslateTop
         }
@@ -66,23 +67,27 @@ abstract class ViewController<N, R, P>(private val listView: ListView) {
 
     abstract fun bindExtraData(headHolder: N, bodyHolder: R, modelObj: P)
 
-    abstract fun makeExpand(headHolder: N, bodyHolder: R, modelObj: P)
+    abstract fun workInExpand(headHolder: N, bodyHolder: R, modelObj: P)
 
-    abstract fun makeCollapsed(headHolder: N, bodyHolder: R, modelObj: P)
+    abstract fun workInCollapse(headHolder: N, bodyHolder: R, modelObj: P)
 
-    protected fun setUp(headHolder: N, bodyHolder: R, modelObj: P) {
+    open fun setUp(headHolder: N, bodyHolder: R, modelObj: P, pos: Int = 0) {
         if (modelObj is ExpandableObj) {
             if (modelObj.isExpanded)
-                makeExpand(headHolder, bodyHolder, modelObj)
+                workInExpand(headHolder, bodyHolder, modelObj)
             else
-                makeCollapsed(headHolder, bodyHolder, modelObj)
+                workInCollapse(headHolder, bodyHolder, modelObj)
         } else
             throw Exception("Model Object must extend Expandable Object")
     }
 
-    fun expand(viewToExpand: View, headHolder: N, bodyHolder: R, modelObj: P, viewToCollapse: View? = null, collapseObj: P? = null) {
-        listView.setOnTouchListener(touchDisabler)
-        viewToExpand.setOnTouchListener(touchDisabler)
+    fun expand(viewToExpand: View, headHolder: N, bodyHolder: R, modelObj: P, viewToCollapse: View? = null, collapseObj: P? = null,pos: Int) {
+
+        listView.isScrollEnabled=false
+//        viewToExpand.setOnTouchListener(touchDisabler)
+
+//        Log.d(TAG,"head $headHolder body $bodyHolder pref $modelObj viewToCollapse $viewToCollapse collapseObj $collapseObj")
+
 
         var oldTop = 0
         var oldBottom = 0
@@ -95,16 +100,23 @@ abstract class ViewController<N, R, P>(private val listView: ListView) {
             val childCount = listView.childCount
             for (i in 0 until childCount) {
                 val v = listView.getChildAt(i)
+                Log.d(TAG,"before expand ${v.findViewById<TextView>(com.pervysage.thelimitbreaker.foco.R.id.tvPlaceTitle).text}")
+
                 oldCoordinates[v] = intArrayOf(v.top, v.bottom)
             }
             bindExtraData(headHolder, bodyHolder, modelObj)
+            workInExpand(headHolder, bodyHolder, modelObj)
         }
 
+        if (collapseObj != null) (collapseObj as ExpandableObj).isExpanded = false
+
         if (viewToCollapse != null) {
-            val collapseHead = viewToCollapse.tag as N
-            val collapseBody = viewToCollapse.tag as R
-            makeCollapsed(collapseHead, collapseBody, collapseObj!!)
+            Log.d(TAG, "collapse view first")
+            val collapseHead = viewToCollapse.getTag(com.pervysage.thelimitbreaker.foco.R.id.HEAD_KEY) as N
+            val collapseBody = viewToCollapse.getTag(com.pervysage.thelimitbreaker.foco.R.id.BODY_KEY) as R
+            workInCollapse(collapseHead, collapseBody, collapseObj!!)
         } else {
+            Log.d(TAG, "Only Expand")
             prepareExpand()
         }
 
@@ -113,21 +125,30 @@ abstract class ViewController<N, R, P>(private val listView: ListView) {
                 return when (mRemoveObserver) {
                     0 -> {
                         prepareExpand()
+                        Log.d(TAG, "1st pass")
                         listView.requestLayout()
                         false
                     }
                     1 -> {
+//                        for(i in 0 until listView.childCount){
+//                            val v = listView.getChildAt(i)
+//                            v.setOnTouchListener(touchDisabler)
+//                        }
+                        Log.d(TAG, "2nd pass")
                         mRemoveObserver = 2
+//                        listView.setSelection(pos)
                         val newTop = viewToExpand.top
                         val newBottom = viewToExpand.bottom
                         val oldHeight = oldBottom - oldTop
                         val newHeight = newBottom - newTop
                         val delta = newHeight - oldHeight
+
                         translateCoords = getExpandedTopBottom(oldTop, oldBottom, delta)
                         listView.requestLayout()
                         false
                     }
                     else -> {
+                        Log.d(TAG, "3rd pass")
                         mRemoveObserver = 0
                         viewToExpand.viewTreeObserver.removeOnPreDrawListener(this)
 
@@ -138,18 +159,23 @@ abstract class ViewController<N, R, P>(private val listView: ListView) {
                         val index = listView.indexOfChild(viewToExpand)
                         for (v in oldCoordinates.keys) {
 
-                            v.parent?.run {
+
+                                Log.d(TAG,"during expand ${v.findViewById<TextView>(com.pervysage.thelimitbreaker.foco.R.id.tvPlaceTitle).text}")
                                 val i = listView.indexOfChild(v)
                                 val oldChildTopBottom = oldCoordinates[v]
                                 v.top = oldChildTopBottom!![0]
                                 v.bottom = oldChildTopBottom[1]
                                 if (v != viewToExpand) {
                                     val delta =
-                                            if (i > index) yTranslateBottom
-                                            else -yTranslateTop
+                                            if (i > index){
+                                                yTranslateBottom
+                                            }
+                                            else {
+                                                -yTranslateTop
+                                            }
                                     animations.add(getAnimation(v, delta * 1f, delta * 1f))
                                 }
-                            }
+
                         }
 
                         val selViewTop = viewToExpand.top
@@ -164,13 +190,13 @@ abstract class ViewController<N, R, P>(private val listView: ListView) {
                         )
 
 
-                        expandTopAnim.duration = 150
+                        expandTopAnim.duration = 250
                         val expandBottomAnim = ObjectAnimator.ofInt(
                                 viewToExpand,
                                 "bottom",
                                 selViewBottom, selViewEndBottom
                         )
-                        expandBottomAnim.duration = 150
+                        expandBottomAnim.duration = 250
                         animations.add(expandTopAnim)
                         animations.add(expandBottomAnim)
                         val animatorSet = AnimatorSet()
@@ -180,8 +206,15 @@ abstract class ViewController<N, R, P>(private val listView: ListView) {
                             }
 
                             override fun onAnimationEnd(animation: Animator?) {
-                                listView.setOnTouchListener(null)
-                                viewToExpand.setOnTouchListener(null)
+
+
+                                listView.isScrollEnabled=true
+//                                for(i in 0 until listView.childCount){
+//                                    val v = listView.getChildAt(i)
+//                                    v.setOnTouchListener(null)
+//                                }
+//                                viewToExpand.setOnTouchListener(null)
+                                (modelObj as ExpandableObj).isExpanded = true
 
                             }
 
@@ -203,11 +236,13 @@ abstract class ViewController<N, R, P>(private val listView: ListView) {
 
     fun collapse(viewToCollapse: View, headHolder: N, bodyHolder: R, modelObj: P) {
 
-        listView.setOnTouchListener(touchDisabler)
-        viewToCollapse.setOnTouchListener(touchDisabler)
+        listView.isScrollEnabled=false
+//        viewToCollapse.setOnTouchListener(touchDisabler)
 
         val oldTop = viewToCollapse.top
         val oldBottom = viewToCollapse.bottom
+
+
 
         val oldCoordinates = HashMap<View, IntArray>()
         for (i in 0 until listView.childCount) {
@@ -218,7 +253,7 @@ abstract class ViewController<N, R, P>(private val listView: ListView) {
             oldCoordinates[child] = oldTopBottom
         }
 
-        makeCollapsed(headHolder, bodyHolder, modelObj)
+        workInCollapse(headHolder, bodyHolder, modelObj)
 
         viewToCollapse.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
             override fun onPreDraw(): Boolean {
@@ -294,9 +329,12 @@ abstract class ViewController<N, R, P>(private val listView: ListView) {
                     }
 
                     override fun onAnimationEnd(animation: Animator?) {
-                        listView.setOnTouchListener(null)
-                        viewToCollapse.setOnTouchListener(null)
+
+                        listView.isScrollEnabled=true
+//                        viewToCollapse.setOnTouchListener(null)
+                        (modelObj as ExpandableObj).isExpanded = false
                         onCollapse()
+
                     }
 
                     override fun onAnimationCancel(animation: Animator?) {// TODO Not Implemented
