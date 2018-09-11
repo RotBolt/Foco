@@ -41,11 +41,11 @@ class PlacesFragment : Fragment() {
 
         val places =repo.getAllPlacePrefs()
         var listSize = places.value?.size?:0
-        val adapter=PlaceAdapter(context!!, ArrayList(),lvPlaces,repo)
+        val adapter=PlaceAdapter(activity!!, ArrayList(),lvPlaces,repo)
         lvPlaces.adapter=adapter
         lvPlaces.setFriction(ViewConfiguration.getScrollFriction() * 2)
         places.observe(activity!!, Observer<List<PlacePrefs>>{
-            if(listSize!=it!!.size && listSize!=0)
+            if(listSize<it!!.size && listSize!=0)
                 isNew=true
             adapter.updateList(it,isNew)
             listSize=it.size

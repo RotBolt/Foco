@@ -35,11 +35,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val iconsTab = arrayOf(
-                ContextCompat.getDrawable(this, R.drawable.ic_place),
-                ContextCompat.getDrawable(this, R.drawable.ic_motorcycle)
-        )
-
         with(tabLayout) {
             addTab(newTab().setIcon(R.drawable.ic_place))
             addTab(newTab().setIcon(R.drawable.ic_motorcycle))
@@ -60,35 +55,29 @@ class MainActivity : AppCompatActivity() {
 
             override fun onTabSelected(p0: TabLayout.Tab?) {
 
-                viewPager.setCurrentItem(p0!!.position, true)
+                if(p0!!.position==0){
+                    ivAction.visibility=View.VISIBLE
+                }else{
+                    ivAction.visibility=View.GONE
+                }
+                viewPager.setCurrentItem(p0.position, true)
                 when(p0.position){
                     0->tvFragTitle.text="Work Places"
                     1->tvFragTitle.text="Drive Mode"
                 }
-                Log.d(TAG, "tab selected")
             }
 
         })
 
         ivAction.setOnClickListener {
-            when (currTabPos) {
-                0 -> {
-                    // Place Picker
-
-                    if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                            == PackageManager.PERMISSION_GRANTED) {
-                        pickPlace()
-                    } else {
-                        ActivityCompat.requestPermissions(
-                                this,
-                                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
-                                LOCATION_PERMISSION)
-                    }
-                }
-                1 -> {
-                    TimePickerDialog(this,
-                            TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute -> },12,0,false).show()
-                }
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                pickPlace()
+            } else {
+                ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
+                        LOCATION_PERMISSION)
             }
         }
 

@@ -1,6 +1,7 @@
 package com.pervysage.thelimitbreaker.foco.adapters
 
 import android.content.Context
+import android.support.v4.app.FragmentActivity
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.SwitchCompat
 import android.util.Log
@@ -8,13 +9,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.pervysage.thelimitbreaker.foco.EditPlaceNameDialog
 import com.pervysage.thelimitbreaker.foco.ExpandCollapseController
-import com.pervysage.thelimitbreaker.foco.MyListView
+import com.pervysage.thelimitbreaker.foco.expandCollapseController.MyListView
 import com.pervysage.thelimitbreaker.foco.R
-import com.pervysage.thelimitbreaker.foco.ViewController
+import com.pervysage.thelimitbreaker.foco.expandCollapseController.ViewController
 import com.pervysage.thelimitbreaker.foco.database.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.Repository
-import kotlinx.android.synthetic.main.layout_place_prefs.view.*
 
 class PlaceAdapter(private val context: Context,
                    private var places: List<PlacePrefs>,
@@ -25,6 +26,7 @@ class PlaceAdapter(private val context: Context,
     private var lastExpandedPos = -1
     private val TAG = "PlaceAdapter"
 
+    private var isNew =false
     private val expandCollapseController = ExpandCollapseController(listView, context, repository)
 
     private val viewController = MyViewController(listView, context)
@@ -35,14 +37,16 @@ class PlaceAdapter(private val context: Context,
         places = newList
 
         notifyDataSetChanged()
-//        if (places.isNotEmpty() && isNew) {
-//            places[places.size - 1].isExpanded = true
-//            listView.setSelection(places.size - 1)
-//        }
+        if (places.isNotEmpty() && isNew) {
+            this.isNew=isNew
+            places[places.size - 1].isExpanded = true
+            listView.setSelection(places.size - 1)
+        }
     }
 
+
+
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
-        Log.d(TAG, "getView $position")
         var itemView = convertView
         val thisPref = places[position]
         parent?.run {
@@ -60,7 +64,7 @@ class PlaceAdapter(private val context: Context,
             }
             val headHolder = itemView!!.getTag(R.id.HEAD_KEY) as HeadHolder
             val bodyHolder = itemView!!.getTag(R.id.BODY_KEY) as BodyHolder
-            viewController.setUp(headHolder, bodyHolder, thisPref,position)
+            viewController.setUp(headHolder, bodyHolder, thisPref, position)
 
             return itemView
         }
@@ -159,6 +163,7 @@ class PlaceAdapter(private val context: Context,
 
         private var lastExpandPos = -1
         private var lastExpandName: String? = null
+
         override fun bindExtraData(headHolder: HeadHolder, bodyHolder: BodyHolder, modelObj: PlacePrefs) {
             headHolder.bindData(modelObj)
             bodyHolder.bindData(modelObj)
@@ -177,6 +182,16 @@ class PlaceAdapter(private val context: Context,
 
             headHolder.bindData(modelObj)
             bodyHolder.bindData(modelObj)
+
+
+            headHolder.setOnClickListeners(modelObj)
+            if (isNew){
+                headHolder.tvPlaceTitle.callOnClick()
+                isNew=false
+            }
+
+
+
         }
 
         override fun workInCollapse(headHolder: HeadHolder, bodyHolder: BodyHolder, modelObj: PlacePrefs) {
@@ -189,30 +204,20 @@ class PlaceAdapter(private val context: Context,
                 viewDivider.visibility = View.VISIBLE
             }
             bodyHolder.extraContent.visibility = View.GONE
-//            modelObj.isExpanded = false //pin point 1
+
             headHolder.bindData(modelObj)
+            headHolder.revertClickListeners()
 
         }
 
 
         override fun setUp(headHolder: HeadHolder, bodyHolder: BodyHolder, modelObj: PlacePrefs, pos: Int) {
             super.setUp(headHolder, bodyHolder, modelObj, pos)
-            Log.d(TAG,"setUp $pos")
-
-//            if(pos==places.size-1){
-//                val layoutParams =
-//                        RelativeLayout.LayoutParams(
-//                                RelativeLayout.LayoutParams.MATCH_PARENT,
-//                                RelativeLayout.LayoutParams.WRAP_CONTENT
-//                        )
-//                layoutParams.bottomMargin=500
-//                headHolder.prefView.layoutParams=layoutParams
-//            }
             bodyHolder.setWorkOnDelete {
-                lastExpandPos=-1
-                lastExpandName=null
+                lastExpandPos = -1
+                lastExpandName = null
             }
-            // pin point 2
+
             headHolder.prefView.setOnClickListener {
                 if (modelObj.isExpanded) {
                     setOnCollapseListener {
@@ -222,30 +227,28 @@ class PlaceAdapter(private val context: Context,
 
                     lastExpandPos = -1
                     lastExpandName = null
+
                 } else {
                     var prevExpandView: View? = null
                     var collapseModelObj = if (lastExpandPos != -1) places[lastExpandPos] else null
-                    Log.d(TAG,"lastExpand $lastExpandPos collapseObj ${collapseModelObj?.name}")
+
                     if (lastExpandName != null) {
                         for (i in 0 until listView.childCount) {
                             val v = listView.getChildAt(i)
                             val thisHead = v.getTag(R.id.HEAD_KEY) as HeadHolder
-                            if (thisHead.tvPlaceTitle.text.toString() == lastExpandName){
-                                prevExpandView=v
+                            if (thisHead.tvPlaceTitle.text.toString() == lastExpandName) {
+                                prevExpandView = v
                                 break
                             }
                         }
                     }
-                    Log.d(TAG,"prevExpandView $prevExpandView")
-                    expand(headHolder.prefView, headHolder, bodyHolder, modelObj,prevExpandView,collapseModelObj,pos)
+                    expand(headHolder.prefView, headHolder, bodyHolder, modelObj, prevExpandView, collapseModelObj)
                     lastExpandPos = pos
-                    lastExpandName=headHolder.tvPlaceTitle.text.toString()
+                    lastExpandName = headHolder.tvPlaceTitle.text.toString()
 
                 }
             }
         }
-
-
     }
 
     inner class HeadHolder(itemView: View) {
@@ -261,6 +264,31 @@ class PlaceAdapter(private val context: Context,
             tvRadiusHead.text = "${placePref.radius} m"
             serviceSwitch.isChecked = placePref.active == 1
         }
+
+        fun setOnClickListeners(placePref: PlacePrefs) {
+
+
+            tvPlaceTitle.setOnClickListener {
+                    val dialog = EditPlaceNameDialog()
+                dialog.hint=placePref.name
+                    dialog.setOnNameConfirm {
+                        tvPlaceTitle.text = it
+                        placePref.name = it
+                    }
+                    dialog.show(
+                            (context as FragmentActivity).supportFragmentManager,
+                            "EditPlaceName"
+                    )
+            }
+
+        }
+
+        fun revertClickListeners() {
+            tvPlaceTitle.setOnClickListener{
+                prefView.callOnClick()
+            }
+
+        }
     }
 
     inner class BodyHolder(itemView: View) {
@@ -270,9 +298,9 @@ class PlaceAdapter(private val context: Context,
         val tvDelete = itemView.findViewById<TextView>(R.id.tvDelete)
         val extraContent = itemView.findViewById<RelativeLayout>(R.id.extraContent)
 
-        private lateinit var workOnDelete :()->Unit
-        fun setWorkOnDelete(l:()->Unit){
-            workOnDelete=l
+        private lateinit var workOnDelete: () -> Unit
+        fun setWorkOnDelete(l: () -> Unit) {
+            workOnDelete = l
         }
 
         fun bindData(placePref: PlacePrefs) = with(placePref) {

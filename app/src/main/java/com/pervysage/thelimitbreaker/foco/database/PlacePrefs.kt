@@ -2,7 +2,7 @@ package com.pervysage.thelimitbreaker.foco.database
 
 import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
-import com.pervysage.thelimitbreaker.foco.ExpandableObj
+import com.pervysage.thelimitbreaker.foco.expandCollapseController.ExpandableObj
 
 
 @Entity(

@@ -1,4 +1,4 @@
-package com.pervysage.thelimitbreaker.foco
+package com.pervysage.thelimitbreaker.foco.expandCollapseController
 
 import android.content.Context
 import android.util.AttributeSet

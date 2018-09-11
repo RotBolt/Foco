@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".fragments.PlacesFragment">
 
-    <com.pervysage.thelimitbreaker.foco.MyListView
+    <com.pervysage.thelimitbreaker.foco.expandCollapseController.MyListView
         android:animateLayoutChanges="true"
         android:id="@+id/lvPlaces"
         android:paddingBottom="50dp"
@@ -16,6 +16,6 @@
         android:divider="@color/colorPrimary"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    </com.pervysage.thelimitbreaker.foco.MyListView>
+    </com.pervysage.thelimitbreaker.foco.expandCollapseController.MyListView>
 
 </FrameLayout>
