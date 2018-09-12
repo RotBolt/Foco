@@ -4,34 +4,37 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:padding="4dp"
     android:layout_height="wrap_content">
 
     <TextView
-        android:padding="8dp"
+        android:background="?attr/selectableItemBackground"
         android:id="@+id/tvPlaceTitle"
-        android:text="Place name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="21dp"
-        android:textSize="21sp"
+        android:padding="8dp"
+        android:text="Place name"
         android:textColor="@color/colorTextDark"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:textSize="21sp" />
 
     <android.support.v7.widget.SwitchCompat
-        android:padding="8dp"
         android:id="@+id/serviceSwitch"
-        android:checked="true"
-        android:focusable="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/tvPlaceTitle"
+        android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_marginRight="8dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:checked="true"
+        android:focusable="false"
+        android:padding="8dp" />
 
     <TextView
-        android:id="@+id/tvRadiusHead"
-        android:text="Radius"
+        android:id="@+id/tvDetails"
+        android:text="Radius, Contact Group"
         android:padding="8dp"
         android:layout_below="@id/tvPlaceTitle"
         android:layout_alignParentLeft="true"
@@ -54,7 +57,7 @@
     <FrameLayout
         android:id="@+id/divideContainer"
         android:padding="8dp"
-        android:layout_below="@id/tvRadiusHead"
+        android:layout_below="@id/tvDetails"
         android:layout_marginLeft="8dp"
         android:layout_marginBottom="12dp"
         android:layout_width="wrap_content"
@@ -72,7 +75,10 @@
         android:visibility="gone"
         android:layout_below="@+id/divideContainer"
         android:layout_width="match_parent"
-        android:padding="8dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp"
         android:layout_height="wrap_content">
 
         <ImageView
@@ -85,6 +91,7 @@
         <TextView
             app:theme="@style/TextStyle"
             android:id="@+id/tvAddress"
+            android:gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/iconPlace"
@@ -97,14 +104,18 @@
             android:src="@drawable/ic_radius"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
         <TextView
-            android:id="@+id/tvRadiusChild"
+            android:id="@+id/tvRadius"
+            android:gravity="center_vertical"
+            android:background="?attr/selectableItemBackground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/iconGroup"
             android:layout_below="@id/tvAddress"
             android:layout_toRightOf="@id/iconRadius"
-            app:theme="@style/TextStyle"
             android:text="Radius"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            app:theme="@style/TextStyle" />
         <ImageView
             android:id="@+id/iconGroup"
             android:padding="8dp"
@@ -112,14 +123,18 @@
             android:layout_below="@id/iconRadius"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
         <TextView
             android:id="@+id/tvContactGroup"
-            app:theme="@style/TextStyle"
+            android:layout_width="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:layout_height="wrap_content"
             android:layout_below="@id/iconRadius"
+            android:layout_alignBottom="@+id/iconGroup"
+            android:gravity="center_vertical"
             android:layout_toRightOf="@id/iconGroup"
             android:text="All Contacts"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            app:theme="@style/TextStyle" />
         <View
             android:id="@+id/childDivider"
             android:layout_below="@id/iconGroup"
@@ -146,7 +161,7 @@
             android:layout_alignBottom="@+id/ic_delete"
             android:layout_marginTop="4dp"
             android:layout_toRightOf="@id/ic_delete"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="?attr/selectableItemBackground"
             android:text="Delete"
             app:theme="@style/TextStyle" />
 

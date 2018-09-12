@@ -59,7 +59,7 @@ class ExpandCollapseController(private val listView: ListView, private val conte
 
     fun expandView(itemView: View, bind:()->Unit, collapseOther:View? = null) {
         val extraContent = itemView.findViewById<RelativeLayout>(R.id.extraContent)
-        val tvTimeHead = itemView.findViewById<TextView>(R.id.tvRadiusHead)
+        val tvTimeHead = itemView.findViewById<TextView>(R.id.tvDetails)
         val ivExpandMore = itemView.findViewById<ImageView>(R.id.ivExpand)
         val tvPlaceTitle = itemView.findViewById<TextView>(R.id.tvPlaceTitle)
         val listDivider = itemView.findViewById<FrameLayout>(R.id.divideContainer)
@@ -96,7 +96,7 @@ class ExpandCollapseController(private val listView: ListView, private val conte
                 setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
                 val otherTitle = findViewById<TextView>(R.id.tvPlaceTitle)
                 val otherExtraContent = findViewById<RelativeLayout>(R.id.extraContent)
-                val otherTimeHead = findViewById<TextView>(R.id.tvRadiusHead)
+                val otherTimeHead = findViewById<TextView>(R.id.tvDetails)
                 val otherExpand = findViewById<ImageView>(R.id.ivExpand)
                 val otherDivider = findViewById<FrameLayout>(R.id.divideContainer)
                 otherTitle.setTextColor(ContextCompat.getColor(context, R.color.colorTextDark))
@@ -214,7 +214,7 @@ class ExpandCollapseController(private val listView: ListView, private val conte
 
     fun collapseView(itemView: View,placePrefs: PlacePrefs) {
         val extraContent = itemView.findViewById<RelativeLayout>(R.id.extraContent)
-        val tvTimeHead = itemView.findViewById<TextView>(R.id.tvRadiusHead)
+        val tvTimeHead = itemView.findViewById<TextView>(R.id.tvDetails)
         val ivExpandMore = itemView.findViewById<ImageView>(R.id.ivExpand)
         val tvPlaceTitle = itemView.findViewById<TextView>(R.id.tvPlaceTitle)
         val listDivider = itemView.findViewById<FrameLayout>(R.id.divideContainer)

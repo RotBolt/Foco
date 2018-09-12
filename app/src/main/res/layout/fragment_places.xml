@@ -10,7 +10,7 @@
     <com.pervysage.thelimitbreaker.foco.expandCollapseController.MyListView
         android:animateLayoutChanges="true"
         android:id="@+id/lvPlaces"
-        android:paddingBottom="50dp"
+        android:paddingBottom="80dp"
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
         android:divider="@color/colorPrimary"

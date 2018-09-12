@@ -1,15 +1,13 @@
-package com.pervysage.thelimitbreaker.foco
+package com.pervysage.thelimitbreaker.foco.dialogs
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
-import android.util.Log
-import android.view.Window
 import android.view.WindowManager
 import android.widget.EditText
 import android.widget.TextView
+import com.pervysage.thelimitbreaker.foco.R
 
 class EditPlaceNameDialog : DialogFragment() {
 
@@ -33,14 +31,18 @@ class EditPlaceNameDialog : DialogFragment() {
                 .setNegativeButton("Cancel", null)
         val dialog = builder.create()
 
+        dialog.window.setBackgroundDrawableResource(R.drawable.dialog_background)
+
         dialog.setOnShowListener {
             val okBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             okBtn.setOnClickListener {
                 val name = etPlaceName.text.toString()
                 if(name.isBlank())
                     etPlaceName.hint="Place Name cannot be empty"
-                else
+                else {
+                    onNameConfirm(name)
                     dialog.dismiss()
+                }
             }
 
             val  cancelBtn = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
