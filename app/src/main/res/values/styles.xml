@@ -11,9 +11,14 @@
     </style>
 
     <style name="TextStyle">
+        <item name="android:fontFamily">@font/maven_pro</item>
         <item name="android:padding">8dp</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="DriveModeSwitchStyle">
+        <item name="colorControlActivated">@color/colorActive</item>
     </style>
 
 </resources>

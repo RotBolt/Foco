@@ -1,7 +1,7 @@
 package com.pervysage.thelimitbreaker.foco
 
 import android.app.Activity
-import android.app.TimePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -11,11 +11,12 @@ import com.pervysage.thelimitbreaker.foco.adapters.PagerAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 import android.widget.Toast
 import android.content.pm.PackageManager
+import android.os.Handler
+import android.os.HandlerThread
 import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.util.Log
 import android.view.View
-import com.pervysage.thelimitbreaker.foco.database.PlacePrefs
+import android.widget.CompoundButton
+import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.Repository
 
 
@@ -31,9 +32,25 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intentBuilder.build(this), PLACE_PICK_REQUEST)
     }
 
+
+    private var onDMStatusChanged:((Boolean)->Unit)?=null
+
+    fun setOnDMStatusChangeListener(l:(Boolean)->Unit){
+        onDMStatusChanged=l
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val sharedPref= getSharedPreferences(
+                resources.getString(R.string.SHARED_PREF_KEY),
+                Context.MODE_PRIVATE
+        )
+        val isDriveSwitchEnabled = sharedPref.getInt(
+                resources.getString(R.string.DRIVE_MODE_ENABLED),
+                -1
+        )
+        switchDriveMode.isChecked= isDriveSwitchEnabled==1
 
         with(tabLayout) {
             addTab(newTab().setIcon(R.drawable.ic_place))
@@ -46,6 +63,9 @@ class MainActivity : AppCompatActivity() {
         viewPager.offscreenPageLimit = 2
         viewPager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabLayout))
 
+        ivAction.visibility=View.VISIBLE
+        switchDriveMode.visibility=View.GONE
+
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabReselected(p0: TabLayout.Tab?) {
             }
@@ -55,21 +75,39 @@ class MainActivity : AppCompatActivity() {
 
             override fun onTabSelected(p0: TabLayout.Tab?) {
 
-                if(p0!!.position==0){
-                    ivAction.visibility=View.VISIBLE
-                }else{
-                    ivAction.visibility=View.GONE
-                }
-                viewPager.setCurrentItem(p0.position, true)
+                viewPager.setCurrentItem(p0!!.position, true)
                 when(p0.position){
-                    0->tvFragTitle.text="Work Places"
-                    1->tvFragTitle.text="Drive Mode"
+                    0->{
+                        tvFragTitle.text="Work Places"
+                        ivAction.visibility=View.VISIBLE
+                        switchDriveMode.visibility=View.GONE
+                    }
+                    1->{
+                        tvFragTitle.text="Drive Mode"
+                        ivAction.visibility=View.GONE
+                        switchDriveMode.visibility=View.VISIBLE
+                        switchDriveMode.setOnCheckedChangeListener(null)
+                        switchDriveMode.setOnCheckedChangeListener { _, isChecked ->
+
+                            if (onDMStatusChanged!=null){
+                                onDMStatusChanged?.invoke(isChecked)
+                            }
+
+                            with(sharedPref.edit()){
+                                val isEnabled = if(isChecked)1 else 0
+                                putInt(resources.getString(R.string.DRIVE_MODE_ENABLED),isEnabled)
+                                apply()
+                            }
+                        }
+
+                    }
                 }
             }
 
         })
 
         ivAction.setOnClickListener {
+            it.setOnTouchListener { _, _ -> true }
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
                 pickPlace()
@@ -96,6 +134,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        ivAction.setOnTouchListener(null)
         if (requestCode == PLACE_PICK_REQUEST && resultCode == Activity.RESULT_OK) {
             val place = PlacePicker.getPlace(this, data)
             val lat = place.latLng.latitude

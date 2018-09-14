@@ -15,6 +15,7 @@
         android:elevation="7dp"
         android:padding="16dp"
         android:text="Work Places"
+        android:fontFamily="@font/maven_pro_medium"
         android:textColor="@android:color/white"
         android:textSize="25sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -23,6 +24,7 @@
 
 
     <ImageView
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:id="@+id/ivAction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -30,19 +32,29 @@
         android:layout_marginEnd="8dp"
         android:elevation="7dp"
         android:padding="7dp"
-        android:scaleX="0.75"
-        android:scaleY="0.75"
+        android:scaleX="0.85"
+        android:scaleY="0.85"
         android:src="@drawable/ic_add_place"
         app:layout_constraintBottom_toBottomOf="@+id/tvFragTitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.v7.widget.SwitchCompat
+        android:elevation="7dp"
+        android:id="@+id/switchDriveMode"
+        android:theme="@style/DriveModeSwitchStyle"
+        android:layout_marginEnd="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/tvFragTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/viewPager"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="2dp"
         app:layout_constraintBottom_toBottomOf="parent"

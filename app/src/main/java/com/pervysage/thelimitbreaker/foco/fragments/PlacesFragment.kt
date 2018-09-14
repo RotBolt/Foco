@@ -11,24 +11,19 @@ import android.view.ViewConfiguration
 import android.view.ViewGroup
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.adapters.PlaceAdapter
-import com.pervysage.thelimitbreaker.foco.database.PlacePrefs
+import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import kotlinx.android.synthetic.main.fragment_places.*
 
-
-/**
- * A simple [Fragment] subclass.
- *
- */
 class PlacesFragment : Fragment() {
     private var lastExpandedPos=-1
     private lateinit var repo:Repository
     private var isNew = false
+    private var isPlaceListEmpty=false
     private val PLACE_PICK_REQUEST = 1
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
 
         return inflater.inflate(R.layout.fragment_places, container, false)
     }
@@ -38,34 +33,42 @@ class PlacesFragment : Fragment() {
         repo=Repository.getInstance(activity!!.application)
 
 
-
         val places =repo.getAllPlacePrefs()
-        var listSize = places.value?.size?:0
+        var listSize = -1
+        places.observe(activity!!,object :Observer<List<PlacePrefs>>{
+            override fun onChanged(t: List<PlacePrefs>?) {
+                listSize=t?.size?:-1
+                places.removeObserver(this)
+            }
+
+        })
+        isPlaceListEmpty=listSize==0
         val adapter=PlaceAdapter(activity!!, ArrayList(),lvPlaces,repo)
         lvPlaces.adapter=adapter
         lvPlaces.setFriction(ViewConfiguration.getScrollFriction() * 2)
         places.observe(activity!!, Observer<List<PlacePrefs>>{
-            if(listSize<it!!.size && listSize!=0)
+            if(listSize<it!!.size && listSize!=-1)
                 isNew=true
             adapter.updateList(it,isNew)
             listSize=it.size
+            isPlaceListEmpty=listSize==0
+            toggleViews()
             isNew=false
         })
-
-
     }
 
-
-
-    override fun onStop() {
-        super.onStop()
-        Log.d("PUI","onStop")
+    private fun toggleViews(){
+        if (isPlaceListEmpty){
+            lvPlaces.visibility=View.GONE
+            noPlaceView.visibility=View.VISIBLE
+        }else{
+            lvPlaces.visibility=View.VISIBLE
+            noPlaceView.visibility=View.GONE
+        }
     }
 
-    override fun onPause() {
-        super.onPause()
-        Log.d("PUI","onPause PlaceFrag")
+    override fun onResume() {
+        super.onResume()
+        toggleViews()
     }
-
-
 }

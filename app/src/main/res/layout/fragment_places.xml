@@ -18,4 +18,30 @@
         android:layout_height="match_parent">
     </com.pervysage.thelimitbreaker.foco.expandCollapseController.MyListView>
 
+    <LinearLayout
+        android:id="@+id/noPlaceView"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:padding="21dp"
+            android:layout_width="match_parent"
+            android:src="@drawable/ic_skyscrapers"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:textSize="16sp"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginStart="32dp"
+            android:background="@drawable/info_box_background"
+            android:textColor="@color/colorTextDark"
+            android:gravity="center"
+            android:padding="8dp"
+            android:fontFamily="@font/maven_pro_medium"
+            android:text="Add work places where you don't want unwanted calls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
 </FrameLayout>

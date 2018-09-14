@@ -2,9 +2,9 @@ package com.pervysage.thelimitbreaker.foco.database
 
 import android.app.Application
 import android.arch.lifecycle.LiveData
-import android.media.AsyncPlayer
 import android.os.AsyncTask
 import android.util.Log
+import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 
 class Repository private constructor(application: Application) {
 

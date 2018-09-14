@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">Foco</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="API_KEY">AIzaSyBJr2KIWctyhBQZMyKRnmlEZt0RcVDgMoc</string>
+
+    <string name="SHARED_PREF_KEY">pref_key</string>
+    <string name="DRIVE_MODE_ENABLED">drive_key</string>
+    <string name="CONTACT_GROUP_KEY">contact_group</string>
+
 </resources>

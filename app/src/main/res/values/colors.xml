@@ -3,8 +3,11 @@
     <color name="colorPrimary">#2196f3</color>
     <color name="colorPrimaryDark">#0069c0</color>
     <color name="colorAccent">#f9a825</color>
-    <color name="colorTextDark">#061354</color>
+    <color name="colorTextDark">#03146c</color>
     <color name="colorGenDark">#03245b</color>
     <color name="colorTextDisable">#f4737678</color>
+    <color name="colorActive">#17ca09</color>
+    <color name="colorInfoBg">#efeeee</color>
+    <color name="colorPrimaryDarkTrans">#a10069c0</color>
 
 </resources>
