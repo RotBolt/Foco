@@ -3,17 +3,21 @@ package com.pervysage.thelimitbreaker.foco
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.support.annotation.IntegerRes
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import com.pervysage.thelimitbreaker.foco.database.Repository
+import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import kotlinx.android.synthetic.main.activity_pick_conatcts.*
 
 class PickContactsActivity : AppCompatActivity() {
@@ -23,7 +27,7 @@ class PickContactsActivity : AppCompatActivity() {
     data class ContactInfo(
             val name:String,
             val lookUpKey:String,
-            var isChecked:Boolean = false
+            var isChecked:Boolean
     )
 
     private val marked=ArrayList<ContactInfo>()
@@ -79,7 +83,32 @@ class PickContactsActivity : AppCompatActivity() {
             finish()
 
         }
+
         ivDone.setOnClickListener {
+            Log.d("PUI","ivDone Click")
+            val repo = Repository.getInstance(application)
+            val projection= arrayOf(
+                    ContactsContract.CommonDataKinds.Phone.NUMBER
+            )
+            val selection = "${ContactsContract.Contacts.LOOKUP_KEY} = ? AND ${ContactsContract.Data.MIMETYPE} = ?"
+            for (obj in marked){
+                val cursor= contentResolver.query(
+                        ContactsContract.Data.CONTENT_URI,
+                        projection,
+                        selection,
+                        arrayOf(obj.lookUpKey,ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE),
+                        null
+                )
+                cursor?.run {
+                    while (cursor.moveToNext()){
+                        val number = getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER))
+                        val info = ContactInfo(obj.name,number)
+                        Log.d("PickContact"," name ${obj.name} number $number")
+                        repo.insertContact(info)
+                    }
+                }
+            }
+
             setResult(Activity.RESULT_OK)
             finish()
         }
@@ -88,6 +117,8 @@ class PickContactsActivity : AppCompatActivity() {
     private fun getAllContacts():List<ContactInfo>{
         val contactList = ArrayList<ContactInfo>()
         val contactMap =HashMap<String,String>()
+        val repo = Repository.getInstance(application)
+
         val cursor = contentResolver.query(
                 ContactsContract.Contacts.CONTENT_URI,
                 arrayOf(
@@ -106,7 +137,7 @@ class PickContactsActivity : AppCompatActivity() {
             }
         }
         contactMap.mapTo(contactList){
-            ContactInfo(it.key,it.value)
+            ContactInfo(it.key,it.value,false)
         }
         contactList.sortWith(Comparator { o1, o2 ->
             o1.name.compareTo(o2.name)

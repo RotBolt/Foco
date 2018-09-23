@@ -44,9 +44,13 @@ class Repository private constructor(application: Application) {
     fun deletePref(prefs: PlacePrefs){
         DbQueryAsyncTask(placePrefsDao,QUERY_TYPE.DELETE_PREF).execute(prefs)
     }
-    fun insertContacts(vararg contactInfo:ContactInfo){
-        val obj = contactInfo
+    fun insertContact(contactInfo:ContactInfo){
         ContactQueryAsyncTask(contactsDao,QUERY_TYPE.INSERT_CONTACT).execute(contactInfo)
+    }
+
+
+    fun deleteContact(contact:ContactInfo){
+        ContactQueryAsyncTask(contactsDao,QUERY_TYPE.DELETE_CONTACT).execute(contact)
     }
 
 
@@ -61,7 +65,7 @@ class Repository private constructor(application: Application) {
         override fun doInBackground(vararg params: ContactInfo): String {
             when(queryType){
                 QUERY_TYPE.INSERT_CONTACT->{
-                    contactsDao.insert(params)
+                    contactsDao.insert(params[0])
                 }
                 QUERY_TYPE.DELETE_CONTACT->{
                     contactsDao.delete(params[0])

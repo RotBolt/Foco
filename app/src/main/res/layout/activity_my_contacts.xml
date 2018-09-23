@@ -52,6 +52,7 @@
         android:layout_height="wrap_content" />
 
     <TextView
+        android:id="@+id/tvNoContacts"
         app:layout_constraintTop_toBottomOf="@id/ivContactHeader"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

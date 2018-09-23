@@ -4,9 +4,10 @@ import android.arch.persistence.room.Database
 import android.arch.persistence.room.Room
 import android.arch.persistence.room.RoomDatabase
 import android.content.Context
+import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 
-@Database(entities = [PlacePrefs::class],version = 1)
+@Database(entities = [PlacePrefs::class,ContactInfo::class],version = 1)
 abstract class AppDatabase:RoomDatabase(){
     abstract fun placePrefsDao():PlacePrefsDao
 
