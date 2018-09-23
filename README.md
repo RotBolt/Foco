@@ -2,7 +2,7 @@
 Smart Call Filter, Lets you focu on your work. Only disturbs for important or emergency
 
 ### Work Places
-![Places](https://user-images.githubusercontent.com/24780524/45929117-dc675c00-bf6a-11e8-92df-cae2c7149d49.png {width=40px height=400px})
+<img src="https://user-images.githubusercontent.com/24780524/45929117-dc675c00-bf6a-11e8-92df-cae2c7149d49.png" width="480">
 
 ### Drive Mode
 ![Drive Mode](https://user-images.githubusercontent.com/24780524/45929123-e721f100-bf6a-11e8-946d-e4bceb83e4f6.png {width=40px height=400px})
