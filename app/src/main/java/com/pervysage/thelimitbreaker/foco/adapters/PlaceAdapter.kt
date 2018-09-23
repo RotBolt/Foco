@@ -88,20 +88,14 @@ class PlaceAdapter(private val context: Context,
         private var lastExpandPos = -1
         private var lastExpandName: String? = null
 
-        override fun bindExtraDataDuringAnimation(headHolder: HeadHolder, bodyHolder: BodyHolder, modelObj: PlacePrefs) {
-                headHolder.bindData(modelObj)
+        override fun bindExtraDataDuringAnimation(headHolder: HeadHolder, bodyHolder: BodyHolder, modelObj: PlacePrefs,position: Int) {
+                headHolder.bindData(modelObj,position)
                 bodyHolder.bindData(modelObj)
 
         }
 
         override fun workInExpand(headHolder: HeadHolder, bodyHolder: BodyHolder, modelObj: PlacePrefs,position: Int) {
                 with(headHolder) {
-                    if (position==0){
-                        ivWorkHeader.visibility=View.VISIBLE
-                    }else{
-                        ivWorkHeader.visibility=View.GONE
-
-                    }
                     actualCard.background = ContextCompat.getDrawable(context, R.drawable.reg_background)
                     actualCard.elevation = 20.0f
                     tvPlaceTitle.setTextColor(ContextCompat.getColor(context, android.R.color.white))
@@ -111,7 +105,7 @@ class PlaceAdapter(private val context: Context,
                 }
                 bodyHolder.extraContent.visibility = View.VISIBLE
 
-                headHolder.bindData(modelObj)
+                headHolder.bindData(modelObj,position)
                 bodyHolder.bindData(modelObj)
 
 
@@ -128,12 +122,7 @@ class PlaceAdapter(private val context: Context,
 
         override fun workInCollapse(headHolder: HeadHolder, bodyHolder: BodyHolder, modelObj: PlacePrefs,position: Int) {
                 with(headHolder) {
-                    if (position==0){
-                        ivWorkHeader.visibility=View.VISIBLE
-                    }else{
-                        ivWorkHeader.visibility=View.GONE
 
-                    }
                     prefView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
                     actualCard.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
                     tvDetails.visibility = View.VISIBLE
@@ -167,7 +156,7 @@ class PlaceAdapter(private val context: Context,
                 }
                 bodyHolder.extraContent.visibility = View.GONE
 
-                headHolder.bindData(modelObj)
+                headHolder.bindData(modelObj,position)
                 headHolder.revertClickListeners()
 
         }
@@ -185,7 +174,7 @@ class PlaceAdapter(private val context: Context,
                 headHolder.prefView.setOnClickListener {
                     if (modelObj.isExpanded) {
                         setOnCollapseListener {
-                            repository.update(modelObj)
+                            repository.updatePref(modelObj)
                         }
                         collapse(headHolder.prefView, headHolder, bodyHolder, modelObj,pos)
 
@@ -230,7 +219,12 @@ class PlaceAdapter(private val context: Context,
             ivWorkHeader.setOnTouchListener{_,_->true}
         }
 
-        fun bindData(placePref: PlacePrefs) {
+        fun bindData(placePref: PlacePrefs,position: Int) {
+            if (position==0){
+                ivWorkHeader.visibility=View.VISIBLE
+            }else{
+                ivWorkHeader.visibility=View.GONE
+            }
             tvPlaceTitle.text = placePref.name
             val radius = when (placePref.radius) {
                 1000 -> "1 km"
@@ -248,7 +242,7 @@ class PlaceAdapter(private val context: Context,
             serviceSwitch.isChecked = placePref.active == 1
             serviceSwitch.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) placePref.active = 1 else placePref.active = 0
-                repository.update(placePref)
+                repository.updatePref(placePref)
             }
         }
 
@@ -352,7 +346,7 @@ class PlaceAdapter(private val context: Context,
             }
 
             tvDelete.setOnClickListener {
-                repository.delete(placePref)
+                repository.deletePref(placePref)
                 workOnDelete()
             }
         }

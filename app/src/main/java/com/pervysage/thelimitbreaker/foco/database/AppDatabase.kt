@@ -10,6 +10,8 @@ import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 abstract class AppDatabase:RoomDatabase(){
     abstract fun placePrefsDao():PlacePrefsDao
 
+    abstract fun contactInfoDao():ContactsDao
+
     companion object {
         private var dbInstance:AppDatabase?=null
         fun getInstance(context: Context):AppDatabase{
@@ -19,7 +21,7 @@ abstract class AppDatabase:RoomDatabase(){
                         dbInstance= Room.databaseBuilder(
                                 context,
                                 AppDatabase::class.java,
-                                "place_prefs.db"
+                                "foco.db"
                         ).build()
                     }
                 }

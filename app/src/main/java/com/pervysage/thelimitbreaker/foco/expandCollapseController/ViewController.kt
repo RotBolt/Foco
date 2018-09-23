@@ -63,7 +63,7 @@ abstract class ViewController<N, R, P>(private val listView: MyListView) {
         return intArrayOf(yTranslateTop, yTranslateBottom)
     }
 
-    abstract fun bindExtraDataDuringAnimation(headHolder: N, bodyHolder: R, modelObj: P)
+    abstract fun bindExtraDataDuringAnimation(headHolder: N, bodyHolder: R, modelObj: P,position: Int)
 
     abstract fun workInExpand(headHolder: N, bodyHolder: R, modelObj: P,position: Int)
 
@@ -96,7 +96,7 @@ abstract class ViewController<N, R, P>(private val listView: MyListView) {
                 val v = listView.getChildAt(i)
                 oldCoordinates[v] = intArrayOf(v.top, v.bottom)
             }
-            bindExtraDataDuringAnimation(headHolder, bodyHolder, modelObj)
+            bindExtraDataDuringAnimation(headHolder, bodyHolder, modelObj,position)
             workInExpand(headHolder, bodyHolder, modelObj,position)
         }
 
@@ -105,7 +105,7 @@ abstract class ViewController<N, R, P>(private val listView: MyListView) {
         if (viewToCollapse != null) {
             val collapseHead = viewToCollapse.getTag(com.pervysage.thelimitbreaker.foco.R.id.HEAD_KEY) as N
             val collapseBody = viewToCollapse.getTag(com.pervysage.thelimitbreaker.foco.R.id.BODY_KEY) as R
-            workInCollapse(collapseHead, collapseBody, collapseObj!!,position)
+            workInCollapse(collapseHead, collapseBody, collapseObj!!,-1)
         } else {
             prepareExpand()
         }

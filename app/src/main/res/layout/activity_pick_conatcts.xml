@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.pervysage.thelimitbreaker.foco.PickContactsActivity">
+
+    <LinearLayout
+        android:id="@+id/topBar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:elevation="7dp"
+        android:paddingTop="3dp"
+        android:paddingRight="7dp"
+        android:paddingLeft="7dp"
+        android:paddingBottom="7dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:background="@color/colorPrimaryDark"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/ivClose"
+            android:scaleX="0.80"
+            android:scaleY="0.80"
+            android:paddingTop="7dp"
+            android:src="@drawable/ic_close"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:padding="7dp"
+            android:layout_weight="7"
+            android:gravity="center_vertical"
+            android:text="Pick Contacts"
+            android:fontFamily="@font/maven_pro_medium"
+            android:textColor="@android:color/white"
+            android:textSize="25sp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tvCount"
+            android:layout_weight="1"
+            android:text="0"
+            android:padding="7dp"
+            android:fontFamily="@font/maven_pro_medium"
+            android:textColor="@android:color/white"
+            android:textSize="25sp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+
+        <ImageView
+            android:id="@+id/ivDone"
+            android:src="@drawable/ic_done"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:scaleY="0.85"
+            android:scaleX="0.85"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rvContacts"
+        android:padding="7dp"
+        app:layout_constraintTop_toBottomOf="@id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </android.support.v7.widget.RecyclerView>
+
+
+
+</android.support.constraint.ConstraintLayout>
