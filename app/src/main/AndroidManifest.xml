@@ -17,15 +17,15 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/API_KEY" />
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".actvities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MyContactsActivity" />
-        <activity android:name=".PickContactsActivity"></activity>
+        <activity android:name=".actvities.MyContactsActivity" />
+        <activity android:name=".actvities.PickContactsActivity"></activity>
     </application>
 
 </manifest>

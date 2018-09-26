@@ -1,4 +1,4 @@
-package com.pervysage.thelimitbreaker.foco
+package com.pervysage.thelimitbreaker.foco.actvities
 
 import android.app.Activity
 import android.content.Context
@@ -13,6 +13,7 @@ import android.widget.Toast
 import android.content.pm.PackageManager
 import android.support.v4.app.ActivityCompat
 import android.view.View
+import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.Repository
 

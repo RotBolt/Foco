@@ -11,7 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import com.pervysage.thelimitbreaker.foco.MainActivity
+import com.pervysage.thelimitbreaker.foco.actvities.MainActivity
 
 import com.pervysage.thelimitbreaker.foco.R
 import kotlinx.android.synthetic.main.fragment_drive_mode.*
