@@ -19,6 +19,8 @@ import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.dialogs.ContactGroupPickDialog
 import com.pervysage.thelimitbreaker.foco.dialogs.RadiusPickDialog
+import com.pervysage.thelimitbreaker.foco.expandCollapseController.ExpandableObj
+import java.lang.ref.WeakReference
 
 class PlaceAdapter(private val context: Context,
                    private var places: List<PlacePrefs>,
@@ -38,8 +40,8 @@ class PlaceAdapter(private val context: Context,
             places[places.size - 1].isExpanded = true
         }
         notifyDataSetChanged()
-        if (places.isNotEmpty() && isNew){
-            listView.setSelection(places.size-1)
+        if (places.isNotEmpty() && isNew) {
+            listView.setSelection(places.size - 1)
         }
 
 
@@ -58,19 +60,15 @@ class PlaceAdapter(private val context: Context,
                 itemView = li.inflate(R.layout.layout_place_prefs, parent, false)
                 itemView!!.setTag(
                         R.id.HEAD_KEY,
-                        HeadHolder(itemView!!)
+                        HeadHolder(itemView!!,context, WeakReference(repository))
                 )
                 itemView!!.setTag(
                         R.id.BODY_KEY,
-                        BodyHolder(itemView!!)
+                        BodyHolder(itemView!!,context, WeakReference(repository))
                 )
 
-
             }
-            val headHolder = itemView!!.getTag(R.id.HEAD_KEY) as HeadHolder
-            val bodyHolder = itemView!!.getTag(R.id.BODY_KEY) as BodyHolder
-            viewController.setUp(headHolder, bodyHolder, thisPref, position)
-
+            viewController.setUp(itemView!!, thisPref, position)
             return itemView
         }
 
@@ -83,147 +81,162 @@ class PlaceAdapter(private val context: Context,
 
     override fun getCount(): Int = places.size
 
-    inner class MyViewController(private val listView: MyListView, private val context: Context) : ViewController<HeadHolder, BodyHolder, PlacePrefs>(listView) {
+    inner class MyViewController(private val listView: MyListView, private val context: Context) : ViewController(listView) {
+
+
+        override fun bindExtraDataDuringAnimation(itemView: View, modelObj: ExpandableObj, position: Int) {
+            val headHolder = itemView.getTag(R.id.HEAD_KEY) as HeadHolder
+            val bodyHolder = itemView.getTag(R.id.BODY_KEY) as BodyHolder
+            modelObj as PlacePrefs
+            headHolder.bindData(modelObj, position)
+            bodyHolder.bindData(modelObj)
+        }
 
         private var lastExpandPos = -1
         private var lastExpandName: String? = null
 
-        override fun bindExtraDataDuringAnimation(headHolder: HeadHolder, bodyHolder: BodyHolder, modelObj: PlacePrefs,position: Int) {
-                headHolder.bindData(modelObj,position)
-                bodyHolder.bindData(modelObj)
+
+        override fun workInExpand(itemView: View, modelObj: ExpandableObj, position: Int) {
+            val headHolder = itemView.getTag(R.id.HEAD_KEY) as HeadHolder
+            val bodyHolder = itemView.getTag(R.id.BODY_KEY) as BodyHolder
+            with(headHolder) {
+                actualCard.background = ContextCompat.getDrawable(context, R.drawable.reg_background)
+                actualCard.elevation = 20.0f
+                tvPlaceTitle.setTextColor(ContextCompat.getColor(context, android.R.color.white))
+                tvDetails.visibility = View.GONE
+                ivExpand.visibility = View.GONE
+                viewDivider.visibility = View.GONE
+            }
+            bodyHolder.extraContent.visibility = View.VISIBLE
+
+            modelObj as PlacePrefs
+
+            headHolder.bindData(modelObj, position)
+            bodyHolder.bindData(modelObj)
+
+
+            headHolder.setOnClickListeners(modelObj)
+            if (isNew) {
+                headHolder.tvPlaceTitle.callOnClick()
+                isNew = false
+            }
+
+            bodyHolder.setOnClickListeners(modelObj)
+
 
         }
 
-        override fun workInExpand(headHolder: HeadHolder, bodyHolder: BodyHolder, modelObj: PlacePrefs,position: Int) {
-                with(headHolder) {
-                    actualCard.background = ContextCompat.getDrawable(context, R.drawable.reg_background)
-                    actualCard.elevation = 20.0f
-                    tvPlaceTitle.setTextColor(ContextCompat.getColor(context, android.R.color.white))
-                    tvDetails.visibility = View.GONE
-                    ivExpand.visibility = View.GONE
-                    viewDivider.visibility = View.GONE
+        override fun workInCollapse(itemView: View, modelObj: ExpandableObj, position: Int) {
+            val headHolder = itemView.getTag(R.id.HEAD_KEY) as HeadHolder
+            val bodyHolder = itemView.getTag(R.id.BODY_KEY) as BodyHolder
+            modelObj as PlacePrefs
+            with(headHolder) {
+
+                prefView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
+                actualCard.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
+                tvDetails.visibility = View.VISIBLE
+                ivExpand.visibility = View.VISIBLE
+                viewDivider.visibility = View.VISIBLE
+                if (modelObj.active == 1) {
+                    tvPlaceTitle.setTextColor(ContextCompat.getColor(context, R.color.colorTextDark))
+                    tvDetails.setTextColor(ContextCompat.getColor(context, R.color.colorTextDark))
+                    viewDivider.getChildAt(0).background =
+                            ContextCompat.getDrawable(context, R.drawable.reg_background)
+
+                    ivExpand.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_expand_more))
+
+                } else {
+                    tvPlaceTitle.setTextColor(ContextCompat.getColor(context, R.color.colorTextDisable))
+                    tvDetails.setTextColor(ContextCompat.getColor(context, R.color.colorTextDisable))
+                    val disableColorFilter = PorterDuffColorFilter(
+                            ContextCompat.getColor(context, R.color.colorTextDisable),
+                            PorterDuff.Mode.SRC_ATOP
+                    )
+                    val disabledDividerDrawable = ContextCompat.getDrawable(context, R.drawable.reg_background)?.mutate()
+                    disabledDividerDrawable?.colorFilter = disableColorFilter
+                    viewDivider.getChildAt(0).background = disabledDividerDrawable
+
+                    val disabledExpandIcon = ContextCompat.getDrawable(context, R.drawable.ic_expand_more)?.mutate()
+                    disabledExpandIcon?.colorFilter = disableColorFilter
+                    ivExpand.setImageDrawable(disabledExpandIcon)
+
                 }
-                bodyHolder.extraContent.visibility = View.VISIBLE
 
-                headHolder.bindData(modelObj,position)
-                bodyHolder.bindData(modelObj)
+            }
+            bodyHolder.extraContent.visibility = View.GONE
 
-
-                headHolder.setOnClickListeners(modelObj)
-                if (isNew) {
-                    headHolder.tvPlaceTitle.callOnClick()
-                    isNew = false
-                }
-
-                bodyHolder.setOnClickListeners(modelObj)
-
+            headHolder.bindData(modelObj, position)
+            headHolder.revertClickListeners()
 
         }
 
-        override fun workInCollapse(headHolder: HeadHolder, bodyHolder: BodyHolder, modelObj: PlacePrefs,position: Int) {
-                with(headHolder) {
 
-                    prefView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
-                    actualCard.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
-                    tvDetails.visibility = View.VISIBLE
-                    ivExpand.visibility = View.VISIBLE
-                    viewDivider.visibility = View.VISIBLE
-                    if (modelObj.active == 1) {
-                        tvPlaceTitle.setTextColor(ContextCompat.getColor(context, R.color.colorTextDark))
-                        tvDetails.setTextColor(ContextCompat.getColor(context, R.color.colorTextDark))
-                        viewDivider.getChildAt(0).background =
-                                ContextCompat.getDrawable(context, R.drawable.reg_background)
+        override fun setUp(itemView: View, modelObj: ExpandableObj, pos: Int) {
+            super.setUp(itemView, modelObj, pos)
+            modelObj as PlacePrefs
+            val headHolder = itemView.getTag(R.id.HEAD_KEY) as HeadHolder
+            val bodyHolder = itemView.getTag(R.id.BODY_KEY) as BodyHolder
 
-                        ivExpand.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_expand_more))
+            bodyHolder.setWorkOnDelete {
+                lastExpandPos = -1
+                lastExpandName = null
+            }
 
-                    } else {
-                        tvPlaceTitle.setTextColor(ContextCompat.getColor(context, R.color.colorTextDisable))
-                        tvDetails.setTextColor(ContextCompat.getColor(context, R.color.colorTextDisable))
-                        val disableColorFilter = PorterDuffColorFilter(
-                                ContextCompat.getColor(context, R.color.colorTextDisable),
-                                PorterDuff.Mode.SRC_ATOP
-                        )
-                        val disabledDividerDrawable = ContextCompat.getDrawable(context, R.drawable.reg_background)?.mutate()
-                        disabledDividerDrawable?.colorFilter = disableColorFilter
-                        viewDivider.getChildAt(0).background = disabledDividerDrawable
 
-                        val disabledExpandIcon = ContextCompat.getDrawable(context, R.drawable.ic_expand_more)?.mutate()
-                        disabledExpandIcon?.colorFilter = disableColorFilter
-                        ivExpand.setImageDrawable(disabledExpandIcon)
-
+            headHolder.prefView.setOnClickListener {
+                if (modelObj.isExpanded) {
+                    setOnCollapseListener {
+                        repository.updatePref(modelObj)
                     }
+                    collapse(headHolder.prefView, modelObj, pos)
 
-                }
-                bodyHolder.extraContent.visibility = View.GONE
-
-                headHolder.bindData(modelObj,position)
-                headHolder.revertClickListeners()
-
-        }
-
-
-        override fun setUp(headHolder: HeadHolder, bodyHolder: BodyHolder, modelObj: PlacePrefs, pos: Int) {
-            super.setUp(headHolder, bodyHolder, modelObj, pos)
-
-                bodyHolder.setWorkOnDelete {
                     lastExpandPos = -1
                     lastExpandName = null
-                }
 
+                } else {
+                    var prevExpandView: View? = null
+                    var collapseModelObj = if (lastExpandPos != -1) places[lastExpandPos] else null
 
-                headHolder.prefView.setOnClickListener {
-                    if (modelObj.isExpanded) {
-                        setOnCollapseListener {
-                            repository.updatePref(modelObj)
-                        }
-                        collapse(headHolder.prefView, headHolder, bodyHolder, modelObj,pos)
-
-                        lastExpandPos = -1
-                        lastExpandName = null
-
-                    } else {
-                        var prevExpandView: View? = null
-                        var collapseModelObj = if (lastExpandPos != -1) places[lastExpandPos] else null
-
-                        if (lastExpandName != null) {
-                            for (i in 0 until listView.childCount) {
-                                val v = listView.getChildAt(i)
-                                val thisHead = v.getTag(R.id.HEAD_KEY) as HeadHolder
-                                if (thisHead.tvPlaceTitle.text.toString() == lastExpandName) {
-                                    prevExpandView = v
-                                    break
-                                }
+                    if (lastExpandName != null) {
+                        for (i in 0 until listView.childCount) {
+                            val v = listView.getChildAt(i)
+                            val thisHead = v.getTag(R.id.HEAD_KEY) as HeadHolder
+                            if (thisHead.tvPlaceTitle.text.toString() == lastExpandName) {
+                                prevExpandView = v
+                                break
                             }
                         }
-                        expand(headHolder.prefView, headHolder, bodyHolder, modelObj, prevExpandView, collapseModelObj,pos)
-                        lastExpandPos = pos
-                        lastExpandName = headHolder.tvPlaceTitle.text.toString()
-
                     }
+                    expand(headHolder.prefView, modelObj, prevExpandView, collapseModelObj, pos)
+                    lastExpandPos = pos
+                    lastExpandName = headHolder.tvPlaceTitle.text.toString()
+
                 }
+            }
 
         }
     }
 
 
-    inner class HeadHolder(itemView: View) {
+    private class HeadHolder(itemView: View,private val context: Context,private val repository:WeakReference<Repository>) {
         val prefView = itemView
-        val actualCard=itemView.findViewById<RelativeLayout>(R.id.actualCard)
+        val actualCard = itemView.findViewById<RelativeLayout>(R.id.actualCard)
         val ivWorkHeader = itemView.findViewById<ImageView>(R.id.ivWorkHeader)
         val tvPlaceTitle = itemView.findViewById<TextView>(R.id.tvPlaceTitle)
         val tvDetails = itemView.findViewById<TextView>(R.id.tvDetails)
         val viewDivider = itemView.findViewById<FrameLayout>(R.id.divideContainer)
         val ivExpand = itemView.findViewById<ImageView>(R.id.ivExpand)
         val serviceSwitch = itemView.findViewById<SwitchCompat>(R.id.serviceSwitch)
+
         init {
-            ivWorkHeader.setOnTouchListener{_,_->true}
+            ivWorkHeader.setOnTouchListener { _, _ -> true }
         }
 
-        fun bindData(placePref: PlacePrefs,position: Int) {
-            if (position==0){
-                ivWorkHeader.visibility=View.VISIBLE
-            }else{
-                ivWorkHeader.visibility=View.GONE
+        fun bindData(placePref: PlacePrefs, position: Int) {
+            if (position == 0) {
+                ivWorkHeader.visibility = View.VISIBLE
+            } else {
+                ivWorkHeader.visibility = View.GONE
             }
             tvPlaceTitle.text = placePref.name
             val radius = when (placePref.radius) {
@@ -242,7 +255,7 @@ class PlaceAdapter(private val context: Context,
             serviceSwitch.isChecked = placePref.active == 1
             serviceSwitch.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) placePref.active = 1 else placePref.active = 0
-                repository.updatePref(placePref)
+                repository.get()?.updatePref(placePref)
             }
         }
 
@@ -270,7 +283,7 @@ class PlaceAdapter(private val context: Context,
 
     }
 
-    inner class BodyHolder(itemView: View) {
+    private class BodyHolder(itemView: View,private val context: Context,private val repository: WeakReference<Repository>) {
 
         val tvAddress = itemView.findViewById<TextView>(R.id.tvAddress)
         val tvRadius = itemView.findViewById<TextView>(R.id.tvRadius)
@@ -346,7 +359,7 @@ class PlaceAdapter(private val context: Context,
             }
 
             tvDelete.setOnClickListener {
-                repository.deletePref(placePref)
+                repository.get()?.deletePref(placePref)
                 workOnDelete()
             }
         }
