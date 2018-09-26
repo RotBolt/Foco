@@ -9,5 +9,18 @@
     <color name="colorActive">#17ca09</color>
     <color name="colorInfoBg">#efeeee</color>
     <color name="colorPrimaryDarkTrans">#a10069c0</color>
-
+    <color name="red_A700">#D50000</color>
+    <color name="red_A200">#FF5252</color>
+    <color name="pink_A700">#C51162</color>
+    <color name="pink_A200">#FF4081</color>
+    <color name="purple_800">#6A1B9A</color>
+    <color name="purple_A200">#E040FB</color>
+    <color name="indigo_900">#1A237E</color>
+    <color name="indigo_A200">#536DFE</color>
+    <color name="deep_orange_A700">#DD2C00</color>
+    <color name="amber_A200">#FFD740</color>
+    <color name="cyan_800">#00838F</color>
+    <color name="cyan_300">#4DD0E1</color>
+    <color name="green_800">#2E7D32</color>
+    <color name="green_300">#81C784</color>
 </resources>

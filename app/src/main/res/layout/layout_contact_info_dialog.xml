@@ -1,25 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout
+<android.support.constraint.ConstraintLayout
+    android:padding="4dp"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:layout_width="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <ImageView
-        android:visibility="gone"
-        android:id="@+id/ivContactHeader"
-        android:padding="21dp"
-        android:scaleY="0.85"
-        android:scaleX="0.85"
-        android:src="@drawable/ic_my_contacts"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
     <LinearLayout
+        android:id="@+id/llContactBar"
         android:background="?attr/selectableItemBackground"
         android:layout_marginTop="8dp"
         android:layout_width="match_parent"
         android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:paddingBottom="8dp"
         android:paddingTop="8dp"
         android:paddingLeft="16dp"
@@ -50,16 +45,21 @@
             android:layout_height="wrap_content" />
 
         <ImageView
-            android:id="@+id/ivChecked"
-            android:visibility="invisible"
-            android:src="@drawable/ic_done"
+            android:id="@+id/ivDelete"
+            android:src="@drawable/ic_delete"
             android:layout_width="0dp"
-            android:scaleY="0.85"
-            android:scaleX="0.85"
+            android:padding="4dp"
             android:layout_weight="1.5"
-            android:layout_height="wrap_content"
-            android:tint="@color/colorPrimaryDark"/>
+            android:layout_height="match_parent"
+            android:tint="@android:color/darker_gray"/>
     </LinearLayout>
 
-
-</LinearLayout>
+    <ListView
+        android:id="@+id/lvNumbers"
+        android:divider="@null"
+        app:layout_constraintTop_toBottomOf="@id/llContactBar"
+        android:layout_width="match_parent"
+        android:padding="8dp"
+        android:layout_height="wrap_content">
+    </ListView>
+</android.support.constraint.ConstraintLayout>

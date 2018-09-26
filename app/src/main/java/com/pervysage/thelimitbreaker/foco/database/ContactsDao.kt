@@ -16,4 +16,5 @@ interface ContactsDao {
 
     @Query("SELECT * FROM contact_info ORDER BY name")
     fun getAll():LiveData<List<ContactInfo>>
+
 }

@@ -6,44 +6,72 @@
     android:layout_height="match_parent"
     tools:context="com.pervysage.thelimitbreaker.foco.MyContactsActivity">
 
-    <TextView
-        android:id="@+id/tvContactHeader"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimaryDark"
-        android:textColor="@android:color/white"
-        android:fontFamily="@font/maven_pro_medium"
-        android:text="My Contacts"
-        android:elevation="7dp"
-        android:padding="16dp"
-        android:textSize="25sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/ivAddContact"
-        android:padding="7dp"
+    <LinearLayout
+        android:id="@+id/titleBar"
         android:elevation="7dp"
-        android:scaleY="0.85"
-        android:scaleX="0.85"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/tvContactHeader"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:background="@color/colorPrimaryDark"
         app:layout_constraintTop_toTopOf="parent"
-        android:src="@drawable/ic_person_add"
-        android:layout_marginEnd="8dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:id="@+id/ivBack"
+            android:layout_weight="1"
+            android:padding="7dp"
+            android:scaleX="0.80"
+            android:scaleY="0.80"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_arrow_back"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tvContactHeader"
+            android:layout_width="0dp"
+            android:layout_weight="7"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/maven_pro_medium"
+            android:text="Priority Contacts"
+            android:padding="7dp"
+            android:textSize="24sp"
+            android:layout_gravity="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:id="@+id/ivAddContact"
+            android:padding="7dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_person_add"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
+
+
+    </LinearLayout>
+
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvMyContacts"
-        app:layout_constraintTop_toBottomOf="@id/tvContactHeader"
+        app:layout_constraintTop_toBottomOf="@id/titleBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
     </android.support.v7.widget.RecyclerView>
     <ImageView
         android:id="@+id/ivContactHeader"
-        app:layout_constraintTop_toBottomOf="@id/tvContactHeader"
+        app:layout_constraintTop_toBottomOf="@id/titleBar"
         android:padding="21dp"
         android:scaleX="0.85"
         android:scaleY="0.85"

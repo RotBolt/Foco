@@ -55,6 +55,7 @@ class RadiusPickDialog:DialogFragment(),DialogInterface.OnClickListener{
         )
         val dialog = builder.create()
         dialog.window.setBackgroundDrawableResource(R.drawable.dialog_background)
+
         return dialog
     }
 }
