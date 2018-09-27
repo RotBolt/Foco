@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.pervysage.thelimitbreaker.foco.geofence.GeoWorker
 import com.pervysage.thelimitbreaker.foco.dialogs.EditPlaceNameDialog
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.MyListView
 import com.pervysage.thelimitbreaker.foco.R
@@ -22,13 +23,16 @@ import com.pervysage.thelimitbreaker.foco.dialogs.RadiusPickDialog
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.ExpandableObj
 import java.lang.ref.WeakReference
 
-class PlaceAdapter(private val context: Context,
+class PlaceAdapter(context: Context,
                    private var places: List<PlacePrefs>,
                    private val listView: MyListView,
                    private val repository: Repository) : BaseAdapter() {
 
     private val TAG = "PlaceAdapter"
     private var isNew = false
+
+    private val geoWorker = GeoWorker(context)
+
 
     private val viewController = MyViewController(listView, context)
 
@@ -42,6 +46,7 @@ class PlaceAdapter(private val context: Context,
         notifyDataSetChanged()
         if (places.isNotEmpty() && isNew) {
             listView.setSelection(places.size - 1)
+            geoWorker.addPlaceForMonitoring(places[places.size - 1])
         }
 
 
@@ -51,7 +56,6 @@ class PlaceAdapter(private val context: Context,
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View? {
 
         var itemView = convertView
-        Log.d(TAG, "getView $position")
 
         val thisPref = places[position]
         parent?.run {
@@ -60,11 +64,11 @@ class PlaceAdapter(private val context: Context,
                 itemView = li.inflate(R.layout.layout_place_prefs, parent, false)
                 itemView!!.setTag(
                         R.id.HEAD_KEY,
-                        HeadHolder(itemView!!,context, WeakReference(repository))
+                        HeadHolder(itemView!!, context, WeakReference(repository))
                 )
                 itemView!!.setTag(
                         R.id.BODY_KEY,
-                        BodyHolder(itemView!!,context, WeakReference(repository))
+                        BodyHolder(itemView!!, context, WeakReference(repository))
                 )
 
             }
@@ -126,7 +130,7 @@ class PlaceAdapter(private val context: Context,
 
         }
 
-        override fun workInCollapse(itemView: View, modelObj: ExpandableObj, position: Int) {
+        override fun workInCollapse(itemView: View, modelObj: ExpandableObj, position: Int,isExplicit:Boolean) {
             val headHolder = itemView.getTag(R.id.HEAD_KEY) as HeadHolder
             val bodyHolder = itemView.getTag(R.id.BODY_KEY) as BodyHolder
             modelObj as PlacePrefs
@@ -168,6 +172,8 @@ class PlaceAdapter(private val context: Context,
             headHolder.bindData(modelObj, position)
             headHolder.revertClickListeners()
 
+            if (isExplicit)geoWorker.updatePlacePrefsForMonitoring(modelObj)
+
         }
 
 
@@ -177,7 +183,10 @@ class PlaceAdapter(private val context: Context,
             val headHolder = itemView.getTag(R.id.HEAD_KEY) as HeadHolder
             val bodyHolder = itemView.getTag(R.id.BODY_KEY) as BodyHolder
 
+            Log.d(TAG, "lat : ${modelObj.latitude}, lng : ${modelObj.longitude}")
             bodyHolder.setWorkOnDelete {
+                geoWorker.removePlaceFromMonitoring(it)
+                repository.deletePref(it)
                 lastExpandPos = -1
                 lastExpandName = null
             }
@@ -218,7 +227,7 @@ class PlaceAdapter(private val context: Context,
     }
 
 
-    private class HeadHolder(itemView: View,private val context: Context,private val repository:WeakReference<Repository>) {
+    private class HeadHolder(itemView: View, private val context: Context, private val repository: WeakReference<Repository>) {
         val prefView = itemView
         val actualCard = itemView.findViewById<RelativeLayout>(R.id.actualCard)
         val ivWorkHeader = itemView.findViewById<ImageView>(R.id.ivWorkHeader)
@@ -283,7 +292,7 @@ class PlaceAdapter(private val context: Context,
 
     }
 
-    private class BodyHolder(itemView: View,private val context: Context,private val repository: WeakReference<Repository>) {
+    private class BodyHolder(itemView: View, private val context: Context, private val repository: WeakReference<Repository>) {
 
         val tvAddress = itemView.findViewById<TextView>(R.id.tvAddress)
         val tvRadius = itemView.findViewById<TextView>(R.id.tvRadius)
@@ -291,8 +300,8 @@ class PlaceAdapter(private val context: Context,
         val tvDelete = itemView.findViewById<TextView>(R.id.tvDelete)
         val extraContent = itemView.findViewById<RelativeLayout>(R.id.extraContent)
 
-        private lateinit var workOnDelete: () -> Unit
-        fun setWorkOnDelete(l: () -> Unit) {
+        private lateinit var workOnDelete: (PlacePrefs) -> Unit
+        fun setWorkOnDelete(l: (PlacePrefs) -> Unit) {
             workOnDelete = l
         }
 
@@ -359,8 +368,7 @@ class PlaceAdapter(private val context: Context,
             }
 
             tvDelete.setOnClickListener {
-                repository.get()?.deletePref(placePref)
-                workOnDelete()
+                workOnDelete(placePref)
             }
         }
 

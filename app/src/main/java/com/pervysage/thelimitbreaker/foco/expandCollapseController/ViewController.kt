@@ -67,13 +67,13 @@ abstract class ViewController(private val listView: MyListView) {
 
     abstract fun workInExpand(itemView: View, modelObj: ExpandableObj,position: Int)
 
-    abstract fun workInCollapse(itemView: View, modelObj: ExpandableObj,position: Int)
+    abstract fun workInCollapse(itemView: View, modelObj: ExpandableObj,position: Int,isExplicit:Boolean)
 
     open fun setUp(itemView: View,modelObj: ExpandableObj, pos: Int) {
             if (modelObj.isExpanded)
                 workInExpand(itemView, modelObj,pos)
             else
-                workInCollapse(itemView, modelObj,pos)
+                workInCollapse(itemView, modelObj,pos,false)
     }
 
     fun expand(viewToExpand: View, modelObj: ExpandableObj, viewToCollapse: View? = null, collapseObj: ExpandableObj? = null,position: Int) {
@@ -100,7 +100,7 @@ abstract class ViewController(private val listView: MyListView) {
         if (collapseObj != null) collapseObj.isExpanded = false
 
         if (viewToCollapse != null) {
-            workInCollapse(viewToCollapse, collapseObj!!,-1)
+            workInCollapse(viewToCollapse, collapseObj!!,-1,false)
         } else {
             prepareExpand()
         }
@@ -219,7 +219,7 @@ abstract class ViewController(private val listView: MyListView) {
             oldCoordinates[child] = oldTopBottom
         }
 
-        workInCollapse(viewToCollapse, modelObj,position)
+        workInCollapse(viewToCollapse, modelObj,position,true)
 
         viewToCollapse.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
             override fun onPreDraw(): Boolean {

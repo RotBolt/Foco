@@ -20,4 +20,7 @@ interface PlacePrefsDao{
     @Query("SELECT * FROM place_prefs")
     fun getAllPrefs():LiveData<List<PlacePrefs>>
 
+    @Query("SELECT * FROM place_prefs WHERE latitude LIKE :lat AND longitude LIKE :lng LIMIT 1")
+    fun getPlacePref(lat:Double,lng:Double):PlacePrefs
+
 }

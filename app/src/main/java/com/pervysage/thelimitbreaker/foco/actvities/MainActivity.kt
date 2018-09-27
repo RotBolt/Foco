@@ -16,21 +16,24 @@ import android.view.View
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.Repository
+import com.pervysage.thelimitbreaker.foco.database.entities.generateGeoKey
+import android.os.Build
+import android.support.v4.content.ContextCompat.getSystemService
+import android.app.NotificationManager
 
 
 class MainActivity : AppCompatActivity() {
 
-    private var currTabPos = 0
+
     private val PLACE_PICK_REQUEST = 1
     private val LOCATION_PERMISSION = 1
-    private val READ_CONTACTS_PERMISSION = 2
+    private val READ_CALL_PERMISSIONS = 2
     private val TAG = "MainActivity"
 
     private val pickPlace = {
         val intentBuilder = PlacePicker.IntentBuilder()
         startActivityForResult(intentBuilder.build(this), PLACE_PICK_REQUEST)
     }
-
 
     private var onDMStatusChanged: ((Boolean) -> Unit)? = null
 
@@ -41,6 +44,27 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !notificationManager.isNotificationPolicyAccessGranted) {
+
+            val intent = Intent(
+                    android.provider.Settings
+                            .ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+
+            startActivity(intent)
+        }
+
+        ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                        android.Manifest.permission.READ_CALL_LOG,
+                        android.Manifest.permission.READ_PHONE_STATE
+                ),
+                READ_CALL_PERMISSIONS
+        )
 
         val sharedPref = getSharedPreferences(
                 resources.getString(R.string.SHARED_PREF_KEY),
@@ -135,6 +159,11 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "Grant Permission to add place", Toast.LENGTH_SHORT).show()
             }
+        } else if (requestCode == READ_CALL_PERMISSIONS) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED)
+                Toast.makeText(this, "You Denied the Permission Read Call Log", Toast.LENGTH_SHORT).show()
+            if (grantResults[1] != PackageManager.PERMISSION_GRANTED)
+                Toast.makeText(this, "You Denied the Permission Read Phone State", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -149,12 +178,14 @@ class MainActivity : AppCompatActivity() {
             val addr = place.address
             val radius = 500
             val isOn = 1
+            val geoKey = generateGeoKey()
             val placePref = PlacePrefs(
                     name = name.toString(),
                     address = addr.toString(),
                     latitude = lat,
                     longitude = lon,
                     radius = radius,
+                    geoKey = geoKey,
                     active = isOn,
                     contactGroup = "All Contacts"
             )

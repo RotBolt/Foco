@@ -221,6 +221,4 @@ class MyContactsActivity : AppCompatActivity() {
             }
         }
     }
-
-
 }

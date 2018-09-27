@@ -3,6 +3,7 @@ package com.pervysage.thelimitbreaker.foco.database.entities
 import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.ExpandableObj
+import java.util.*
 
 
 @Entity(
@@ -18,7 +19,14 @@ data class PlacePrefs(
 
         @ColumnInfo(name="longitude")
         var longitude:Double,
+        var geoKey:Int,
         var radius:Int,
         var active:Int,
         var contactGroup:String
 ): ExpandableObj(false)
+
+
+fun generateGeoKey():Int{
+    val rand = Random(System.currentTimeMillis())
+    return rand.nextInt(Int.MAX_VALUE)
+}

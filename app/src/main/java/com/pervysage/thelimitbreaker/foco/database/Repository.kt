@@ -29,6 +29,10 @@ class Repository private constructor(application: Application) {
     }
 
 
+    fun getPlacePref(lat:Double,lng:Double):PlacePrefs{
+        return placePrefsDao.getPlacePref(lat, lng)
+    }
+
     fun getMyContacts():LiveData<List<ContactInfo>> = myContacts
 
     fun getAllPlacePrefs():LiveData<List<PlacePrefs>> = allPlacePrefs
