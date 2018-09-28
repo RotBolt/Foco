@@ -191,6 +191,10 @@ class PlaceAdapter(context: Context,
                 lastExpandName = null
             }
 
+            headHolder.setOnSwitchChange { isOn, placePrefs ->
+                if(isOn) geoWorker.addPlaceForMonitoring(placePrefs)
+                else geoWorker.removePlaceFromMonitoring(placePrefs)
+            }
 
             headHolder.prefView.setOnClickListener {
                 if (modelObj.isExpanded) {
@@ -241,6 +245,11 @@ class PlaceAdapter(context: Context,
             ivWorkHeader.setOnTouchListener { _, _ -> true }
         }
 
+        private lateinit var onSwitchChange:(isOn:Boolean,placePrefs:PlacePrefs)->Unit
+
+        fun setOnSwitchChange(l:(Boolean,PlacePrefs)->Unit){
+            onSwitchChange=l
+        }
         fun bindData(placePref: PlacePrefs, position: Int) {
             if (position == 0) {
                 ivWorkHeader.visibility = View.VISIBLE
@@ -264,6 +273,7 @@ class PlaceAdapter(context: Context,
             serviceSwitch.isChecked = placePref.active == 1
             serviceSwitch.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) placePref.active = 1 else placePref.active = 0
+                onSwitchChange(isChecked,placePref)
                 repository.get()?.updatePref(placePref)
             }
         }

@@ -61,7 +61,8 @@ class MainActivity : AppCompatActivity() {
                 this,
                 arrayOf(
                         android.Manifest.permission.READ_CALL_LOG,
-                        android.Manifest.permission.READ_PHONE_STATE
+                        android.Manifest.permission.READ_PHONE_STATE,
+                        android.Manifest.permission.CALL_PHONE
                 ),
                 READ_CALL_PERMISSIONS
         )
@@ -164,6 +165,8 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "You Denied the Permission Read Call Log", Toast.LENGTH_SHORT).show()
             if (grantResults[1] != PackageManager.PERMISSION_GRANTED)
                 Toast.makeText(this, "You Denied the Permission Read Phone State", Toast.LENGTH_SHORT).show()
+            if (grantResults[2] != PackageManager.PERMISSION_GRANTED)
+                Toast.makeText(this, "You Denied the Permission Call Phone", Toast.LENGTH_SHORT).show()
         }
     }
 

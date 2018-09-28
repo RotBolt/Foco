@@ -66,7 +66,7 @@ class GeoWorker(private val context: Context){
     }
 
     private fun getPendingIntent(requestID:Int):PendingIntent{
-        val intent = Intent(context, GeoActionsIntentService::class.java)
-        return PendingIntent.getService(context,requestID,intent,PendingIntent.FLAG_UPDATE_CURRENT)
+        val intent = Intent(context, GeoBroadcastReceiver::class.java)
+        return PendingIntent.getBroadcast(context,requestID,intent,PendingIntent.FLAG_UPDATE_CURRENT)
     }
 }

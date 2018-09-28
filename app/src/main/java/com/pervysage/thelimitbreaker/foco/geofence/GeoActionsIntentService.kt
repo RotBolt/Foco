@@ -1,6 +1,5 @@
 package com.pervysage.thelimitbreaker.foco.geofence
 
-import android.app.IntentService
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -10,6 +9,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.media.AudioManager
 import android.os.Build
+import android.support.v4.app.JobIntentService
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.TaskStackBuilder
 import android.util.Log
@@ -21,10 +21,21 @@ import com.pervysage.thelimitbreaker.foco.actvities.MainActivity
 import com.pervysage.thelimitbreaker.foco.database.Repository
 
 
-class GeoActionsIntentService : IntentService("GeoActionsIntentService") {
+class GeoActionsIntentService : JobIntentService() {
 
     private val TAG = "GeoActions"
-    override fun onHandleIntent(intent: Intent) {
+
+    companion object {
+        private val JOB_ID = 2505
+        var isMonitorOn=false
+        var contactGroup="All Contacts"
+        fun enqueueWork(context: Context, intent: Intent) {
+            enqueueWork(context, GeoActionsIntentService::class.java, JOB_ID, intent)
+        }
+    }
+
+
+    override fun onHandleWork(intent: Intent) {
         Log.d(TAG, "intent came ")
         val geofenceEvent = GeofencingEvent.fromIntent(intent)
         if (geofenceEvent.hasError()) {
@@ -59,12 +70,16 @@ class GeoActionsIntentService : IntentService("GeoActionsIntentService") {
                 val lng = lngStr.toDouble()
                 val placePrefs = repo.getPlacePref(lat, lng)
                 Log.d(TAG, "placepref : ${placePrefs.name}")
-
+                contactGroup=placePrefs.contactGroup
                 val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                if (geofenceEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER)
-                    am.ringerMode = AudioManager.RINGER_MODE_SILENT
+                if (geofenceEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+                    val minVal = am.getStreamMinVolume(AudioManager.STREAM_RING)
+                    Log.d(TAG,"minVol: $minVal")
+                    am.adjustStreamVolume(AudioManager.STREAM_RING,minVal,AudioManager.FLAG_SHOW_UI)
+                    isMonitorOn=true
+                }
                 else
-                    am.ringerMode = AudioManager.RINGER_MODE_NORMAL
+                    am.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION,AudioManager.ADJUST_RAISE,AudioManager.FLAG_SHOW_UI)
 
                 notificationDetails += placePrefs.name
                 break
@@ -121,7 +136,7 @@ class GeoActionsIntentService : IntentService("GeoActionsIntentService") {
             builder.setChannelId("channel_id") // Channel ID
         }
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER)
-            builder.setOngoing(true)
+            builder.setAutoCancel(true)
         else
             builder.setAutoCancel(true)
 

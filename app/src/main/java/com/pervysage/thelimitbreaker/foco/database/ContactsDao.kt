@@ -17,4 +17,7 @@ interface ContactsDao {
     @Query("SELECT * FROM contact_info ORDER BY name")
     fun getAll():LiveData<List<ContactInfo>>
 
+    @Query("SELECT * FROM contact_info WHERE number LIKE :number")
+    fun getInfoFromNumber(number:String):ContactInfo?
+
 }

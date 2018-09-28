@@ -6,6 +6,9 @@ import android.os.AsyncTask
 import android.util.Log
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
+import java.util.concurrent.Callable
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 class Repository private constructor(application: Application) {
 
@@ -33,6 +36,12 @@ class Repository private constructor(application: Application) {
         return placePrefsDao.getPlacePref(lat, lng)
     }
 
+    fun getInfoFromNumber(number: String):ContactInfo?{
+        val executor = Executors.newSingleThreadExecutor()
+        val getInfoTask= Callable { contactsDao.getInfoFromNumber(number) }
+        val future = executor.submit(getInfoTask)
+        return future.get()
+    }
     fun getMyContacts():LiveData<List<ContactInfo>> = myContacts
 
     fun getAllPlacePrefs():LiveData<List<PlacePrefs>> = allPlacePrefs
