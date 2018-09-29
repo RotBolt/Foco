@@ -3,7 +3,9 @@ package com.pervysage.thelimitbreaker.foco.adapters
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.media.AudioManager
 import android.support.v4.app.FragmentActivity
+import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.SwitchCompat
 import android.util.Log
@@ -21,6 +23,7 @@ import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.dialogs.ContactGroupPickDialog
 import com.pervysage.thelimitbreaker.foco.dialogs.RadiusPickDialog
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.ExpandableObj
+import com.pervysage.thelimitbreaker.foco.sendNotification
 import java.lang.ref.WeakReference
 
 class PlaceAdapter(context: Context,
@@ -46,7 +49,6 @@ class PlaceAdapter(context: Context,
         notifyDataSetChanged()
         if (places.isNotEmpty() && isNew) {
             listView.setSelection(places.size - 1)
-            geoWorker.addPlaceForMonitoring(places[places.size - 1])
         }
 
 
@@ -130,7 +132,7 @@ class PlaceAdapter(context: Context,
 
         }
 
-        override fun workInCollapse(itemView: View, modelObj: ExpandableObj, position: Int,isExplicit:Boolean) {
+        override fun workInCollapse(itemView: View, modelObj: ExpandableObj, position: Int, isExplicit: Boolean) {
             val headHolder = itemView.getTag(R.id.HEAD_KEY) as HeadHolder
             val bodyHolder = itemView.getTag(R.id.BODY_KEY) as BodyHolder
             modelObj as PlacePrefs
@@ -172,7 +174,7 @@ class PlaceAdapter(context: Context,
             headHolder.bindData(modelObj, position)
             headHolder.revertClickListeners()
 
-            if (isExplicit)geoWorker.updatePlacePrefsForMonitoring(modelObj)
+            if (isExplicit && modelObj.active == 1) geoWorker.updatePlacePrefsForMonitoring(modelObj)
 
         }
 
@@ -192,8 +194,25 @@ class PlaceAdapter(context: Context,
             }
 
             headHolder.setOnSwitchChange { isOn, placePrefs ->
-                if(isOn) geoWorker.addPlaceForMonitoring(placePrefs)
-                else geoWorker.removePlaceFromMonitoring(placePrefs)
+                if (isOn) geoWorker.addPlaceForMonitoring(placePrefs)
+                else {
+                    geoWorker.removePlaceFromMonitoring(placePrefs)
+                    val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
+                    val serviceStatus = sharedPrefs.getBoolean(context.getString(R.string.SERVICE_STATUS), false)
+                    if (serviceStatus) {
+                        val notificationManagerCompat = NotificationManagerCompat.from(context)
+                        notificationManagerCompat.cancel(0)
+                        val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                        am.ringerMode=AudioManager.RINGER_MODE_NORMAL
+                        am.setStreamVolume(AudioManager.STREAM_NOTIFICATION, am.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION), AudioManager.FLAG_PLAY_SOUND)
+                        sendNotification("Service Stopped for ${placePrefs.name}", -1, context)
+                        with(sharedPrefs.edit()){
+                            putBoolean(context.getString(R.string.SERVICE_STATUS),false)
+                            putString(context.getString(R.string.ACTIVE_CONTACT_GROUP),"")
+                        }.apply()
+                    }
+
+                }
             }
 
             headHolder.prefView.setOnClickListener {
@@ -245,11 +264,12 @@ class PlaceAdapter(context: Context,
             ivWorkHeader.setOnTouchListener { _, _ -> true }
         }
 
-        private lateinit var onSwitchChange:(isOn:Boolean,placePrefs:PlacePrefs)->Unit
+        private lateinit var onSwitchChange: (isOn: Boolean, placePrefs: PlacePrefs) -> Unit
 
-        fun setOnSwitchChange(l:(Boolean,PlacePrefs)->Unit){
-            onSwitchChange=l
+        fun setOnSwitchChange(l: (Boolean, PlacePrefs) -> Unit) {
+            onSwitchChange = l
         }
+
         fun bindData(placePref: PlacePrefs, position: Int) {
             if (position == 0) {
                 ivWorkHeader.visibility = View.VISIBLE
@@ -273,7 +293,7 @@ class PlaceAdapter(context: Context,
             serviceSwitch.isChecked = placePref.active == 1
             serviceSwitch.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) placePref.active = 1 else placePref.active = 0
-                onSwitchChange(isChecked,placePref)
+                onSwitchChange(isChecked, placePref)
                 repository.get()?.updatePref(placePref)
             }
         }

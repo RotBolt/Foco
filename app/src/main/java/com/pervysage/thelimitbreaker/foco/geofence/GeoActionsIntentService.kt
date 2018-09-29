@@ -6,12 +6,12 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.media.AudioManager
 import android.os.Build
 import android.support.v4.app.JobIntentService
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.TaskStackBuilder
+import android.support.v4.content.ContextCompat
 import android.util.Log
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
@@ -19,6 +19,7 @@ import com.google.android.gms.location.GeofencingEvent
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.actvities.MainActivity
 import com.pervysage.thelimitbreaker.foco.database.Repository
+import com.pervysage.thelimitbreaker.foco.sendNotification
 
 
 class GeoActionsIntentService : JobIntentService() {
@@ -27,8 +28,7 @@ class GeoActionsIntentService : JobIntentService() {
 
     companion object {
         private val JOB_ID = 2505
-        var isMonitorOn=false
-        var contactGroup="All Contacts"
+
         fun enqueueWork(context: Context, intent: Intent) {
             enqueueWork(context, GeoActionsIntentService::class.java, JOB_ID, intent)
         }
@@ -54,14 +54,8 @@ class GeoActionsIntentService : JobIntentService() {
             }
             return
         }
-        if (geofenceEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER || geofenceEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+        if (geofenceEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
             val repo = Repository.getInstance(application)
-            var notificationDetails =
-                    if (geofenceEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER)
-                        "Entered :"
-                    else
-                        "Exit :"
-
             val triggeringGeofences = geofenceEvent.triggeringGeofences
             for (geofence in triggeringGeofences) {
                 val geoID = geofence.requestId
@@ -69,79 +63,30 @@ class GeoActionsIntentService : JobIntentService() {
                 val lat = latStr.toDouble()
                 val lng = lngStr.toDouble()
                 val placePrefs = repo.getPlacePref(lat, lng)
-                Log.d(TAG, "placepref : ${placePrefs.name}")
-                contactGroup=placePrefs.contactGroup
-                val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                if (geofenceEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                    val minVal = am.getStreamMinVolume(AudioManager.STREAM_RING)
-                    Log.d(TAG,"minVol: $minVal")
-                    am.adjustStreamVolume(AudioManager.STREAM_RING,minVal,AudioManager.FLAG_SHOW_UI)
-                    isMonitorOn=true
-                }
-                else
-                    am.adjustStreamVolume(AudioManager.STREAM_NOTIFICATION,AudioManager.ADJUST_RAISE,AudioManager.FLAG_SHOW_UI)
-
-                notificationDetails += placePrefs.name
+                val notifyMsg = "Entered : ${placePrefs.name}"
+                toggleService(true,placePrefs.contactGroup)
+                sendNotification(notifyMsg, Geofence.GEOFENCE_TRANSITION_ENTER,baseContext)
                 break
             }
-            sendNotification(notificationDetails, geofenceEvent.geofenceTransition)
-
+        }else if(geofenceEvent.geofenceTransition==Geofence.GEOFENCE_TRANSITION_EXIT){
+            toggleService(false,"")
+            sendNotification("Exit",Geofence.GEOFENCE_TRANSITION_EXIT,baseContext)
         }
     }
 
-    private fun sendNotification(notificationDetails: String, geofenceTransition: Int) {
 
-        val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // Android O requires a Notification Channel.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = getString(R.string.app_name)
-            // Create the channel for the notification
-            val mChannel = NotificationChannel("channel_id", name, NotificationManager.IMPORTANCE_DEFAULT)
-            // Set the Notification Channel for the Notification Manager.
-            mNotificationManager.createNotificationChannel(mChannel)
+    private fun toggleService(doStart: Boolean,activeContactGroup:String){
+        val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val sharedPref = baseContext.getSharedPreferences(getString(R.string.SHARED_PREF_KEY),Context.MODE_PRIVATE)
+        if (doStart){
+            am.ringerMode=AudioManager.RINGER_MODE_SILENT
+        }else{
+            am.ringerMode=AudioManager.RINGER_MODE_NORMAL
         }
-
-        // Create an explicit content Intent that starts the main Activity.
-        val notificationIntent = Intent(applicationContext, MainActivity::class.java)
-
-        // Construct a task stack.
-        val stackBuilder = TaskStackBuilder.create(this)
-
-        // Add the main Activity to the task stack as the parent.
-        stackBuilder.addParentStack(MainActivity::class.java)
-
-        // Push the content Intent onto the stack.
-        stackBuilder.addNextIntent(notificationIntent)
-
-        // Get a PendingIntent containing the entire back stack.
-        val notificationPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
-
-        // Get a notification builder that's compatible with platform versions >= 4
-        val builder = NotificationCompat.Builder(this)
-
-        // Define the notification settings.
-        builder.setSmallIcon(R.drawable.ic_launcher_foreground)
-                // In a real app, you may want to use a library like Volley
-                // to decode the Bitmap.
-                .setLargeIcon(BitmapFactory.decodeResource(resources,
-                        R.drawable.ic_launcher_foreground))
-                .setColor(Color.BLUE)
-                .setContentTitle(notificationDetails)
-                .setContentText("Monitoring Calls")
-                .setContentIntent(notificationPendingIntent)
-
-        // Set the Channel ID for Android O.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder.setChannelId("channel_id") // Channel ID
-        }
-        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER)
-            builder.setAutoCancel(true)
-        else
-            builder.setAutoCancel(true)
-
-        // Issue the notification
-        mNotificationManager.notify(0, builder.build())
+        with(sharedPref.edit()){
+            putBoolean(getString(R.string.SERVICE_STATUS),doStart)
+            putString(getString(R.string.ACTIVE_CONTACT_GROUP),activeContactGroup)
+        }.apply()
     }
 
 
