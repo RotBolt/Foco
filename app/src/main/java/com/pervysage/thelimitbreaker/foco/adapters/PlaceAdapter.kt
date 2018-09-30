@@ -13,16 +13,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.pervysage.thelimitbreaker.foco.geofence.GeoWorker
-import com.pervysage.thelimitbreaker.foco.dialogs.EditPlaceNameDialog
-import com.pervysage.thelimitbreaker.foco.expandCollapseController.MyListView
 import com.pervysage.thelimitbreaker.foco.R
-import com.pervysage.thelimitbreaker.foco.expandCollapseController.ViewController
-import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.Repository
+import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.dialogs.ContactGroupPickDialog
+import com.pervysage.thelimitbreaker.foco.dialogs.EditPlaceNameDialog
 import com.pervysage.thelimitbreaker.foco.dialogs.RadiusPickDialog
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.ExpandableObj
+import com.pervysage.thelimitbreaker.foco.expandCollapseController.MyListView
+import com.pervysage.thelimitbreaker.foco.expandCollapseController.ViewController
+import com.pervysage.thelimitbreaker.foco.geofence.GeoWorker
 import com.pervysage.thelimitbreaker.foco.sendNotification
 import java.lang.ref.WeakReference
 

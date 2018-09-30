@@ -49,6 +49,8 @@ class IncomingCallReceiver : BroadcastReceiver() {
             }
         })
 
+        private val motionUtil=DeviceMotionUtil(context)
+
         private var name = ""
 
 
@@ -56,7 +58,8 @@ class IncomingCallReceiver : BroadcastReceiver() {
             Log.d(TAG, "tts speak $name")
 
             tts.language = Locale.US
-            if (name.isNotEmpty()){
+
+            if (name.isNotEmpty()) {
                 tts.speak("Call from $name", TextToSpeech.QUEUE_FLUSH, null, "Pui")
             }
             tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
@@ -70,7 +73,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
                 override fun onDone(utteranceId: String?) {
                     if (name.isNotEmpty()) {
-                        Log.d(TAG,"Caller Name : $name")
+                        Log.d(TAG, "Caller Name : $name")
                         tts.speak("Call from $name", TextToSpeech.QUEUE_FLUSH, null, "Pui")
                     } else {
                         tts.setOnUtteranceProgressListener(null)
@@ -99,7 +102,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
             }
             if (state == TelephonyManager.CALL_STATE_IDLE) {
                 Log.d(TAG, "state Idle")
-
+                motionUtil.stopFlipListener()
                 if (tts.isSpeaking) {
                     tts.stop()
                     tts.setOnUtteranceProgressListener(null)
@@ -139,6 +142,12 @@ class IncomingCallReceiver : BroadcastReceiver() {
                         val contactInfo = repo.getInfoFromNumber(phoneNumber!!)
                         contactInfo?.run {
                             this@MyPhoneStateListener.name = name
+
+                            motionUtil.setAction {
+                                Log.d(TAG,"end on flip")
+                                methodEndCall.invoke(iTelephony)
+                            }
+                            motionUtil.startFlipListener()
                             speak()
 
                         } ?: methodEndCall.invoke(iTelephony)
