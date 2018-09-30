@@ -1,4 +1,4 @@
-package com.pervysage.thelimitbreaker.foco.geofence
+package com.pervysage.thelimitbreaker.foco.utils
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
@@ -9,12 +9,13 @@ import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Task
+import com.pervysage.thelimitbreaker.foco.broadcastReceivers.GeoBroadcastReceiver
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 
-class GeoWorker(private val context: Context){
+class GeoWorkerUtil(private val context: Context){
     private val geofenceClient = LocationServices.getGeofencingClient(context)
 
-    private val TAG="GeoWorker"
+    private val TAG="GeoWorkerUtil"
 
     @SuppressLint("MissingPermission")
     fun addPlaceForMonitoring(placePrefs: PlacePrefs){

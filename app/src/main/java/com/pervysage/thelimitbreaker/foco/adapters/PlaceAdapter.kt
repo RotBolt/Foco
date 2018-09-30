@@ -22,8 +22,8 @@ import com.pervysage.thelimitbreaker.foco.dialogs.RadiusPickDialog
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.ExpandableObj
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.MyListView
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.ViewController
-import com.pervysage.thelimitbreaker.foco.geofence.GeoWorker
-import com.pervysage.thelimitbreaker.foco.sendNotification
+import com.pervysage.thelimitbreaker.foco.utils.GeoWorkerUtil
+import com.pervysage.thelimitbreaker.foco.utils.sendNotification
 import java.lang.ref.WeakReference
 
 class PlaceAdapter(context: Context,
@@ -34,7 +34,7 @@ class PlaceAdapter(context: Context,
     private val TAG = "PlaceAdapter"
     private var isNew = false
 
-    private val geoWorker = GeoWorker(context)
+    private val geoWorker = GeoWorkerUtil(context)
 
 
     private val viewController = MyViewController(listView, context)

@@ -31,18 +31,18 @@
         <activity android:name=".actvities.PickContactsActivity" />
 
         <service
-            android:name=".geofence.GeoActionsIntentService"
+            android:name=".services.GeoActionsIntentService"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
-        <receiver android:name=".IncomingCallReceiver">
+        <receiver android:name=".broadcastReceivers.IncomingCallReceiver">
             <intent-filter android:priority="999999999">
                 <action android:name="android.intent.action.PHONE_STATE" />
 
             </intent-filter>
         </receiver>
-        <receiver android:name=".geofence.GeoBroadcastReceiver"
+        <receiver android:name=".broadcastReceivers.GeoBroadcastReceiver"
             android:exported="true"
             android:enabled="true"/>
     </application>

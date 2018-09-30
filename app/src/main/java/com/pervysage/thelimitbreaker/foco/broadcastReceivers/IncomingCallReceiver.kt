@@ -1,4 +1,4 @@
-package com.pervysage.thelimitbreaker.foco
+package com.pervysage.thelimitbreaker.foco.broadcastReceivers
 
 import android.app.Application
 import android.content.BroadcastReceiver
@@ -11,6 +11,8 @@ import android.speech.tts.UtteranceProgressListener
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.util.Log
+import com.pervysage.thelimitbreaker.foco.utils.DeviceMotionUtil
+import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import java.lang.reflect.Method
 import java.util.*
@@ -49,7 +51,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
             }
         })
 
-        private val motionUtil=DeviceMotionUtil(context)
+        private val motionUtil= DeviceMotionUtil(context)
 
         private var name = ""
 

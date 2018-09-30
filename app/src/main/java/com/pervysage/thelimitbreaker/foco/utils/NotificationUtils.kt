@@ -1,4 +1,4 @@
-package com.pervysage.thelimitbreaker.foco
+package com.pervysage.thelimitbreaker.foco.utils
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -11,6 +11,7 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.TaskStackBuilder
 import android.support.v4.content.ContextCompat
 import com.google.android.gms.location.Geofence
+import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.actvities.MainActivity
 
 
@@ -51,7 +52,7 @@ fun sendNotification(notifyMsg: String, geofenceTransition: Int,context: Context
             // to decode the Bitmap.
             .setLargeIcon(BitmapFactory.decodeResource(context.resources,
                     R.drawable.ic_notify))
-            .setColor(ContextCompat.getColor(context,R.color.colorPrimaryDark))
+            .setColor(ContextCompat.getColor(context, R.color.colorPrimaryDark))
             .setColorized(true)
             .setContentIntent(notificationPendingIntent)
 

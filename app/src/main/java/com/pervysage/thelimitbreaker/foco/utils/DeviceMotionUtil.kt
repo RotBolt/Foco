@@ -1,4 +1,4 @@
-package com.pervysage.thelimitbreaker.foco
+package com.pervysage.thelimitbreaker.foco.utils
 
 import android.content.Context
 import android.hardware.Sensor
@@ -36,7 +36,7 @@ class DeviceMotionUtil(context: Context) : SensorEventListener {
                 y: ${event.values[1]}
                 z: ${event.values[2]}
             """.trimIndent())
-            if (event.values[2] > 7 && event.values[1] < 3 && event.values[1] > -3) {
+            if (event.values[2] > 5 && event.values[1] < 3 && event.values[1] > -3) {
                 initialFaceDown = false
             }
             if (!initialFaceDown) {
