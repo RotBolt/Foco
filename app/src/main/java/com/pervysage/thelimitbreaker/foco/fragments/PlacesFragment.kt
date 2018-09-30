@@ -4,15 +4,14 @@ package com.pervysage.thelimitbreaker.foco.fragments
 import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.adapters.PlaceAdapter
-import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.Repository
+import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import kotlinx.android.synthetic.main.fragment_places.*
 
 class PlacesFragment : Fragment() {
