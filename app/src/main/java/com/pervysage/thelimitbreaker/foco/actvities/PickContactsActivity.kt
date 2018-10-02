@@ -11,6 +11,7 @@ import com.pervysage.thelimitbreaker.foco.adapters.ContactAdapter
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import kotlinx.android.synthetic.main.activity_pick_conatcts.*
+import java.lang.StringBuilder
 import java.util.*
 
 class PickContactsActivity : AppCompatActivity() {
@@ -42,22 +43,22 @@ class PickContactsActivity : AppCompatActivity() {
         }
 
         contactAdapter.setOnContactCheckListener {
-            if (it.isChecked){
-                it.isChecked=false
+            if (it.isChecked) {
+                it.isChecked = false
                 count--
-                tvCount.text="$count"
+                tvCount.text = "$count"
                 marked.remove(it)
-            }else{
-                it.isChecked=true
+            } else {
+                it.isChecked = true
                 count++
-                tvCount.text="$count"
+                tvCount.text = "$count"
                 marked.add(it)
             }
         }
         ivDone.setOnClickListener {
 
             val projection = arrayOf(
-                    ContactsContract.CommonDataKinds.Phone.NUMBER
+                    ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER
             )
             val selection = "${ContactsContract.Contacts.LOOKUP_KEY} = ? AND ${ContactsContract.Data.MIMETYPE} = ?"
             for (obj in marked) {
@@ -70,9 +71,11 @@ class PickContactsActivity : AppCompatActivity() {
                 )
                 cursor?.run {
                     while (cursor.moveToNext()) {
-                        val number = getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                        val info = ContactInfo(obj.name, number)
+                        val number = getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER))
+
+                        val info = ContactInfo(obj.name,number)
                         repo.insertContact(info)
+
                     }
                 }
             }
@@ -103,7 +106,7 @@ class PickContactsActivity : AppCompatActivity() {
                 val lookUpKey = getString(getColumnIndexOrThrow(ContactsContract.Contacts.LOOKUP_KEY))
                 if (oldMap.isNotEmpty() && !oldMap.containsKey(name))
                     contactMap[name] = lookUpKey
-                else if(oldMap.isEmpty()){
+                else if (oldMap.isEmpty()) {
                     contactMap[name] = lookUpKey
                 }
             }
@@ -136,8 +139,6 @@ class PickContactsActivity : AppCompatActivity() {
         }
         return orderedMap
     }
-
-
 
 
 }

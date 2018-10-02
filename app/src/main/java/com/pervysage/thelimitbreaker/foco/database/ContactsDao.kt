@@ -8,7 +8,7 @@ import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 @Dao
 interface ContactsDao {
 
-    @Insert(onConflict = OnConflictStrategy.ROLLBACK)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(contactInfo:ContactInfo)
 
     @Delete

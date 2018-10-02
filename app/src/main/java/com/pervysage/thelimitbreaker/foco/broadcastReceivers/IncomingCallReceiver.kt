@@ -4,16 +4,20 @@ import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.os.Build
 import android.provider.ContactsContract
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.support.annotation.RequiresApi
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.util.Log
 import com.pervysage.thelimitbreaker.foco.utils.DeviceMotionUtil
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.Repository
+import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import java.lang.reflect.Method
 import java.util.*
 
@@ -44,6 +48,9 @@ class IncomingCallReceiver : BroadcastReceiver() {
         private var methodEndCall: Method
         private var silenceRinger: Method
         private var am: AudioManager
+
+        private var focusRequest:AudioFocusRequest?=null
+
         private var tts: TextToSpeech = TextToSpeech(context.applicationContext, TextToSpeech.OnInitListener {
             if (it == TextToSpeech.SUCCESS) {
                 Log.d(TAG, "tts init")
@@ -51,15 +58,36 @@ class IncomingCallReceiver : BroadcastReceiver() {
             }
         })
 
-        private val motionUtil= DeviceMotionUtil(context)
+        private val motionUtil = DeviceMotionUtil(context)
 
         private var name = ""
 
+        private fun gainAudioFocus(){
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                am.requestAudioFocus(focusRequest)
+            }else{
+                am.requestAudioFocus(null,AudioManager.STREAM_MUSIC,AudioManager.AUDIOFOCUS_GAIN)
+            }
+
+        }
+
+        private fun removeAudioFocus(){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                am.abandonAudioFocusRequest(focusRequest)
+            }else{
+                am.abandonAudioFocus(null)
+            }
+        }
 
         private fun speak() {
             Log.d(TAG, "tts speak $name")
 
-            tts.language = Locale.US
+            tts.apply {
+                language= Locale.US
+                setSpeechRate(0.70f)
+            }
+            gainAudioFocus()
 
             if (name.isNotEmpty()) {
                 tts.speak("Call from $name", TextToSpeech.QUEUE_FLUSH, null, "Pui")
@@ -94,6 +122,10 @@ class IncomingCallReceiver : BroadcastReceiver() {
             methodEndCall = iTelephony.javaClass.getDeclaredMethod("endCall")
             silenceRinger = iTelephony.javaClass.getDeclaredMethod("silenceRinger")
             am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                focusRequest=AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).build()
+            }
         }
 
 
@@ -109,6 +141,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     tts.stop()
                     tts.setOnUtteranceProgressListener(null)
                 }
+                removeAudioFocus()
 
             }
 
@@ -121,15 +154,9 @@ class IncomingCallReceiver : BroadcastReceiver() {
             )
 
             Log.d(TAG, "Checking number ")
-            val cursor = context.contentResolver.query(
-                    ContactsContract.Data.CONTENT_URI,
-                    arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER),
-                    "${ContactsContract.CommonDataKinds.Phone.NUMBER} = ?",
-                    arrayOf(phoneNumber),
-                    null
-            )
+
             // exist in contacts or not
-            if (cursor.count < 1) {
+            if (!checkNumber(phoneNumber!!)) {
                 Log.d(TAG, "Unknown Number")
                 methodEndCall.invoke(iTelephony)
             } else {
@@ -141,12 +168,13 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     }
                     "Priority Contacts" -> {
                         val repo = Repository.getInstance((context.applicationContext) as Application)
-                        val contactInfo = repo.getInfoFromNumber(phoneNumber!!)
+                        val numberParam = "%${phoneNumber.substring(3)}"
+                        val contactInfo = repo.getInfoFromNumber(numberParam)
                         contactInfo?.run {
                             this@MyPhoneStateListener.name = name
-
+                            Log.d(TAG,"in Priority")
                             motionUtil.setAction {
-                                Log.d(TAG,"end on flip")
+                                Log.d(TAG, "end on flip")
                                 methodEndCall.invoke(iTelephony)
                             }
                             motionUtil.startFlipListener()
@@ -163,6 +191,27 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     }
                 }
             }
+
+        }
+
+        private fun checkNumber(phoneNumber: String): Boolean {
+
+            var number=phoneNumber
+            if (phoneNumber.contains("+91"))
+                number=phoneNumber.substring(3)
+
+            Log.d(TAG,"checking ${phoneNumber.substring(3)}")
+            val cursor = context.contentResolver.query(
+                    ContactsContract.Data.CONTENT_URI,
+                    arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER),
+                    "${ContactsContract.Data.MIMETYPE} = ? " +
+                            "AND ${ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER} LIKE ?",
+                    arrayOf(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,"%$number"),
+                    null
+            )
+
+            cursor?.also { if (cursor.count>0) return true }
+            return false
 
         }
     }
