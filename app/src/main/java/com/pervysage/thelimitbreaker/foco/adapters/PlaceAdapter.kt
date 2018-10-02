@@ -46,7 +46,7 @@ class PlaceAdapter(context: Context,
                 Log.d(TAG, """
                     Destruction
                     buffer $bufferPrefs
-                    lastExpandPos pref : ${places[lastExpandPos]}
+                    lastExpandPos pref : ${if (lastExpandPos!=-1 )places[lastExpandPos] else null}
                 """.trimIndent())
                 if (bufferPrefs != null && lastExpandPos != -1) {
                     if (bufferPrefs!!.radius != places[lastExpandPos].radius
@@ -74,21 +74,26 @@ class PlaceAdapter(context: Context,
         places = newList
         if (places.isNotEmpty() && isNew) {
             this.isNew = isNew
+            viewController.bufferPrefs=places[places.size-1].copy()
+            viewController.lastExpandPos=places.size-1
+            viewController.lastExpandName=places[places.size-1].name
             places[places.size - 1].isExpanded = true
+
         }
-        if (viewController.lastExpandPos != -1) {
+        if (viewController.lastExpandPos != -1 && !isNew) {
             places[viewController.lastExpandPos].isExpanded = true
         }
         notifyDataSetChanged()
-        if (places.isNotEmpty() && isNew) {
-            listView.setSelection(places.size - 1)
-        }
-        if (viewController.lastExpandPos != -1) {
+        if (viewController.lastExpandPos != -1 && !isNew) {
             listView.setSelectionFromTop(
                     viewController.lastExpandPos,
                     viewController.getTopOffsetEx()
             )
         }
+        if (places.isNotEmpty() && isNew) {
+            listView.setSelection(places.size - 1)
+        }
+
 
 
     }
@@ -234,6 +239,7 @@ class PlaceAdapter(context: Context,
             bodyHolder.setWorkOnDelete {
                 geoWorker.removePlaceFromMonitoring(it)
                 repository.deletePref(it)
+                bufferPrefs=null
                 lastExpandPos = -1
                 lastExpandName = null
             }
@@ -322,7 +328,7 @@ class PlaceAdapter(context: Context,
                         Log.d(TAG, "fresh assign implicit  buffer : $bufferPrefs, lexp :$lastExpandPos")
                     }
 
-
+                    Log.d(TAG,"lastXName : $lastExpandName")
                     if (lastExpandName != null) {
                         for (i in 0 until listView.childCount) {
                             val v = listView.getChildAt(i)

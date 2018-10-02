@@ -47,8 +47,8 @@ class MainActivity : AppCompatActivity() {
         onDMStatusChanged = l
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        super.onPause()
         updateLeftOver?.run {
             this()
         }
