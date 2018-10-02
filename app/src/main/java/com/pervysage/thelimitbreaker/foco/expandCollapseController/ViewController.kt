@@ -22,7 +22,7 @@ abstract class ViewController(private val listView: MyListView) {
 
     private lateinit var onCollapse: () -> Unit
 
-    fun setOnExpandListener(l: () -> Unit) {
+    fun setOnExpandListener(l: (() -> Unit)?) {
         onExpand = l
     }
 
@@ -101,8 +101,8 @@ abstract class ViewController(private val listView: MyListView) {
 
         if (collapseObj != null) collapseObj.isExpanded = false
 
-        if (viewToCollapse != null) {
-            workInCollapse(viewToCollapse, collapseObj!!,-1,false)
+        if (viewToCollapse != null && collapseObj!=null) {
+            workInCollapse(viewToCollapse, collapseObj,-1,false)
         } else {
             prepareExpand()
         }

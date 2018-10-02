@@ -30,6 +30,12 @@ class MainActivity : AppCompatActivity() {
     private val READ_CALL_PERMISSIONS = 2
     private val TAG = "MainActivity"
 
+    private var updateLeftOver:(()->Unit)?=null
+
+    fun setOnUpdateLeftOver(l:()->Unit){
+        updateLeftOver=l
+    }
+
     private val pickPlace = {
         val intentBuilder = PlacePicker.IntentBuilder()
         startActivityForResult(intentBuilder.build(this), PLACE_PICK_REQUEST)
@@ -39,6 +45,13 @@ class MainActivity : AppCompatActivity() {
 
     fun setOnDMStatusChangeListener(l: (Boolean) -> Unit) {
         onDMStatusChanged = l
+    }
+
+    override fun onStop() {
+        super.onStop()
+        updateLeftOver?.run {
+            this()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
