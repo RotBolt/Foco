@@ -16,7 +16,9 @@ abstract class ViewController(private val listView: MyListView) {
 
     private var translateCoords = IntArray(2)
 
-    private lateinit var onExpand: () -> Unit
+    private var onExpand: (() -> Unit)?=null
+
+    var topOffsetX = 0
 
     private lateinit var onCollapse: () -> Unit
 
@@ -159,6 +161,7 @@ abstract class ViewController(private val listView: MyListView) {
                         val selViewBottom = viewToExpand.bottom
                         val selViewEndTop = selViewTop + (-yTranslateTop)
                         val selViewEndBottom = selViewBottom + yTranslateBottom
+                        topOffsetX=selViewEndTop
 
                         val expandTopAnim = ObjectAnimator.ofInt(
                                 viewToExpand,
@@ -185,6 +188,7 @@ abstract class ViewController(private val listView: MyListView) {
                             override fun onAnimationEnd(animation: Animator?) {
                                 listView.isScrollEnabled=true
                                 modelObj.isExpanded = true
+                                onExpand?.run { this() }
                             }
 
                             override fun onAnimationCancel(animation: Animator?) {// TODO Not Implemented

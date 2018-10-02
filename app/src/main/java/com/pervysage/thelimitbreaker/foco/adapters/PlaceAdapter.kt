@@ -46,9 +46,18 @@ class PlaceAdapter(context: Context,
             this.isNew = isNew
             places[places.size - 1].isExpanded = true
         }
+        if (viewController.lastExpandPos!=-1){
+            places[viewController.lastExpandPos].isExpanded=true
+        }
         notifyDataSetChanged()
         if (places.isNotEmpty() && isNew) {
             listView.setSelection(places.size - 1)
+        }
+        if (viewController.lastExpandPos!=-1){
+            listView.setSelectionFromTop(
+                    viewController.lastExpandPos,
+                    viewController.getTopOffsetEx()
+            )
         }
 
 
@@ -98,8 +107,10 @@ class PlaceAdapter(context: Context,
             bodyHolder.bindData(modelObj)
         }
 
-        private var lastExpandPos = -1
-        private var lastExpandName: String? = null
+        var lastExpandPos = -1
+        var lastExpandName: String? = null
+
+        var bufferPrefs:PlacePrefs?=null
 
 
         override fun workInExpand(itemView: View, modelObj: ExpandableObj, position: Int) {
@@ -179,13 +190,17 @@ class PlaceAdapter(context: Context,
         }
 
 
+        fun getTopOffsetEx():Int{
+            return super.topOffsetX
+        }
+
         override fun setUp(itemView: View, modelObj: ExpandableObj, pos: Int) {
             super.setUp(itemView, modelObj, pos)
             modelObj as PlacePrefs
             val headHolder = itemView.getTag(R.id.HEAD_KEY) as HeadHolder
             val bodyHolder = itemView.getTag(R.id.BODY_KEY) as BodyHolder
 
-            Log.d(TAG, "lat : ${modelObj.latitude}, lng : ${modelObj.longitude}")
+
             bodyHolder.setWorkOnDelete {
                 geoWorker.removePlaceFromMonitoring(it)
                 repository.deletePref(it)
@@ -218,7 +233,23 @@ class PlaceAdapter(context: Context,
             headHolder.prefView.setOnClickListener {
                 if (modelObj.isExpanded) {
                     setOnCollapseListener {
-                        repository.updatePref(modelObj)
+                        if (bufferPrefs!=null)
+                            if (bufferPrefs!!.radius!=modelObj.radius
+                                    ||bufferPrefs!!.name!=modelObj.name
+                                    ||bufferPrefs!!.contactGroup!=modelObj.contactGroup){
+                                Log.d(TAG,"""
+                                update on explicit collapse
+                                buffer : ${bufferPrefs?.address}
+                                modelObj : ${modelObj.address}
+                            """.trimIndent())
+
+                                if (modelObj.active==1 && modelObj.radius!=bufferPrefs!!.radius){
+                                    geoWorker.updatePlacePrefsForMonitoring(modelObj)
+                                }
+                                bufferPrefs=null
+
+                                repository.updatePref(modelObj)
+                            }
                     }
                     collapse(headHolder.prefView, modelObj, pos)
 
@@ -228,6 +259,24 @@ class PlaceAdapter(context: Context,
                 } else {
                     var prevExpandView: View? = null
                     var collapseModelObj = if (lastExpandPos != -1) places[lastExpandPos] else null
+
+                    if (bufferPrefs!=null && collapseModelObj!=null){
+                        if (bufferPrefs!!.radius!=collapseModelObj.radius
+                        ||bufferPrefs!!.name!=collapseModelObj.name
+                        ||bufferPrefs!!.contactGroup!=collapseModelObj.contactGroup){
+                            setOnExpandListener {
+                                Log.d(TAG,"""
+                                update on implicit collapse
+                                buffer : $bufferPrefs
+                                modelObj : $collapseModelObj
+                            """.trimIndent())
+                                if (collapseModelObj.active==1 && modelObj.radius!=bufferPrefs!!.radius){
+                                    geoWorker.updatePlacePrefsForMonitoring(modelObj)
+                                }
+                                repository.updatePref(collapseModelObj)
+                            }
+                        }
+                    }
 
                     if (lastExpandName != null) {
                         for (i in 0 until listView.childCount) {
@@ -241,6 +290,7 @@ class PlaceAdapter(context: Context,
                     }
                     expand(headHolder.prefView, modelObj, prevExpandView, collapseModelObj, pos)
                     lastExpandPos = pos
+                    bufferPrefs=modelObj.copy()
                     lastExpandName = headHolder.tvPlaceTitle.text.toString()
 
                 }
