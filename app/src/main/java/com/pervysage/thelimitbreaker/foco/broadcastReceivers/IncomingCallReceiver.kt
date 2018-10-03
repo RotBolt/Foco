@@ -10,14 +10,12 @@ import android.os.Build
 import android.provider.ContactsContract
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
-import android.support.annotation.RequiresApi
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.util.Log
 import com.pervysage.thelimitbreaker.foco.utils.DeviceMotionUtil
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.Repository
-import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import java.lang.reflect.Method
 import java.util.*
 
@@ -67,7 +65,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 am.requestAudioFocus(focusRequest)
             }else{
-                am.requestAudioFocus(null,AudioManager.STREAM_MUSIC,AudioManager.AUDIOFOCUS_GAIN)
+                am.requestAudioFocus(null,AudioManager.STREAM_MUSIC,AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
             }
 
         }
@@ -124,7 +122,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
             am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                focusRequest=AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).build()
+                focusRequest=AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK).build()
             }
         }
 
@@ -136,12 +134,12 @@ class IncomingCallReceiver : BroadcastReceiver() {
             }
             if (state == TelephonyManager.CALL_STATE_IDLE) {
                 Log.d(TAG, "state Idle")
-                motionUtil.stopFlipListener()
+                motionUtil.stopMotionListener()
                 if (tts.isSpeaking) {
                     tts.stop()
                     tts.setOnUtteranceProgressListener(null)
                 }
-                removeAudioFocus()
+
 
             }
 
@@ -154,9 +152,10 @@ class IncomingCallReceiver : BroadcastReceiver() {
             )
 
             Log.d(TAG, "Checking number ")
-
+            name=checkNumber(phoneNumber!!)
+            Log.d(TAG,"name $name")
             // exist in contacts or not
-            if (!checkNumber(phoneNumber!!)) {
+            if (name.isEmpty()) {
                 Log.d(TAG, "Unknown Number")
                 methodEndCall.invoke(iTelephony)
             } else {
@@ -165,6 +164,14 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 when (activeContactGroup) {
                     "All Contacts" -> {
                         Log.d(TAG, "All Contacts")
+                        motionUtil.setAction {
+                            Log.d(TAG, "end on flip")
+                            methodEndCall.invoke(iTelephony)
+                        }
+                        motionUtil.setShakeACtion {
+                            if (tts.isSpeaking) tts.stop()
+                        }
+                        motionUtil.startMotionListener()
                     }
                     "Priority Contacts" -> {
                         val repo = Repository.getInstance((context.applicationContext) as Application)
@@ -177,7 +184,10 @@ class IncomingCallReceiver : BroadcastReceiver() {
                                 Log.d(TAG, "end on flip")
                                 methodEndCall.invoke(iTelephony)
                             }
-                            motionUtil.startFlipListener()
+                            motionUtil.setShakeACtion {
+                                if (tts.isSpeaking) tts.stop()
+                            }
+                            motionUtil.startMotionListener()
                             speak()
 
                         } ?: methodEndCall.invoke(iTelephony)
@@ -194,7 +204,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
         }
 
-        private fun checkNumber(phoneNumber: String): Boolean {
+        private fun checkNumber(phoneNumber: String): String {
 
             var number=phoneNumber
             if (phoneNumber.contains("+91"))
@@ -203,15 +213,21 @@ class IncomingCallReceiver : BroadcastReceiver() {
             Log.d(TAG,"checking ${phoneNumber.substring(3)}")
             val cursor = context.contentResolver.query(
                     ContactsContract.Data.CONTENT_URI,
-                    arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER),
+                    arrayOf(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER),
                     "${ContactsContract.Data.MIMETYPE} = ? " +
                             "AND ${ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER} LIKE ?",
                     arrayOf(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,"%$number"),
                     null
             )
 
-            cursor?.also { if (cursor.count>0) return true }
-            return false
+            cursor?.also { if (cursor.count>0)
+                cursor.moveToNext()
+                return cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                    ))
+            }
+            return ""
 
         }
     }
