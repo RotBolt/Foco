@@ -35,11 +35,12 @@ class Repository private constructor(application: Application) {
         return placePrefsDao.getPlacePref(lat, lng)
     }
 
-    fun getAllContactsBackround():List<ContactInfo>{
-        val executor = Executors.newSingleThreadExecutor()
-        val getAllContacts = Callable { contactsDao.getContactsBackground() }
-        val future = executor.submit(getAllContacts)
-        return future.get()
+    fun getAllContactsBackground():List<ContactInfo>{
+//        val executor = Executors.newSingleThreadExecutor()
+//        val getAllContacts = Callable { contactsDao.getContactsBackground() }
+//        val future = executor.submit(getAllContacts)
+//        return future.get()
+        return contactsDao.getContactsBackground()
     }
     fun getAllPlacePrefsBackground():List<PlacePrefs>{
         val executor = Executors.newSingleThreadExecutor()

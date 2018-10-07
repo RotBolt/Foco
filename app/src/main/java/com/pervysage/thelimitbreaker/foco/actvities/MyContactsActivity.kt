@@ -24,6 +24,7 @@ import com.pervysage.thelimitbreaker.foco.adapters.MyContactsAdapter
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import com.pervysage.thelimitbreaker.foco.dialogs.ContactInfoDialog
+import com.pervysage.thelimitbreaker.foco.services.ContactSyncIntentService
 import kotlinx.android.synthetic.main.activity_my_contacts.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -99,6 +100,11 @@ class MyContactsActivity : AppCompatActivity() {
         ivBack.setOnClickListener {
             finish()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        startService(Intent(this, ContactSyncIntentService::class.java))
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

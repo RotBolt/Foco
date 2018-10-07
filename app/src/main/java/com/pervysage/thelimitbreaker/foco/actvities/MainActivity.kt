@@ -22,6 +22,7 @@ import android.os.Build
 import android.support.v4.content.ContextCompat.getSystemService
 import android.app.NotificationManager
 import android.content.DialogInterface
+import com.pervysage.thelimitbreaker.foco.services.ContactSyncIntentService
 
 
 class MainActivity : AppCompatActivity() {
@@ -85,6 +86,8 @@ class MainActivity : AppCompatActivity() {
 
 
         }
+
+
 
         ActivityCompat.requestPermissions(
                 this,
@@ -181,6 +184,8 @@ class MainActivity : AppCompatActivity() {
 
 
     }
+
+
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (requestCode == LOCATION_PERMISSION) {
