@@ -55,18 +55,18 @@ class GeoActionsIntentService : JobIntentService() {
                 val lng = lngStr.toDouble()
                 val placePrefs = repo.getPlacePref(lat, lng)
                 val notifyMsg = "Entered : ${placePrefs.name}"
-                toggleService(true,placePrefs.contactGroup)
+                toggleService(true,placePrefs.name,placePrefs.contactGroup)
                 sendNotification(notifyMsg, Geofence.GEOFENCE_TRANSITION_ENTER, baseContext)
                 break
             }
         }else if(geofenceEvent.geofenceTransition==Geofence.GEOFENCE_TRANSITION_EXIT){
-            toggleService(false,"")
+            toggleService(false,"","")
             sendNotification("Exit", Geofence.GEOFENCE_TRANSITION_EXIT, baseContext)
         }
     }
 
 
-    private fun toggleService(doStart: Boolean,activeContactGroup:String){
+    private fun toggleService(doStart: Boolean,activeName:String,activeContactGroup:String){
         val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val sharedPref = baseContext.getSharedPreferences(getString(R.string.SHARED_PREF_KEY),Context.MODE_PRIVATE)
         if (doStart){
@@ -81,6 +81,7 @@ class GeoActionsIntentService : JobIntentService() {
         }
         with(sharedPref.edit()){
             putBoolean(getString(R.string.SERVICE_STATUS),doStart)
+            putString(getString(R.string.ACTIVE_NAME),activeName)
             putString(getString(R.string.ACTIVE_CONTACT_GROUP),activeContactGroup)
         }.apply()
     }

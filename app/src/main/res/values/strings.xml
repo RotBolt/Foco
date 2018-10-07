@@ -7,6 +7,7 @@
     <string name="DRIVE_MODE_ENABLED">drive_key</string>
     <string name="CONTACT_GROUP_KEY">contact_group</string>
     <string name="SERVICE_STATUS">service</string>
+    <string name="ACTIVE_NAME">active_name</string>
     <string name="ACTIVE_CONTACT_GROUP">active_contact_group</string>
 
 </resources>

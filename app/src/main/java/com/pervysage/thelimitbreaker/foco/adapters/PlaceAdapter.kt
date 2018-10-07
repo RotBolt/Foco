@@ -46,24 +46,20 @@ class PlaceAdapter(context: Context,
                 Log.d(TAG, """
                     Destruction
                     buffer $bufferPrefs
-                    lastExpandPos pref : ${if (lastExpandPos!=-1 )places[lastExpandPos] else null}
+                    lastExpandPos pref : ${if (lastExpandPos != -1) places[lastExpandPos] else null}
                 """.trimIndent())
                 if (bufferPrefs != null && lastExpandPos != -1) {
-                    if (bufferPrefs!!.radius != places[lastExpandPos].radius
-                            || bufferPrefs!!.name != places[lastExpandPos].name
-                            || bufferPrefs!!.contactGroup != places[lastExpandPos].contactGroup) {
-                        Log.d(TAG, """
+                    Log.d(TAG, """
                                 update on Destruction
                                 buffer : $bufferPrefs
                                 modelObj : ${places[lastExpandPos]}
                             """.trimIndent())
-                        if (places[lastExpandPos].active == 1 && places[lastExpandPos].radius != bufferPrefs!!.radius) {
-                            geoWorker.updatePlacePrefsForMonitoring(places[lastExpandPos])
-                        }
-                        places[lastExpandPos].isExpanded=false
-                        bufferPrefs=null
-                        repository.updatePref(places[lastExpandPos])
+                    if (places[lastExpandPos].active == 1 && places[lastExpandPos].radius != bufferPrefs!!.radius) {
+                        geoWorker.updatePlacePrefsForMonitoring(places[lastExpandPos])
                     }
+                    places[lastExpandPos].isExpanded = false
+                    bufferPrefs = null
+                    repository.updatePref(places[lastExpandPos])
                 }
             }
         }
@@ -74,9 +70,9 @@ class PlaceAdapter(context: Context,
         places = newList
         if (places.isNotEmpty() && isNew) {
             this.isNew = isNew
-            viewController.bufferPrefs=places[places.size-1].copy()
-            viewController.lastExpandPos=places.size-1
-            viewController.lastExpandName=places[places.size-1].name
+            viewController.bufferPrefs = places[places.size - 1].copy()
+            viewController.lastExpandPos = places.size - 1
+            viewController.lastExpandName = places[places.size - 1].name
             places[places.size - 1].isExpanded = true
 
         }
@@ -84,6 +80,7 @@ class PlaceAdapter(context: Context,
             places[viewController.lastExpandPos].isExpanded = true
         }
         notifyDataSetChanged()
+        viewController.bufferFirstAddress = places[0].address
         if (viewController.lastExpandPos != -1 && !isNew) {
             listView.setSelectionFromTop(
                     viewController.lastExpandPos,
@@ -93,7 +90,6 @@ class PlaceAdapter(context: Context,
         if (places.isNotEmpty() && isNew) {
             listView.setSelection(places.size - 1)
         }
-
 
 
     }
@@ -144,7 +140,7 @@ class PlaceAdapter(context: Context,
 
         var lastExpandPos = -1
         var lastExpandName: String? = null
-
+        var bufferFirstAddress = ""
         var bufferPrefs: PlacePrefs? = null
 
 
@@ -217,7 +213,11 @@ class PlaceAdapter(context: Context,
             }
             bodyHolder.extraContent.visibility = View.GONE
 
-            headHolder.bindData(modelObj, position)
+            if (modelObj.address == bufferFirstAddress) {
+                headHolder.bindData(modelObj, 0)
+            } else {
+                headHolder.bindData(modelObj, position)
+            }
             headHolder.revertClickListeners()
 
             if (isExplicit && modelObj.active == 1) geoWorker.updatePlacePrefsForMonitoring(modelObj)
@@ -239,7 +239,7 @@ class PlaceAdapter(context: Context,
             bodyHolder.setWorkOnDelete {
                 geoWorker.removePlaceFromMonitoring(it)
                 repository.deletePref(it)
-                bufferPrefs=null
+                bufferPrefs = null
                 lastExpandPos = -1
                 lastExpandName = null
             }
@@ -250,7 +250,8 @@ class PlaceAdapter(context: Context,
                     geoWorker.removePlaceFromMonitoring(placePrefs)
                     val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
                     val serviceStatus = sharedPrefs.getBoolean(context.getString(R.string.SERVICE_STATUS), false)
-                    if (serviceStatus) {
+                    val activeName = sharedPrefs.getString(context.getString(R.string.ACTIVE_NAME), "")
+                    if (serviceStatus && activeName == placePrefs.name) {
                         val notificationManagerCompat = NotificationManagerCompat.from(context)
                         notificationManagerCompat.cancel(0)
                         val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -328,7 +329,7 @@ class PlaceAdapter(context: Context,
                         Log.d(TAG, "fresh assign implicit  buffer : $bufferPrefs, lexp :$lastExpandPos")
                     }
 
-                    Log.d(TAG,"lastXName : $lastExpandName")
+                    Log.d(TAG, "lastXName : $lastExpandName")
                     if (lastExpandName != null) {
                         for (i in 0 until listView.childCount) {
                             val v = listView.getChildAt(i)
