@@ -220,12 +220,14 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     null
             )
 
-            cursor?.also { if (cursor.count>0)
-                cursor.moveToNext()
-                return cursor.getString(
-                    cursor.getColumnIndexOrThrow(
-                            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
-                    ))
+            cursor?.also {
+                if (cursor.count>0) {
+                    cursor.moveToNext()
+                    return cursor.getString(
+                            cursor.getColumnIndexOrThrow(
+                                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                            ))
+                }
             }
             return ""
 

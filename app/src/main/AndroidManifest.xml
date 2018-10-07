@@ -5,10 +5,11 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
-    <uses-permission android:name="android.permission.CALL_PHONE"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_app"
@@ -33,18 +34,25 @@
         <service
             android:name=".services.GeoActionsIntentService"
             android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE">
-        </service>
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <receiver android:name=".broadcastReceivers.IncomingCallReceiver">
             <intent-filter android:priority="999999999">
                 <action android:name="android.intent.action.PHONE_STATE" />
-
             </intent-filter>
         </receiver>
-        <receiver android:name=".broadcastReceivers.GeoBroadcastReceiver"
-            android:exported="true"
-            android:enabled="true"/>
+        <receiver
+            android:name=".broadcastReceivers.GeoBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true" />
+        <receiver
+            android:name=".broadcastReceivers.BootReceiver"
+            android:enabled="true"
+            android:exported="true" />
+
+        <service
+            android:name=".services.ContactSyncIntentService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

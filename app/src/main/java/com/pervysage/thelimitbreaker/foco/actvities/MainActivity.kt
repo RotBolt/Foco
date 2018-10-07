@@ -1,6 +1,7 @@
 package com.pervysage.thelimitbreaker.foco.actvities
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
@@ -20,6 +21,7 @@ import com.pervysage.thelimitbreaker.foco.database.entities.generateGeoKey
 import android.os.Build
 import android.support.v4.content.ContextCompat.getSystemService
 import android.app.NotificationManager
+import android.content.DialogInterface
 
 
 class MainActivity : AppCompatActivity() {
@@ -30,10 +32,10 @@ class MainActivity : AppCompatActivity() {
     private val READ_CALL_PERMISSIONS = 2
     private val TAG = "MainActivity"
 
-    private var updateLeftOver:(()->Unit)?=null
+    private var updateLeftOver: (() -> Unit)? = null
 
-    fun setOnUpdateLeftOver(l:()->Unit){
-        updateLeftOver=l
+    fun setOnUpdateLeftOver(l: () -> Unit) {
+        updateLeftOver = l
     }
 
     private val pickPlace = {
@@ -63,11 +65,25 @@ class MainActivity : AppCompatActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !notificationManager.isNotificationPolicyAccessGranted) {
 
-            val intent = Intent(
-                    android.provider.Settings
-                            .ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+            val builder = AlertDialog.Builder(this)
+                    .setTitle("Request Permission")
+                    .setMessage("Allow Foco to manage phone's Do Not Disturb setting on the basis of your location")
+                    .setPositiveButton("OK") { _, _ ->
+                        val intent = Intent(
+                                android.provider.Settings
+                                        .ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
 
-            startActivity(intent)
+                        startActivity(intent)
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+
+            val dialog = builder.create()
+            dialog.window.setBackgroundDrawableResource(R.drawable.dialog_background)
+            dialog.show()
+
+
         }
 
         ActivityCompat.requestPermissions(

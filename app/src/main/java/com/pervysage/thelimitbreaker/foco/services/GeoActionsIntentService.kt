@@ -71,10 +71,13 @@ class GeoActionsIntentService : JobIntentService() {
         val sharedPref = baseContext.getSharedPreferences(getString(R.string.SHARED_PREF_KEY),Context.MODE_PRIVATE)
         if (doStart){
             am.ringerMode=AudioManager.RINGER_MODE_SILENT
-            val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*0.70).toInt()
+            am.setStreamVolume(AudioManager.STREAM_RING,0,AudioManager.FLAG_PLAY_SOUND)
+            val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*0.90).toInt()
             am.setStreamVolume(AudioManager.STREAM_MUSIC,maxVolume,AudioManager.FLAG_PLAY_SOUND)
         }else{
             am.ringerMode=AudioManager.RINGER_MODE_NORMAL
+            val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_RING)*0.90).toInt()
+            am.setStreamVolume(AudioManager.STREAM_RING,maxVolume,AudioManager.FLAG_PLAY_SOUND)
         }
         with(sharedPref.edit()){
             putBoolean(getString(R.string.SERVICE_STATUS),doStart)

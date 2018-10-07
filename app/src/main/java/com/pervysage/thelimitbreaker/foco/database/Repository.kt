@@ -7,7 +7,6 @@ import android.util.Log
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import java.util.concurrent.Callable
-import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 class Repository private constructor(application: Application) {
@@ -36,6 +35,19 @@ class Repository private constructor(application: Application) {
         return placePrefsDao.getPlacePref(lat, lng)
     }
 
+    fun getAllContactsBackround():List<ContactInfo>{
+        val executor = Executors.newSingleThreadExecutor()
+        val getAllContacts = Callable { contactsDao.getContactsBackground() }
+        val future = executor.submit(getAllContacts)
+        return future.get()
+    }
+    fun getAllPlacePrefsBackground():List<PlacePrefs>{
+        val executor = Executors.newSingleThreadExecutor()
+        val getAllPrefs = Callable { placePrefsDao.getAllPrefsBackGround() }
+        val future = executor.submit(getAllPrefs)
+        return  future.get()
+    }
+
     fun getInfoFromNumber(number: String):ContactInfo?{
         val executor = Executors.newSingleThreadExecutor()
         val getInfoTask= Callable { contactsDao.getInfoFromNumber(number) }
@@ -44,7 +56,7 @@ class Repository private constructor(application: Application) {
     }
     fun getMyContacts():LiveData<List<ContactInfo>> = myContacts
 
-    fun getAllPlacePrefs():LiveData<List<PlacePrefs>> = allPlacePrefs
+    fun getAllPlacePrefs(): LiveData<List<PlacePrefs>> = allPlacePrefs
 
     fun insertPref(prefs: PlacePrefs){
         DbQueryAsyncTask(placePrefsDao,QUERY_TYPE.INSERT_PREF).execute(prefs)
@@ -62,13 +74,16 @@ class Repository private constructor(application: Application) {
     }
 
 
+    fun updateContact(contactInfo: ContactInfo){
+        ContactQueryAsyncTask(contactsDao,QUERY_TYPE.UPDATE_CONTACT).execute(contactInfo)
+    }
     fun deleteContact(contact:ContactInfo){
         ContactQueryAsyncTask(contactsDao,QUERY_TYPE.DELETE_CONTACT).execute(contact)
     }
 
 
     enum class QUERY_TYPE{
-        INSERT_PREF,UPDATE_PREF,DELETE_PREF,INSERT_CONTACT,DELETE_CONTACT
+        INSERT_PREF,UPDATE_PREF,DELETE_PREF,INSERT_CONTACT,DELETE_CONTACT,UPDATE_CONTACT
     }
 
     private class ContactQueryAsyncTask(
@@ -82,6 +97,9 @@ class Repository private constructor(application: Application) {
                 }
                 QUERY_TYPE.DELETE_CONTACT->{
                     contactsDao.delete(params[0])
+                }
+                QUERY_TYPE.UPDATE_CONTACT->{
+                    contactsDao.update(params[0])
                 }
             }
 
