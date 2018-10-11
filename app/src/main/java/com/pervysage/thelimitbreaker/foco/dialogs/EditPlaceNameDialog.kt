@@ -31,7 +31,7 @@ class EditPlaceNameDialog : DialogFragment() {
                 .setNegativeButton("Cancel", null)
         val dialog = builder.create()
 
-        dialog.window.setBackgroundDrawableResource(R.drawable.dialog_background)
+        dialog.window?.setBackgroundDrawableResource(R.drawable.dialog_background)
 
         dialog.setOnShowListener {
             val okBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
@@ -48,7 +48,7 @@ class EditPlaceNameDialog : DialogFragment() {
             val  cancelBtn = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
             cancelBtn.setOnClickListener { dialog.dismiss() }
         }
-        dialog.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+        dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
         return dialog
     }

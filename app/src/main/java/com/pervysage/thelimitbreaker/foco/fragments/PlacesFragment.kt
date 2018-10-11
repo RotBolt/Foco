@@ -15,11 +15,11 @@ import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import kotlinx.android.synthetic.main.fragment_places.*
 
 class PlacesFragment : Fragment() {
-    private var lastExpandedPos=-1
+
     private lateinit var repo:Repository
     private var isNew = false
     private var isPlaceListEmpty=false
-    private val PLACE_PICK_REQUEST = 1
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -42,7 +42,7 @@ class PlacesFragment : Fragment() {
 
         })
         isPlaceListEmpty=listSize==0
-        val adapter=PlaceAdapter(activity!!, ArrayList(),lvPlaces,repo)
+        val adapter=PlaceAdapter(activity!!, ArrayList(),lvPlaces)
         lvPlaces.adapter=adapter
         lvPlaces.setFriction(ViewConfiguration.getScrollFriction() * 2)
         places.observe(activity!!, Observer<List<PlacePrefs>>{

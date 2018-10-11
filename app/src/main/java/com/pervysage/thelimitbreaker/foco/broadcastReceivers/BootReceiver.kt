@@ -14,13 +14,14 @@ class BootReceiver : BroadcastReceiver() {
     private val TAG = "MyBootReceiver"
     override fun onReceive(context: Context, intent: Intent) {
 
-        Log.d(TAG,"onReceive PUI")
+        Log.d(TAG, "onReceive PUI")
 
-        val repo= Repository.getInstance((context.applicationContext) as Application)
+        val repo = Repository.getInstance((context.applicationContext) as Application)
         val placePrefs = repo.getAllPlacePrefsBackground()
         val geoWorker = GeoWorkerUtil(context)
-        for (pref in placePrefs){
-            geoWorker.addPlaceForMonitoring(pref)
+        for (pref in placePrefs) {
+            if (pref.active == 1)
+                geoWorker.addPlaceForMonitoring(pref)
         }
     }
 }

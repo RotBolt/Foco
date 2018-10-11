@@ -54,7 +54,7 @@ class GeoActionsIntentService : JobIntentService() {
                 val lat = latStr.toDouble()
                 val lng = lngStr.toDouble()
                 val placePrefs = repo.getPlacePref(lat, lng)
-                val notifyMsg = "Entered : ${placePrefs.name}"
+                val notifyMsg = "Entered : ${placePrefs.name} "
                 toggleService(true,placePrefs.name,placePrefs.contactGroup)
                 sendNotification(notifyMsg, Geofence.GEOFENCE_TRANSITION_ENTER, baseContext)
                 break

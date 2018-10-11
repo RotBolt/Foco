@@ -22,6 +22,9 @@ import android.os.Build
 import android.support.v4.content.ContextCompat.getSystemService
 import android.app.NotificationManager
 import android.content.DialogInterface
+import android.database.sqlite.SQLiteConstraintException
+import android.database.sqlite.SQLiteException
+import android.util.Log
 import com.pervysage.thelimitbreaker.foco.services.ContactSyncIntentService
 
 
@@ -31,6 +34,9 @@ class MainActivity : AppCompatActivity() {
     private val PLACE_PICK_REQUEST = 1
     private val LOCATION_PERMISSION = 1
     private val READ_CALL_PERMISSIONS = 2
+
+    private lateinit var repo:Repository
+
     private val TAG = "MainActivity"
 
     private var updateLeftOver: (() -> Unit)? = null
@@ -60,44 +66,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        repo= Repository.getInstance(application)
 
+        val builder = AlertDialog.Builder(this)
+                .setTitle("Same Place Exists")
+                .setMessage("Same place address already exists." +
+                        " If you want to modify some values please change in that place card")
+                .setPositiveButton("Ok"){dialog, _ ->
+                    dialog.dismiss()
+                }
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawableResource(R.drawable.dialog_background)
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !notificationManager.isNotificationPolicyAccessGranted) {
-
-            val builder = AlertDialog.Builder(this)
-                    .setTitle("Request Permission")
-                    .setMessage("Allow Foco to manage phone's Do Not Disturb setting on the basis of your location")
-                    .setPositiveButton("OK") { _, _ ->
-                        val intent = Intent(
-                                android.provider.Settings
-                                        .ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
-
-                        startActivity(intent)
-                    }
-                    .setNegativeButton("Cancel") { dialog, _ ->
-                        dialog.dismiss()
-                    }
-
-            val dialog = builder.create()
-            dialog.window.setBackgroundDrawableResource(R.drawable.dialog_background)
-            dialog.show()
-
-
-        }
-
-
-
-        ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                        android.Manifest.permission.READ_CALL_LOG,
-                        android.Manifest.permission.READ_PHONE_STATE,
-                        android.Manifest.permission.CALL_PHONE
-                ),
-                READ_CALL_PERMISSIONS
-        )
+        repo.setExceptionDialog(dialog)
 
         val sharedPref = getSharedPreferences(
                 resources.getString(R.string.SHARED_PREF_KEY),
@@ -167,15 +148,7 @@ class MainActivity : AppCompatActivity() {
 
         ivAction.setOnClickListener {
             it.setOnTouchListener { _, _ -> true }
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-                pickPlace()
-            } else {
-                ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
-                        LOCATION_PERMISSION)
-            }
+            pickPlace()
         }
 
         ivContacts.setOnClickListener {
@@ -185,24 +158,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (requestCode == LOCATION_PERMISSION) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                pickPlace()
-            } else {
-                Toast.makeText(this, "Grant Permission to add place", Toast.LENGTH_SHORT).show()
-            }
-        } else if (requestCode == READ_CALL_PERMISSIONS) {
-            if (grantResults[0] != PackageManager.PERMISSION_GRANTED)
-                Toast.makeText(this, "You Denied the Permission Read Call Log", Toast.LENGTH_SHORT).show()
-            if (grantResults[1] != PackageManager.PERMISSION_GRANTED)
-                Toast.makeText(this, "You Denied the Permission Read Phone State", Toast.LENGTH_SHORT).show()
-            if (grantResults[2] != PackageManager.PERMISSION_GRANTED)
-                Toast.makeText(this, "You Denied the Permission Call Phone", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -226,8 +181,10 @@ class MainActivity : AppCompatActivity() {
                     active = isOn,
                     contactGroup = "All Contacts"
             )
-            val repo = Repository.getInstance(application)
+
             repo.insertPref(prefs = placePref)
+
+
 
         }
     }

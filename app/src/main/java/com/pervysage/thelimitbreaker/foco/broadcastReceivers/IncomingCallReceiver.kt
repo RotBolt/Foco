@@ -1,5 +1,6 @@
 package com.pervysage.thelimitbreaker.foco.broadcastReceivers
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -7,10 +8,13 @@ import android.content.Intent
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
+import android.provider.CallLog
 import android.provider.ContactsContract
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.telecom.Call
 import android.telephony.PhoneStateListener
+import android.telephony.SmsManager
 import android.telephony.TelephonyManager
 import android.util.Log
 import com.pervysage.thelimitbreaker.foco.utils.DeviceMotionUtil
@@ -47,7 +51,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
         private var silenceRinger: Method
         private var am: AudioManager
 
-        private var focusRequest:AudioFocusRequest?=null
+        private var focusRequest: AudioFocusRequest? = null
 
         private var tts: TextToSpeech = TextToSpeech(context.applicationContext, TextToSpeech.OnInitListener {
             if (it == TextToSpeech.SUCCESS) {
@@ -59,21 +63,22 @@ class IncomingCallReceiver : BroadcastReceiver() {
         private val motionUtil = DeviceMotionUtil(context)
 
         private var name = ""
+        private var toSay = ""
 
-        private fun gainAudioFocus(){
+        private fun gainAudioFocus() {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                am.requestAudioFocus(focusRequest)
-            }else{
-                am.requestAudioFocus(null,AudioManager.STREAM_MUSIC,AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                am.requestAudioFocus(focusRequest!!)
+            } else {
+                am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
             }
 
         }
 
-        private fun removeAudioFocus(){
+        private fun removeAudioFocus() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                am.abandonAudioFocusRequest(focusRequest)
-            }else{
+                am.abandonAudioFocusRequest(focusRequest!!)
+            } else {
                 am.abandonAudioFocus(null)
             }
         }
@@ -82,14 +87,12 @@ class IncomingCallReceiver : BroadcastReceiver() {
             Log.d(TAG, "tts speak $name")
 
             tts.apply {
-                language= Locale.US
+                language = Locale.US
                 setSpeechRate(0.70f)
             }
             gainAudioFocus()
 
-            if (name.isNotEmpty()) {
-                tts.speak("Call from $name", TextToSpeech.QUEUE_FLUSH, null, "Pui")
-            }
+            tts.speak(toSay , TextToSpeech.QUEUE_FLUSH, null, "Pui")
             tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onError(utteranceId: String?) {
                     // TODO Not Implemented
@@ -100,17 +103,8 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 }
 
                 override fun onDone(utteranceId: String?) {
-                    if (name.isNotEmpty()) {
-                        Log.d(TAG, "Caller Name : $name")
-                        tts.speak("Call from $name", TextToSpeech.QUEUE_FLUSH, null, "Pui")
-                    } else {
-                        tts.setOnUtteranceProgressListener(null)
-                        if (tts.isSpeaking) {
-                            tts.stop()
-                        }
-                    }
+                    tts.speak(toSay , TextToSpeech.QUEUE_FLUSH, null, "Pui")
                 }
-
             })
         }
 
@@ -122,7 +116,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
             am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                focusRequest=AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK).build()
+                focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK).build()
             }
         }
 
@@ -130,19 +124,26 @@ class IncomingCallReceiver : BroadcastReceiver() {
         override fun onCallStateChanged(state: Int, phoneNumber: String?) {
             if (state == TelephonyManager.CALL_STATE_RINGING) {
                 Log.d(TAG, "incomingNumber : $phoneNumber")
+
                 handleIncomingCall(phoneNumber)
             }
             if (state == TelephonyManager.CALL_STATE_IDLE) {
                 Log.d(TAG, "state Idle")
                 motionUtil.stopMotionListener()
-                if (tts.isSpeaking) {
-                    tts.stop()
-                    tts.setOnUtteranceProgressListener(null)
-                }
-
-
+                tts.stop()
+                tts.shutdown()
+                tts.setOnUtteranceProgressListener(null)
             }
+        }
 
+        private fun sendSMS(phoneNumber: String) {
+            val smsManager = SmsManager.getDefault()
+            smsManager.sendTextMessage(
+                    phoneNumber,
+                    null,
+                    "Hello, this is Foco , Rohan is quite busy at the moment. Please Call him later if not important",
+                    null,
+                    null)
         }
 
         private fun handleIncomingCall(phoneNumber: String?) {
@@ -152,12 +153,27 @@ class IncomingCallReceiver : BroadcastReceiver() {
             )
 
             Log.d(TAG, "Checking number ")
-            name=checkNumber(phoneNumber!!)
-            Log.d(TAG,"name $name")
+            name = checkNumber(phoneNumber!!)
+            Log.d(TAG, "name $name")
             // exist in contacts or not
             if (name.isEmpty()) {
                 Log.d(TAG, "Unknown Number")
-                methodEndCall.invoke(iTelephony)
+                if (!isUnder15Min(phoneNumber)) {
+                    methodEndCall.invoke(iTelephony)
+                    sendSMS(phoneNumber)
+                }else{
+                    motionUtil.setAction {
+                        Log.d(TAG, "end on flip")
+                        methodEndCall.invoke(iTelephony)
+                        sendSMS(phoneNumber)
+                    }
+                    motionUtil.setShakeACtion {
+                        if (tts.isSpeaking) tts.stop()
+                    }
+                    motionUtil.startMotionListener()
+                    toSay="This might be important call"
+                    speak()
+                }
             } else {
                 // check contact group
                 val activeContactGroup = sharedPref.getString(context.getString(R.string.ACTIVE_CONTACT_GROUP), "")
@@ -167,30 +183,52 @@ class IncomingCallReceiver : BroadcastReceiver() {
                         motionUtil.setAction {
                             Log.d(TAG, "end on flip")
                             methodEndCall.invoke(iTelephony)
+                            sendSMS(phoneNumber)
                         }
                         motionUtil.setShakeACtion {
                             if (tts.isSpeaking) tts.stop()
                         }
                         motionUtil.startMotionListener()
+                        toSay="Call from $name"
+                        speak()
                     }
                     "Priority Contacts" -> {
                         val repo = Repository.getInstance((context.applicationContext) as Application)
                         val numberParam = "%${phoneNumber.substring(3)}"
                         val contactInfo = repo.getInfoFromNumber(numberParam)
-                        contactInfo?.run {
+                        if (contactInfo != null) {
                             this@MyPhoneStateListener.name = name
-                            Log.d(TAG,"in Priority")
+                            Log.d(TAG, "in Priority")
                             motionUtil.setAction {
                                 Log.d(TAG, "end on flip")
                                 methodEndCall.invoke(iTelephony)
+                                sendSMS(phoneNumber)
                             }
                             motionUtil.setShakeACtion {
                                 if (tts.isSpeaking) tts.stop()
                             }
                             motionUtil.startMotionListener()
+                            toSay = "Call from $name"
                             speak()
 
-                        } ?: methodEndCall.invoke(iTelephony)
+                        } else {
+                            if (!isUnder15Min(phoneNumber)) {
+                                methodEndCall.invoke(iTelephony)
+                                sendSMS(phoneNumber)
+                            }else {
+                                motionUtil.setAction {
+                                    Log.d(TAG, "end on flip")
+                                    methodEndCall.invoke(iTelephony)
+                                    sendSMS(phoneNumber)
+                                }
+                                motionUtil.setShakeACtion {
+                                    if (tts.isSpeaking) tts.stop()
+                                }
+                                motionUtil.startMotionListener()
+                                toSay="This might be important call. Call from $name"
+                                speak()
+                            }
+                        }
 
                     }
                     "None" -> {
@@ -206,22 +244,22 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
         private fun checkNumber(phoneNumber: String): String {
 
-            var number=phoneNumber
+            var number = phoneNumber
             if (phoneNumber.contains("+91"))
-                number=phoneNumber.substring(3)
+                number = phoneNumber.substring(3)
 
-            Log.d(TAG,"checking ${phoneNumber.substring(3)}")
+            Log.d(TAG, "checking ${phoneNumber.substring(3)}")
             val cursor = context.contentResolver.query(
                     ContactsContract.Data.CONTENT_URI,
                     arrayOf(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER),
                     "${ContactsContract.Data.MIMETYPE} = ? " +
                             "AND ${ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER} LIKE ?",
-                    arrayOf(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,"%$number"),
+                    arrayOf(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE, "%$number"),
                     null
             )
 
             cursor?.also {
-                if (cursor.count>0) {
+                if (cursor.count > 0) {
                     cursor.moveToNext()
                     return cursor.getString(
                             cursor.getColumnIndexOrThrow(
@@ -232,6 +270,39 @@ class IncomingCallReceiver : BroadcastReceiver() {
             return ""
 
         }
+
+
+        @SuppressLint("MissingPermission")
+        private fun isUnder15Min(phoneNumber: String): Boolean {
+            val cursor = context.contentResolver.query(
+                    CallLog.Calls.CONTENT_URI,
+                    arrayOf(
+                            CallLog.Calls.NUMBER,
+                            CallLog.Calls.DATE
+                    ),
+                    "${CallLog.Calls.TYPE} LIKE ? OR ${CallLog.Calls.TYPE} LIKE ?  AND ${CallLog.Calls.NUMBER} LIKE ?",
+                    arrayOf("${CallLog.Calls.REJECTED_TYPE}","${CallLog.Calls.MISSED_TYPE}", phoneNumber),
+                    CallLog.Calls.DEFAULT_SORT_ORDER
+            )
+
+            Log.d(TAG, "call count ${cursor?.count}")
+
+
+            cursor?.run {
+                if (count > 0) {
+                    val currentTime = System.currentTimeMillis()
+                    while (moveToNext()) {
+                        val time = getLong(getColumnIndexOrThrow(CallLog.Calls.DATE))
+                        Log.d(TAG, "$currentTime - $time = ${currentTime - time} | ${15 * 60 * 1000}")
+                        if (currentTime - time <= (15 * 60 * 1000)) return true
+                    }
+                }
+                close()
+            }
+
+            return false
+        }
     }
+
 
 }

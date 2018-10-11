@@ -1,11 +1,14 @@
 package com.pervysage.thelimitbreaker.foco.database
 
+import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.LiveData
+import android.database.sqlite.SQLiteConstraintException
 import android.os.AsyncTask
 import android.util.Log
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
+import java.time.temporal.TemporalAccessor
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
@@ -16,6 +19,7 @@ class Repository private constructor(application: Application) {
     private var allPlacePrefs:LiveData<List<PlacePrefs>>
     private var myContacts:LiveData<List<ContactInfo>>
 
+    private var  dialog:AlertDialog?=null
     companion object {
         private var instance:Repository?=null
         fun getInstance(application: Application):Repository{
@@ -30,6 +34,9 @@ class Repository private constructor(application: Application) {
         }
     }
 
+    fun setExceptionDialog(exDialog:AlertDialog){
+        dialog=exDialog
+    }
 
     fun getPlacePref(lat:Double,lng:Double):PlacePrefs{
         return placePrefsDao.getPlacePref(lat, lng)
@@ -60,7 +67,7 @@ class Repository private constructor(application: Application) {
     fun getAllPlacePrefs(): LiveData<List<PlacePrefs>> = allPlacePrefs
 
     fun insertPref(prefs: PlacePrefs){
-        DbQueryAsyncTask(placePrefsDao,QUERY_TYPE.INSERT_PREF).execute(prefs)
+        DbQueryAsyncTask(placePrefsDao,QUERY_TYPE.INSERT_PREF,dialog).execute(prefs)
     }
 
     fun updatePref(prefs: PlacePrefs){
@@ -70,6 +77,8 @@ class Repository private constructor(application: Application) {
     fun deletePref(prefs: PlacePrefs){
         DbQueryAsyncTask(placePrefsDao,QUERY_TYPE.DELETE_PREF).execute(prefs)
     }
+
+
     fun insertContact(contactInfo:ContactInfo){
         ContactQueryAsyncTask(contactsDao,QUERY_TYPE.INSERT_CONTACT).execute(contactInfo)
     }
@@ -111,14 +120,23 @@ class Repository private constructor(application: Application) {
 
     private class DbQueryAsyncTask(
             private val prefDao:PlacePrefsDao,
-            private val queryType:Enum<QUERY_TYPE>
+            private val queryType:Enum<QUERY_TYPE>,
+            private val dialog: AlertDialog?=null
     ):AsyncTask<PlacePrefs,Unit,String>(){
+
         private val TAG="Repository"
-        override fun doInBackground(vararg params: PlacePrefs?): String {
+
+
+        override fun doInBackground(vararg params: PlacePrefs?): String{
             when(queryType){
                 QUERY_TYPE.INSERT_PREF->{
-                    prefDao.insert(params[0]!!)
-                    return "Insert Success"
+                    try {
+                        prefDao.insert(params[0]!!)
+                        return "Insert Success"
+                    }catch (sqle:SQLiteConstraintException){
+                        return "SamePlaceException"
+                    }
+
                 }
                 QUERY_TYPE.UPDATE_PREF->{
                     prefDao.update(params[0]!!)
@@ -132,9 +150,14 @@ class Repository private constructor(application: Application) {
             return " Konoyarou!! "
         }
 
+
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             Log.d(TAG,"$result")
+
+            if (result=="SamePlaceException"){
+                dialog?.run { show() }
+            }
         }
     }
 

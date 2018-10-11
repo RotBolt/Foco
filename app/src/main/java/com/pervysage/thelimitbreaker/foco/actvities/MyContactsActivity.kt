@@ -31,10 +31,7 @@ import kotlin.collections.ArrayList
 
 class MyContactsActivity : AppCompatActivity() {
 
-    private val PICK_CONTACTS = 1
-    private val PERMISSION_REQUEST = 2
     private var areContactEmpty = true
-
 
     private fun toggleViews() {
         if (areContactEmpty) {
@@ -82,19 +79,7 @@ class MyContactsActivity : AppCompatActivity() {
             dialog.show(supportFragmentManager, "ContactInfoDialog")
         }
         ivAddContact.setOnClickListener {
-            if (ActivityCompat.checkSelfPermission(
-                            this@MyContactsActivity,
-                            android.Manifest.permission.READ_CONTACTS
-                    ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                startActivityForResult(Intent(this@MyContactsActivity, PickContactsActivity::class.java), PICK_CONTACTS)
-            } else {
-                ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(android.Manifest.permission.READ_CONTACTS),
-                        PERMISSION_REQUEST
-                )
-            }
+            startActivity(Intent(this@MyContactsActivity, PickContactsActivity::class.java))
         }
 
         ivBack.setOnClickListener {
@@ -105,22 +90,6 @@ class MyContactsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         startService(Intent(this, ContactSyncIntentService::class.java))
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_REQUEST && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            startActivityForResult(Intent(this@MyContactsActivity, PickContactsActivity::class.java), PICK_CONTACTS)
-        } else {
-            Toast.makeText(this, "You denied the permission", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PICK_CONTACTS && resultCode == Activity.RESULT_OK) {
-
-        }
     }
 
 }

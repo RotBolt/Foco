@@ -232,8 +232,7 @@ abstract class ViewController(private val listView: MyListView) {
 
                     val newTop = viewToCollapse.top
                     val newBottom = viewToCollapse.bottom
-                    val oldHeight = oldBottom - oldTop
-                    val newHeight = newBottom - newTop
+
                     translateCoords[0] = newTop - oldTop
                     translateCoords[1] = newBottom - oldBottom
                     listView.requestLayout()

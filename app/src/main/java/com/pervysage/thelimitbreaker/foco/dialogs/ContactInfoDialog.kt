@@ -45,7 +45,7 @@ class ContactInfoDialog:DialogFragment(){
         val builder=AlertDialog.Builder(context)
                 .setView(itemView)
         val dialog = builder.create()
-        dialog.window.setBackgroundDrawableResource(R.drawable.dialog_background)
+        dialog.window?.setBackgroundDrawableResource(R.drawable.dialog_background)
         return dialog
     }
 

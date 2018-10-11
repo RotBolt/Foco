@@ -1,5 +1,6 @@
 package com.pervysage.thelimitbreaker.foco.adapters
 
+import android.app.Application
 import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -29,39 +30,18 @@ import java.lang.ref.WeakReference
 
 class PlaceAdapter(context: Context,
                    private var places: List<PlacePrefs>,
-                   private val listView: MyListView,
-                   private val repository: Repository) : BaseAdapter() {
+                   private val listView: MyListView) : BaseAdapter() {
 
     private val TAG = "PlaceAdapter"
     private var isNew = false
-
-    private val geoWorker = GeoWorkerUtil(context)
 
     private val viewController = MyViewController(listView, context)
 
     init {
         (context as MainActivity).setOnUpdateLeftOver {
             Log.d(TAG, "onDestruction")
-            with(viewController) {
-                Log.d(TAG, """
-                    Destruction
-                    buffer $bufferPrefs
-                    lastExpandPos pref : ${if (lastExpandPos != -1) places[lastExpandPos] else null}
-                """.trimIndent())
-                if (bufferPrefs != null && lastExpandPos != -1) {
-                    Log.d(TAG, """
-                                update on Destruction
-                                buffer : $bufferPrefs
-                                modelObj : ${places[lastExpandPos]}
-                            """.trimIndent())
-                    if (places[lastExpandPos].active == 1 && places[lastExpandPos].radius != bufferPrefs!!.radius) {
-                        geoWorker.updatePlacePrefsForMonitoring(places[lastExpandPos])
-                    }
-                    places[lastExpandPos].isExpanded = false
-                    bufferPrefs = null
-                    repository.updatePref(places[lastExpandPos])
-                }
-            }
+            if (viewController.getLastExpandPos()!=-1)
+            viewController.updateLeftOver(places[viewController.getLastExpandPos()])
         }
     }
 
@@ -70,23 +50,19 @@ class PlaceAdapter(context: Context,
         places = newList
         if (places.isNotEmpty() && isNew) {
             this.isNew = isNew
-            viewController.bufferPrefs = places[places.size - 1].copy()
-            viewController.lastExpandPos = places.size - 1
-            viewController.lastExpandName = places[places.size - 1].name
-            places[places.size - 1].isExpanded = true
+            viewController.setNewBuffer(places[places.size - 1], places.size - 1)
 
         }
-        if (viewController.lastExpandPos != -1 && !isNew) {
-            places[viewController.lastExpandPos].isExpanded = true
+        if (viewController.getLastExpandPos() != -1 && !isNew) {
+            places[viewController.getLastExpandPos()].isExpanded = true
         }
         notifyDataSetChanged()
-        viewController.bufferFirstAddress = places[0].address
-        if (viewController.lastExpandPos != -1 && !isNew) {
-            listView.setSelectionFromTop(
-                    viewController.lastExpandPos,
-                    viewController.getTopOffsetEx()
-            )
-        }
+
+        if (places.isNotEmpty() && !isNew)
+        viewController.setBufferAddress(places[0].address)
+
+        viewController.setLastExpandView()
+
         if (places.isNotEmpty() && isNew) {
             listView.setSelection(places.size - 1)
         }
@@ -106,11 +82,11 @@ class PlaceAdapter(context: Context,
                 itemView = li.inflate(R.layout.layout_place_prefs, parent, false)
                 itemView!!.setTag(
                         R.id.HEAD_KEY,
-                        HeadHolder(itemView!!, context, WeakReference(repository))
+                        HeadHolder(itemView!!, context)
                 )
                 itemView!!.setTag(
                         R.id.BODY_KEY,
-                        BodyHolder(itemView!!, context, WeakReference(repository))
+                        BodyHolder(itemView!!, context)
                 )
 
             }
@@ -129,6 +105,8 @@ class PlaceAdapter(context: Context,
 
     inner class MyViewController(private val listView: MyListView, private val context: Context) : ViewController(listView) {
 
+        private val geoWorker = GeoWorkerUtil(context)
+        private val repository = Repository.getInstance((context.applicationContext) as Application)
 
         override fun bindExtraDataDuringAnimation(itemView: View, modelObj: ExpandableObj, position: Int) {
             val headHolder = itemView.getTag(R.id.HEAD_KEY) as HeadHolder
@@ -138,10 +116,45 @@ class PlaceAdapter(context: Context,
             bodyHolder.bindData(modelObj)
         }
 
-        var lastExpandPos = -1
-        var lastExpandName: String? = null
-        var bufferFirstAddress = ""
-        var bufferPrefs: PlacePrefs? = null
+        private var lastExpandPos = -1
+        private var lastExpandName: String? = null
+        private var bufferFirstAddress = ""
+        private var bufferPrefs: PlacePrefs? = null
+
+        fun updateLeftOver(placePref: PlacePrefs) {
+            if (bufferPrefs != null && lastExpandPos != -1) {
+
+                Log.d(TAG, """
+                                update on Destruction
+                                buffer : $bufferPrefs
+                                modelObj : ${placePref}
+                            """.trimIndent())
+
+                if (placePref.active == 1 && placePref.radius != bufferPrefs!!.radius) {
+                    geoWorker.updatePlacePrefsForMonitoring(placePref)
+                }
+                placePref.isExpanded = false
+                bufferPrefs = null
+                repository.updatePref(placePref)
+            }
+        }
+
+        fun getLastExpandPos() = lastExpandPos
+
+        fun setBufferAddress(address: String) {
+            bufferFirstAddress = address
+        }
+
+        fun setLastExpandView() {
+            listView.setSelectionFromTop(lastExpandPos, topOffsetX)
+        }
+
+        fun setNewBuffer(placePref: PlacePrefs, position: Int) {
+            lastExpandPos = position
+            bufferPrefs = placePref.copy()
+            lastExpandName = placePref.name
+            placePref.isExpanded = true
+        }
 
 
         override fun workInExpand(itemView: View, modelObj: ExpandableObj, position: Int) {
@@ -224,9 +237,85 @@ class PlaceAdapter(context: Context,
 
         }
 
+        private fun manageBufferPrefs(changedPrefs: PlacePrefs, prevBuffer: PlacePrefs?, isExpanding: Boolean, position: Int) {
 
-        fun getTopOffsetEx(): Int {
-            return super.topOffsetX
+            if (isExpanding) {
+
+                if (bufferPrefs != null && prevBuffer != null) {
+                    if (bufferPrefs!!.radius != prevBuffer.radius
+                            || bufferPrefs!!.name != prevBuffer.name
+                            || bufferPrefs!!.contactGroup != prevBuffer.contactGroup) {
+
+                        // Previous card values have changed , So need to be updated
+
+                        setOnExpandListener {
+                            Log.d(TAG, """
+                                update on implicit collapse
+                                buffer : $bufferPrefs
+                                modelObj : $prevBuffer
+                            """.trimIndent())
+
+
+                            if (prevBuffer.active == 1 && prevBuffer.radius != bufferPrefs!!.radius) {
+                                // Values change in radius parameter
+                                geoWorker.updatePlacePrefsForMonitoring(prevBuffer)
+                            }
+
+                            // Making the current expanding card buffer
+                            lastExpandPos = position
+                            bufferPrefs = changedPrefs.copy()
+                            lastExpandName = changedPrefs.name
+
+                            setOnExpandListener(null)
+                            repository.updatePref(prevBuffer)
+                        }
+                    } else {
+                        // Previous Cards value didn't change
+                        // Making the current expanding card buffer
+                        lastExpandPos = position
+                        bufferPrefs = changedPrefs.copy()
+
+                    }
+                } else {
+
+                    // No Previous expanded card. So fresh buffer
+                    lastExpandPos = position
+                    bufferPrefs = changedPrefs.copy()
+
+                }
+
+
+            } else {
+                setOnCollapseListener {
+                    if (bufferPrefs != null) {
+                        if (bufferPrefs!!.radius != changedPrefs.radius
+                                || bufferPrefs!!.name != changedPrefs.name
+                                || bufferPrefs!!.contactGroup != changedPrefs.contactGroup) {
+
+                            Log.d(TAG, """
+                                update on explicit collapse
+                                buffer : ${bufferPrefs?.address}
+                                modelObj : ${changedPrefs.address}
+                            """.trimIndent())
+
+                            if (changedPrefs.active == 1 && changedPrefs.radius != bufferPrefs!!.radius) {
+                                // Radius of pref changed
+                                geoWorker.updatePlacePrefsForMonitoring(changedPrefs)
+                            }
+
+                            // Need to update buffer before updating repository as it will immediately update adapter
+                            // And the  buffer will be outdated
+                            bufferPrefs = changedPrefs
+
+                            repository.updatePref(changedPrefs)
+                        } else bufferPrefs = null
+                    }
+
+                    lastExpandPos = position
+                    lastExpandName = null
+                }
+            }
+
         }
 
         override fun setUp(itemView: View, modelObj: ExpandableObj, pos: Int) {
@@ -263,73 +352,23 @@ class PlaceAdapter(context: Context,
                             putString(context.getString(R.string.ACTIVE_CONTACT_GROUP), "")
                         }.apply()
                     }
-
                 }
+                repository.updatePref(placePrefs)
             }
 
             headHolder.prefView.setOnClickListener {
                 if (modelObj.isExpanded) {
-                    setOnCollapseListener {
-                        if (bufferPrefs != null) {
-                            if (bufferPrefs!!.radius != modelObj.radius
-                                    || bufferPrefs!!.name != modelObj.name
-                                    || bufferPrefs!!.contactGroup != modelObj.contactGroup) {
-                                Log.d(TAG, """
-                                update on explicit collapse
-                                buffer : ${bufferPrefs?.address}
-                                modelObj : ${modelObj.address}
-                            """.trimIndent())
-
-                                if (modelObj.active == 1 && modelObj.radius != bufferPrefs!!.radius) {
-                                    geoWorker.updatePlacePrefsForMonitoring(modelObj)
-                                }
-                                bufferPrefs = null
-                                repository.updatePref(modelObj)
-                            } else bufferPrefs = null
-                        }
-                    }
+                    manageBufferPrefs(modelObj, null, false, -1)
                     collapse(headHolder.prefView, modelObj, pos)
-
-                    lastExpandPos = -1
-                    lastExpandName = null
 
                 } else {
                     var prevExpandView: View? = null
 
                     var collapseModelObj = if (lastExpandPos != -1) places[lastExpandPos] else null
 
-                    if (bufferPrefs != null && collapseModelObj != null) {
-                        if (bufferPrefs!!.radius != collapseModelObj.radius
-                                || bufferPrefs!!.name != collapseModelObj.name
-                                || bufferPrefs!!.contactGroup != collapseModelObj.contactGroup) {
-                            setOnExpandListener {
-                                Log.d(TAG, """
-                                update on implicit collapse
-                                buffer : $bufferPrefs
-                                modelObj : $collapseModelObj
-                            """.trimIndent())
-                                if (collapseModelObj.active == 1 && collapseModelObj.radius != bufferPrefs!!.radius) {
-                                    geoWorker.updatePlacePrefsForMonitoring(collapseModelObj)
-                                }
-                                lastExpandPos = pos
-                                bufferPrefs = modelObj.copy()
-                                Log.d(TAG, "update assign implicit  buffer : $bufferPrefs, lexp :$lastExpandPos")
-                                lastExpandName = headHolder.tvPlaceTitle.text.toString()
-                                setOnExpandListener(null)
-                                repository.updatePref(collapseModelObj)
-                            }
-                        } else {
-                            lastExpandPos = pos
-                            bufferPrefs = modelObj.copy()
-                            Log.d(TAG, "change assign implicit  buffer : $bufferPrefs, lexp :$lastExpandPos")
-                        }
-                    } else {
-                        lastExpandPos = pos
-                        bufferPrefs = modelObj.copy()
-                        Log.d(TAG, "fresh assign implicit  buffer : $bufferPrefs, lexp :$lastExpandPos")
-                    }
+                    manageBufferPrefs(modelObj, collapseModelObj, true, pos)
 
-                    Log.d(TAG, "lastXName : $lastExpandName")
+                    // Checking of last expanded card on screen or not
                     if (lastExpandName != null) {
                         for (i in 0 until listView.childCount) {
                             val v = listView.getChildAt(i)
@@ -340,8 +379,13 @@ class PlaceAdapter(context: Context,
                             }
                         }
                     }
+
+
                     expand(headHolder.prefView, modelObj, prevExpandView, collapseModelObj, pos)
-                    lastExpandName = headHolder.tvPlaceTitle.text.toString()
+
+                    // to set last expand name after actual expand
+                    // otherwise conflict in checking last expanded card on screem
+                    lastExpandName = modelObj.name
 
 
                 }
@@ -351,7 +395,7 @@ class PlaceAdapter(context: Context,
     }
 
 
-    private class HeadHolder(itemView: View, private val context: Context, private val repository: WeakReference<Repository>) {
+    private class HeadHolder(itemView: View, private val context: Context) {
         val prefView = itemView
         val actualCard = itemView.findViewById<RelativeLayout>(R.id.actualCard)
         val ivWorkHeader = itemView.findViewById<ImageView>(R.id.ivWorkHeader)
@@ -395,7 +439,6 @@ class PlaceAdapter(context: Context,
             serviceSwitch.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) placePref.active = 1 else placePref.active = 0
                 onSwitchChange(isChecked, placePref)
-                repository.get()?.updatePref(placePref)
             }
         }
 
@@ -423,7 +466,7 @@ class PlaceAdapter(context: Context,
 
     }
 
-    private class BodyHolder(itemView: View, private val context: Context, private val repository: WeakReference<Repository>) {
+    private class BodyHolder(itemView: View, private val context: Context) {
 
         val tvAddress = itemView.findViewById<TextView>(R.id.tvAddress)
         val tvRadius = itemView.findViewById<TextView>(R.id.tvRadius)
