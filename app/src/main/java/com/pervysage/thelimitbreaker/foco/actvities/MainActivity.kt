@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
 
     private val PLACE_PICK_REQUEST = 1
 
-    private lateinit var repository:Repository
+    private lateinit var repository: Repository
 
     private val TAG = "MainActivity"
 
@@ -44,9 +44,9 @@ class MainActivity : AppCompatActivity() {
         onDMStatusChanged = l
     }
 
-    private var onAddNewPlace:(()->Unit)?=null
-    fun setOnAddNewPlaceListener(l:()->Unit){
-        onAddNewPlace=l
+    private var onAddNewPlace: (() -> Unit)? = null
+    fun setOnAddNewPlaceListener(l: () -> Unit) {
+        onAddNewPlace = l
     }
 
     override fun onPause() {
@@ -138,13 +138,13 @@ class MainActivity : AppCompatActivity() {
         ivAction.setOnTouchListener(null)
         if (requestCode == PLACE_PICK_REQUEST && resultCode == Activity.RESULT_OK) {
 
-            repository= Repository.getInstance(application)
+            repository = Repository.getInstance(application)
 
             val builder = AlertDialog.Builder(this)
                     .setTitle("Same Place Exists")
                     .setMessage("Same place address already exists." +
                             " If you want to modify some values please change in that place card")
-                    .setPositiveButton("Ok"){dialog, _ ->
+                    .setPositiveButton("Ok") { dialog, _ ->
                         dialog.dismiss()
                     }
             val dialog = builder.create()
@@ -155,26 +155,25 @@ class MainActivity : AppCompatActivity() {
             val place = PlacePicker.getPlace(this, data)
 
             val nameDialog = EditPlaceNameDialog()
-            nameDialog.iniName=place.name.toString()
+            nameDialog.iniName = place.name.toString()
 
             nameDialog.setOnNameConfirm {
-               with(place){
-                   val placePrefs=PlacePrefs(
-                           name = it,
-                           address = address.toString(),
-                           latitude = latLng.latitude,
-                           longitude = latLng.longitude,
-                           geoKey = generateGeoKey(),
-                           radius = 500,
-                           active = 1,
-                           contactGroup = "All Contacts"
+                val placePrefs = PlacePrefs(
+                        name = it,
+                        address = place.address.toString(),
+                        latitude = place.latLng.latitude,
+                        longitude = place.latLng.longitude,
+                        geoKey = generateGeoKey(),
+                        radius = 500,
+                        active = 1,
+                        contactGroup = "All Contacts"
 
-                   )
-                   repository.insertPref(placePrefs)
-                   onAddNewPlace?.invoke()
-               }
+                )
+                if (repository.insertPref(placePrefs))
+                    onAddNewPlace?.invoke()
+
             }
-            nameDialog.show(supportFragmentManager,"EditPlaceName")
+            nameDialog.show(supportFragmentManager, "EditPlaceName")
         }
     }
 }
