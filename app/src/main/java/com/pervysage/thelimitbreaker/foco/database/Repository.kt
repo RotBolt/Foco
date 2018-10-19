@@ -8,7 +8,9 @@ import android.os.AsyncTask
 import android.util.Log
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
+import java.lang.Exception
 import java.util.concurrent.Callable
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 
 class Repository private constructor(application: Application) {
@@ -18,7 +20,7 @@ class Repository private constructor(application: Application) {
 
     private var myContacts:LiveData<List<ContactInfo>>
 
-    private var  dialog:AlertDialog?=null
+    private var  exceptionDialog:AlertDialog?=null
     companion object {
         private var instance:Repository?=null
         fun getInstance(application: Application):Repository{
@@ -34,7 +36,7 @@ class Repository private constructor(application: Application) {
     }
 
     fun setExceptionDialog(exDialog:AlertDialog){
-        dialog=exDialog
+        exceptionDialog=exDialog
     }
 
     fun getPlacePref(lat:Double,lng:Double):PlacePrefs{
@@ -59,11 +61,18 @@ class Repository private constructor(application: Application) {
     }
     fun getMyContacts():LiveData<List<ContactInfo>> = myContacts
 
-    fun insertPref(prefs: PlacePrefs){
+    fun insertPref(prefs: PlacePrefs):Boolean{
         val executor= Executors.newSingleThreadExecutor()
         val insertPrefs= Callable { placePrefsDao.insert(prefs) }
-        val future = executor.submit(insertPrefs)
-        return future.get()
+        return try {
+            val future = executor.submit(insertPrefs)
+            future.get()
+            true
+        }catch (ee:ExecutionException){
+            exceptionDialog?.show()
+            false
+        }
+
     }
 
     fun updatePref(prefs: PlacePrefs){
