@@ -2,7 +2,6 @@ package com.pervysage.thelimitbreaker.foco.database.entities
 
 import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
-import com.pervysage.thelimitbreaker.foco.expandCollapseController.ExpandableObj
 import java.util.*
 
 
@@ -22,8 +21,9 @@ data class PlacePrefs(
         var geoKey:Int,
         var radius:Int,
         var active:Int,
-        var contactGroup:String
-): ExpandableObj(false)
+        var contactGroup:String,
+        var isExpanded:Boolean = false
+)
 
 
 fun generateGeoKey():Int{

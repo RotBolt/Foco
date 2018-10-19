@@ -48,7 +48,6 @@ class ContactInfoDialog:DialogFragment(){
         dialog.window?.setBackgroundDrawableResource(R.drawable.dialog_background)
         return dialog
     }
-
     private fun bindData(itemView: View){
         val ivDelete = itemView.findViewById<ImageView>(R.id.ivDelete)
         ivDelete.setOnClickListener {

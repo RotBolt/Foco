@@ -13,9 +13,11 @@ class RadiusPickDialog:DialogFragment(),DialogInterface.OnClickListener{
     private lateinit var onRadiusPick:(String,Int)->Unit
     private var iniCheckedItem = -1
 
-    fun setOnRadiusPickListener(l:(String,Int)->Unit,iniCheckedItem:Int){
-        onRadiusPick=l
+    fun setIniCheckedItem(iniCheckedItem: Int){
         this.iniCheckedItem=iniCheckedItem
+    }
+    fun setOnRadiusPickListener(l:(String,Int)->Unit){
+        onRadiusPick=l
     }
 
     override fun onClick(dialog: DialogInterface?, which: Int) {

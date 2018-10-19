@@ -13,7 +13,7 @@ class EditPlaceNameDialog : DialogFragment() {
 
     private lateinit var onNameConfirm: (name: String) -> Unit
     private lateinit var etPlaceName: EditText
-    var hint = "Place Name"
+    var iniName = "Place Name"
 
     fun setOnNameConfirm(l: (String) -> Unit) {
         onNameConfirm = l
@@ -23,7 +23,7 @@ class EditPlaceNameDialog : DialogFragment() {
         val li = activity?.layoutInflater
         val itemView = li?.inflate(R.layout.layout_place_name_dialog, null)
         etPlaceName = itemView!!.findViewById(R.id.etPlaceName)
-        etPlaceName.setText(hint, TextView.BufferType.EDITABLE)
+        etPlaceName.setText(iniName, TextView.BufferType.EDITABLE)
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Enter place name")
                 .setView(itemView)
@@ -49,10 +49,7 @@ class EditPlaceNameDialog : DialogFragment() {
             cancelBtn.setOnClickListener { dialog.dismiss() }
         }
         dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-
         return dialog
     }
-
-
 
 }

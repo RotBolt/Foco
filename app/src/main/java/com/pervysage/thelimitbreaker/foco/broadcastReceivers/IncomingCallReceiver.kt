@@ -35,11 +35,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
         Log.d(TAG, "service status $serviceStatus")
         if (serviceStatus) {
             val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            try {
-                tm.listen(MyPhoneStateListener(context, tm), PhoneStateListener.LISTEN_CALL_STATE)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            tm.listen(MyPhoneStateListener(context, tm), PhoneStateListener.LISTEN_CALL_STATE)
         }
     }
 
@@ -50,8 +46,19 @@ class IncomingCallReceiver : BroadcastReceiver() {
         private var methodEndCall: Method
         private var silenceRinger: Method
         private var am: AudioManager
-
         private var focusRequest: AudioFocusRequest? = null
+
+        init {
+            method1.isAccessible = true
+            iTelephony = method1.invoke(tm)
+            methodEndCall = iTelephony.javaClass.getDeclaredMethod("endCall")
+            silenceRinger = iTelephony.javaClass.getDeclaredMethod("silenceRinger")
+            am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK).build()
+            }
+        }
 
         private var tts: TextToSpeech = TextToSpeech(context.applicationContext, TextToSpeech.OnInitListener {
             if (it == TextToSpeech.SUCCESS) {
@@ -90,6 +97,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 language = Locale.US
                 setSpeechRate(0.70f)
             }
+
             gainAudioFocus()
 
             tts.speak(toSay , TextToSpeech.QUEUE_FLUSH, null, "Pui")
@@ -108,18 +116,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
             })
         }
 
-        init {
-            method1.isAccessible = true
-            iTelephony = method1.invoke(tm)
-            methodEndCall = iTelephony.javaClass.getDeclaredMethod("endCall")
-            silenceRinger = iTelephony.javaClass.getDeclaredMethod("silenceRinger")
-            am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK).build()
-            }
-        }
-
 
         override fun onCallStateChanged(state: Int, phoneNumber: String?) {
             if (state == TelephonyManager.CALL_STATE_RINGING) {
@@ -127,13 +123,14 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
                 handleIncomingCall(phoneNumber)
             }
-            if (state == TelephonyManager.CALL_STATE_IDLE) {
+            if (state == TelephonyManager.CALL_STATE_IDLE || state==TelephonyManager.CALL_STATE_OFFHOOK) {
                 Log.d(TAG, "state Idle")
                 motionUtil.stopMotionListener()
                 tts.stop()
                 tts.shutdown()
                 tts.setOnUtteranceProgressListener(null)
             }
+
         }
 
         private fun sendSMS(phoneNumber: String) {
@@ -177,6 +174,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
             } else {
                 // check contact group
                 val activeContactGroup = sharedPref.getString(context.getString(R.string.ACTIVE_CONTACT_GROUP), "")
+
                 when (activeContactGroup) {
                     "All Contacts" -> {
                         Log.d(TAG, "All Contacts")
