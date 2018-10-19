@@ -28,8 +28,6 @@ class DriveModeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
-        Log.d("PUI","onViewCreated")
-
         val sharedPrefs = with(activity!!) {
             getSharedPreferences(resources.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
         }
@@ -57,7 +55,7 @@ class DriveModeFragment : Fragment() {
                             group = "All Contacts"
                         }
                         1 -> {
-                            tvInfoBox.text="Receive calls from Priority People only"
+                            tvInfoBox.text = "Receive calls from Priority People only"
                             group = "Priority Contacts"
                         }
                         2 -> {
@@ -85,9 +83,9 @@ class DriveModeFragment : Fragment() {
 
         }
 
-        if (activity!! is MainActivity) {
-            (activity as MainActivity).setOnDMStatusChangeListener {
-                applyState(it)
+        activity?.run {
+            if (this is MainActivity) {
+                setOnDMStatusChangeListener { applyState(it) }
             }
         }
 

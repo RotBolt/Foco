@@ -17,7 +17,7 @@ class BootReceiver : BroadcastReceiver() {
         Log.d(TAG, "onReceive PUI")
 
         val repo = Repository.getInstance((context.applicationContext) as Application)
-        val placePrefs = repo.getAllPlacePrefsBackground()
+        val placePrefs = repo.getAllPlacePrefs()
         val geoWorker = GeoWorkerUtil(context)
         for (pref in placePrefs) {
             if (pref.active == 1)

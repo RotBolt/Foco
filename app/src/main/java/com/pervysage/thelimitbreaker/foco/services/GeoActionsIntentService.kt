@@ -9,7 +9,9 @@ import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
 import com.google.android.gms.location.GeofencingEvent
 import com.pervysage.thelimitbreaker.foco.R
+import com.pervysage.thelimitbreaker.foco.database.PlacePrefsDao_Impl
 import com.pervysage.thelimitbreaker.foco.database.Repository
+import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.utils.sendNotification
 
 
@@ -55,18 +57,18 @@ class GeoActionsIntentService : JobIntentService() {
                 val lng = lngStr.toDouble()
                 val placePrefs = repo.getPlacePref(lat, lng)
                 val notifyMsg = "Entered : ${placePrefs.name} "
-                toggleService(true,placePrefs.name,placePrefs.contactGroup)
+                toggleService(true,placePrefs)
                 sendNotification(notifyMsg, Geofence.GEOFENCE_TRANSITION_ENTER, baseContext)
                 break
             }
         }else if(geofenceEvent.geofenceTransition==Geofence.GEOFENCE_TRANSITION_EXIT){
-            toggleService(false,"","")
+            toggleService(false,null)
             sendNotification("Exit", Geofence.GEOFENCE_TRANSITION_EXIT, baseContext)
         }
     }
 
 
-    private fun toggleService(doStart: Boolean,activeName:String,activeContactGroup:String){
+    private fun toggleService(doStart: Boolean,placePrefs:PlacePrefs?){
         val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val sharedPref = baseContext.getSharedPreferences(getString(R.string.SHARED_PREF_KEY),Context.MODE_PRIVATE)
         if (doStart){
@@ -79,10 +81,13 @@ class GeoActionsIntentService : JobIntentService() {
             val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_RING)*0.90).toInt()
             am.setStreamVolume(AudioManager.STREAM_RING,maxVolume,AudioManager.FLAG_PLAY_SOUND)
         }
+
         with(sharedPref.edit()){
             putBoolean(getString(R.string.SERVICE_STATUS),doStart)
-            putString(getString(R.string.ACTIVE_NAME),activeName)
-            putString(getString(R.string.ACTIVE_CONTACT_GROUP),activeContactGroup)
+            putString(getString(R.string.ACTIVE_NAME),placePrefs?.name?:"")
+            putString(getString(R.string.ACTIVE_CONTACT_GROUP),placePrefs?.contactGroup?:"")
+            putString(getString(R.string.LAT),placePrefs?.latitude?.toString()?:"")
+            putString(getString(R.string.LNG),placePrefs?.longitude?.toString()?:"")
         }.apply()
     }
 

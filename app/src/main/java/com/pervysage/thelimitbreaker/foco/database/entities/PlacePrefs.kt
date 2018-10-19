@@ -22,8 +22,9 @@ data class PlacePrefs(
         var geoKey:Int,
         var radius:Int,
         var active:Int,
-        var contactGroup:String
-): ExpandableObj(false)
+        var contactGroup:String,
+        var isExpanded:Boolean = false
+)
 
 
 fun generateGeoKey():Int{

@@ -21,27 +21,24 @@ import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.dialogs.ContactGroupPickDialog
 import com.pervysage.thelimitbreaker.foco.dialogs.EditPlaceNameDialog
 import com.pervysage.thelimitbreaker.foco.dialogs.RadiusPickDialog
-import com.pervysage.thelimitbreaker.foco.expandCollapseController.ExpandableObj
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.MyListView
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.ViewController
 import com.pervysage.thelimitbreaker.foco.utils.GeoWorkerUtil
 import com.pervysage.thelimitbreaker.foco.utils.sendNotification
-import java.lang.ref.WeakReference
 
 class PlaceAdapter(context: Context,
                    private var places: List<PlacePrefs>,
                    private val listView: MyListView) : BaseAdapter() {
 
     private val TAG = "PlaceAdapter"
-    private var isNew = false
 
     private val viewController = MyViewController(listView, context)
 
     init {
         (context as MainActivity).setOnUpdateLeftOver {
             Log.d(TAG, "onDestruction")
-            if (viewController.getLastExpandPos()!=-1)
-            viewController.updateLeftOver(places[viewController.getLastExpandPos()])
+            if (viewController.getLastExpandPos() != -1)
+                viewController.updateLeftOver(places[viewController.getLastExpandPos()])
         }
     }
 
@@ -49,17 +46,17 @@ class PlaceAdapter(context: Context,
 
         places = newList
         if (places.isNotEmpty() && isNew) {
-            this.isNew = isNew
             viewController.setNewBuffer(places[places.size - 1], places.size - 1)
-
         }
+
         if (viewController.getLastExpandPos() != -1 && !isNew) {
             places[viewController.getLastExpandPos()].isExpanded = true
         }
+
         notifyDataSetChanged()
 
         if (places.isNotEmpty() && !isNew)
-        viewController.setBufferAddress(places[0].address)
+            viewController.setBufferAddress(places[0].address)
 
         viewController.setLastExpandView()
 
@@ -103,12 +100,12 @@ class PlaceAdapter(context: Context,
 
     override fun getCount(): Int = places.size
 
-    inner class MyViewController(private val listView: MyListView, private val context: Context) : ViewController(listView) {
+   inner class MyViewController(private val listView: MyListView, private val context: Context) : ViewController(listView) {
 
         private val geoWorker = GeoWorkerUtil(context)
         private val repository = Repository.getInstance((context.applicationContext) as Application)
 
-        override fun bindExtraDataDuringAnimation(itemView: View, modelObj: ExpandableObj, position: Int) {
+        override fun bindExtraDataDuringAnimation(itemView: View, modelObj: PlacePrefs, position: Int) {
             val headHolder = itemView.getTag(R.id.HEAD_KEY) as HeadHolder
             val bodyHolder = itemView.getTag(R.id.BODY_KEY) as BodyHolder
             modelObj as PlacePrefs
@@ -157,7 +154,7 @@ class PlaceAdapter(context: Context,
         }
 
 
-        override fun workInExpand(itemView: View, modelObj: ExpandableObj, position: Int) {
+        override fun workInExpand(itemView: View, modelObj: PlacePrefs, position: Int) {
             val headHolder = itemView.getTag(R.id.HEAD_KEY) as HeadHolder
             val bodyHolder = itemView.getTag(R.id.BODY_KEY) as BodyHolder
             with(headHolder) {
@@ -177,17 +174,12 @@ class PlaceAdapter(context: Context,
 
 
             headHolder.setOnClickListeners(modelObj)
-            if (isNew) {
-                headHolder.tvPlaceTitle.callOnClick()
-                isNew = false
-            }
-
             bodyHolder.setOnClickListeners(modelObj)
 
 
         }
 
-        override fun workInCollapse(itemView: View, modelObj: ExpandableObj, position: Int, isExplicit: Boolean) {
+        override fun workInCollapse(itemView: View, modelObj:PlacePrefs, position: Int, isExplicit: Boolean) {
             val headHolder = itemView.getTag(R.id.HEAD_KEY) as HeadHolder
             val bodyHolder = itemView.getTag(R.id.BODY_KEY) as BodyHolder
             modelObj as PlacePrefs
@@ -318,7 +310,7 @@ class PlaceAdapter(context: Context,
 
         }
 
-        override fun setUp(itemView: View, modelObj: ExpandableObj, pos: Int) {
+        override fun setUp(itemView: View, modelObj: PlacePrefs, pos: Int) {
             super.setUp(itemView, modelObj, pos)
             modelObj as PlacePrefs
             val headHolder = itemView.getTag(R.id.HEAD_KEY) as HeadHolder
@@ -336,6 +328,7 @@ class PlaceAdapter(context: Context,
             headHolder.setOnSwitchChange { isOn, placePrefs ->
                 if (isOn) geoWorker.addPlaceForMonitoring(placePrefs)
                 else {
+
                     geoWorker.removePlaceFromMonitoring(placePrefs)
                     val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
                     val serviceStatus = sharedPrefs.getBoolean(context.getString(R.string.SERVICE_STATUS), false)
@@ -384,7 +377,7 @@ class PlaceAdapter(context: Context,
                     expand(headHolder.prefView, modelObj, prevExpandView, collapseModelObj, pos)
 
                     // to set last expand name after actual expand
-                    // otherwise conflict in checking last expanded card on screem
+                    // otherwise conflict in checking last expanded card on screen
                     lastExpandName = modelObj.name
 
 
@@ -404,6 +397,8 @@ class PlaceAdapter(context: Context,
         val viewDivider = itemView.findViewById<FrameLayout>(R.id.divideContainer)
         val ivExpand = itemView.findViewById<ImageView>(R.id.ivExpand)
         val serviceSwitch = itemView.findViewById<SwitchCompat>(R.id.serviceSwitch)
+
+
 
         init {
             ivWorkHeader.setOnTouchListener { _, _ -> true }
@@ -446,7 +441,7 @@ class PlaceAdapter(context: Context,
 
             tvPlaceTitle.setOnClickListener {
                 val dialog = EditPlaceNameDialog()
-                dialog.hint = placePref.name
+                dialog.iniName = placePref.name
                 dialog.setOnNameConfirm {
                     tvPlaceTitle.text = it
                     placePref.name = it
@@ -494,11 +489,8 @@ class PlaceAdapter(context: Context,
         fun setOnClickListeners(placePref: PlacePrefs) {
             tvRadius.setOnClickListener {
                 val dialog = RadiusPickDialog()
-                dialog.setOnRadiusPickListener(
-                        { radiusString, radiusInt ->
-                            tvRadius.text = radiusString
-                            placePref.radius = radiusInt
-                        },
+                dialog.setIniCheckedItem(
+                        iniCheckedItem =
                         when (placePref.radius) {
                             500 -> 0
                             1000 -> 1
@@ -507,36 +499,35 @@ class PlaceAdapter(context: Context,
                             else -> -1
                         }
                 )
+                dialog.setOnRadiusPickListener { radiusString, radiusInt ->
+                    tvRadius.text = radiusString
+                    placePref.radius = radiusInt
+                }
                 dialog.show((context as FragmentActivity).supportFragmentManager, "RadiusPickDialog")
             }
 
             tvContactGroup.setOnClickListener {
                 val dialog = ContactGroupPickDialog()
-                dialog.setOnContactGroupPickListener(
-                        { group ->
-                            tvContactGroup.text = group
-                            placePref.contactGroup = group
-
-                            when (group) {
-                                "All Contacts" -> {
-                                    // set flag for all contacts
-                                }
-                                "Priority Contacts" -> {
-                                    // Pick priority contacts
-                                    // start contact picker activity
-                                }
-                                "None" -> {
-                                    // disable all contacts
-                                }
-                            }
-                        },
-                        when (placePref.contactGroup) {
+                dialog.setIniCheckedItem(
+                        iniCheckedItem = when (placePref.contactGroup) {
                             "All Contacts" -> 0
                             "Priority Contacts" -> 1
                             "None" -> 2
                             else -> -1
                         }
                 )
+                dialog.setOnContactGroupPickListener { group ->
+                    tvContactGroup.text = group
+                    placePref.contactGroup = group
+
+                    val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
+                    val serviceStatus = sharedPrefs.getBoolean(context.getString(R.string.SERVICE_STATUS), false)
+                    val activeName = sharedPrefs.getString(context.getString(R.string.ACTIVE_NAME), "")
+
+                    if (serviceStatus && activeName == placePref.name) {
+                        sharedPrefs.edit().putString(context.getString(R.string.ACTIVE_CONTACT_GROUP), group).apply()
+                    }
+                }
                 dialog.show((context as FragmentActivity).supportFragmentManager, "ContactGroupPickDialog")
 
             }

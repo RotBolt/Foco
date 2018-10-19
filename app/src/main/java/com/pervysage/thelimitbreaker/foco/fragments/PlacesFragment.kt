@@ -1,24 +1,22 @@
 package com.pervysage.thelimitbreaker.foco.fragments
 
 
-import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewConfiguration
 import android.view.ViewGroup
 import com.pervysage.thelimitbreaker.foco.R
-import com.pervysage.thelimitbreaker.foco.adapters.PlaceAdapter
+import com.pervysage.thelimitbreaker.foco.actvities.MainActivity
+import com.pervysage.thelimitbreaker.foco.adapters.PlacePrefsAdapter
 import com.pervysage.thelimitbreaker.foco.database.Repository
-import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import kotlinx.android.synthetic.main.fragment_places.*
 
 class PlacesFragment : Fragment() {
 
-    private lateinit var repo:Repository
+    private lateinit var repository: Repository
     private var isNew = false
-    private var isPlaceListEmpty=false
+    private var isPlaceListEmpty = false
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -29,40 +27,40 @@ class PlacesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        repo=Repository.getInstance(activity!!.application)
+        activity?.run {
 
 
-        val places =repo.getAllPlacePrefs()
-        var listSize = -1
-        places.observe(activity!!,object :Observer<List<PlacePrefs>>{
-            override fun onChanged(t: List<PlacePrefs>?) {
-                listSize=t?.size?:-1
-                places.removeObserver(this)
+            repository = Repository.getInstance(this.application)
+            val placePrefList = repository.getAllPlacePrefs()
+            isPlaceListEmpty = placePrefList.isEmpty()
+            val placePrefAdapter = PlacePrefsAdapter(this, placePrefList = placePrefList, listView = lvPlaces)
+            lvPlaces.adapter = placePrefAdapter
+
+            placePrefAdapter.setOnEmptyListListener {
+                isPlaceListEmpty=it
+                toggleViews()
             }
 
-        })
-        isPlaceListEmpty=listSize==0
-        val adapter=PlaceAdapter(activity!!, ArrayList(),lvPlaces)
-        lvPlaces.adapter=adapter
-        lvPlaces.setFriction(ViewConfiguration.getScrollFriction() * 2)
-        places.observe(activity!!, Observer<List<PlacePrefs>>{
-            if(listSize<it!!.size && listSize!=-1)
-                isNew=true
-            adapter.updateList(it,isNew)
-            listSize=it.size
-            isPlaceListEmpty=listSize==0
-            toggleViews()
-            isNew=false
-        })
+            if (this is MainActivity) {
+                setOnAddNewPlaceListener {
+
+                    val list = repository.getAllPlacePrefs()
+                    isPlaceListEmpty = list.isEmpty()
+                    toggleViews()
+                    placePrefAdapter.refreshList(list, true)
+                }
+            }
+
+        }
     }
 
-    private fun toggleViews(){
-        if (isPlaceListEmpty){
-            lvPlaces.visibility=View.GONE
-            noPlaceView.visibility=View.VISIBLE
-        }else{
-            lvPlaces.visibility=View.VISIBLE
-            noPlaceView.visibility=View.GONE
+    private fun toggleViews() {
+        if (isPlaceListEmpty) {
+            lvPlaces.visibility = View.GONE
+            noPlaceView.visibility = View.VISIBLE
+        } else {
+            lvPlaces.visibility = View.VISIBLE
+            noPlaceView.visibility = View.GONE
         }
     }
 

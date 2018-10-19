@@ -12,9 +12,12 @@ class ContactGroupPickDialog : DialogFragment(), DialogInterface.OnClickListener
     private var iniCheckedItem = -1
     private lateinit var onContactGroupPick: (String) -> Unit
 
-    fun setOnContactGroupPickListener(l: (String) -> Unit, iniCheckedItem: Int) {
+    fun setIniCheckedItem(iniCheckedItem:Int){
+        this.iniCheckedItem=iniCheckedItem
+    }
+
+    fun setOnContactGroupPickListener(l: (String) -> Unit) {
         onContactGroupPick = l
-        this.iniCheckedItem = iniCheckedItem
     }
 
     override fun onClick(dialog: DialogInterface?, which: Int) {

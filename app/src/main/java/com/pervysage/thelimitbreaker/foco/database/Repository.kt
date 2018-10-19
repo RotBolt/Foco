@@ -8,7 +8,6 @@ import android.os.AsyncTask
 import android.util.Log
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
-import java.time.temporal.TemporalAccessor
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
@@ -16,7 +15,7 @@ class Repository private constructor(application: Application) {
 
     private var placePrefsDao:PlacePrefsDao
     private var contactsDao:ContactsDao
-    private var allPlacePrefs:LiveData<List<PlacePrefs>>
+
     private var myContacts:LiveData<List<ContactInfo>>
 
     private var  dialog:AlertDialog?=null
@@ -43,13 +42,9 @@ class Repository private constructor(application: Application) {
     }
 
     fun getAllContactsBackground():List<ContactInfo>{
-//        val executor = Executors.newSingleThreadExecutor()
-//        val getAllContacts = Callable { contactsDao.getContactsBackground() }
-//        val future = executor.submit(getAllContacts)
-//        return future.get()
         return contactsDao.getContactsBackground()
     }
-    fun getAllPlacePrefsBackground():List<PlacePrefs>{
+    fun getAllPlacePrefs():List<PlacePrefs>{
         val executor = Executors.newSingleThreadExecutor()
         val getAllPrefs = Callable { placePrefsDao.getAllPrefsBackGround() }
         val future = executor.submit(getAllPrefs)
@@ -64,18 +59,25 @@ class Repository private constructor(application: Application) {
     }
     fun getMyContacts():LiveData<List<ContactInfo>> = myContacts
 
-    fun getAllPlacePrefs(): LiveData<List<PlacePrefs>> = allPlacePrefs
-
     fun insertPref(prefs: PlacePrefs){
-        DbQueryAsyncTask(placePrefsDao,QUERY_TYPE.INSERT_PREF,dialog).execute(prefs)
+        val executor= Executors.newSingleThreadExecutor()
+        val insertPrefs= Callable { placePrefsDao.insert(prefs) }
+        val future = executor.submit(insertPrefs)
+        return future.get()
     }
 
     fun updatePref(prefs: PlacePrefs){
-        DbQueryAsyncTask(placePrefsDao,QUERY_TYPE.UPDATE_PREF).execute(prefs)
+        val executor= Executors.newSingleThreadExecutor()
+        val updatePrefs= Callable { placePrefsDao.update(prefs) }
+        val future = executor.submit(updatePrefs)
+        return future.get()
     }
 
     fun deletePref(prefs: PlacePrefs){
-        DbQueryAsyncTask(placePrefsDao,QUERY_TYPE.DELETE_PREF).execute(prefs)
+        val executor= Executors.newSingleThreadExecutor()
+        val deletePrefs= Callable { placePrefsDao.delete(prefs) }
+        val future = executor.submit(deletePrefs)
+        return future.get()
     }
 
 
@@ -117,55 +119,11 @@ class Repository private constructor(application: Application) {
         }
 
     }
-
-    private class DbQueryAsyncTask(
-            private val prefDao:PlacePrefsDao,
-            private val queryType:Enum<QUERY_TYPE>,
-            private val dialog: AlertDialog?=null
-    ):AsyncTask<PlacePrefs,Unit,String>(){
-
-        private val TAG="Repository"
-
-
-        override fun doInBackground(vararg params: PlacePrefs?): String{
-            when(queryType){
-                QUERY_TYPE.INSERT_PREF->{
-                    try {
-                        prefDao.insert(params[0]!!)
-                        return "Insert Success"
-                    }catch (sqle:SQLiteConstraintException){
-                        return "SamePlaceException"
-                    }
-
-                }
-                QUERY_TYPE.UPDATE_PREF->{
-                    prefDao.update(params[0]!!)
-                    return "Update Success"
-                }
-                QUERY_TYPE.DELETE_PREF->{
-                    prefDao.delete(params[0]!!)
-                    return "Delete Success"
-                }
-            }
-            return " Konoyarou!! "
-        }
-
-
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            Log.d(TAG,"$result")
-
-            if (result=="SamePlaceException"){
-                dialog?.run { show() }
-            }
-        }
-    }
-
     init {
         val dbInstance = AppDatabase.getInstance(application)
         placePrefsDao = dbInstance.placePrefsDao()
         contactsDao=dbInstance.contactInfoDao()
-        allPlacePrefs = placePrefsDao.getAllPrefs()
+
         myContacts=contactsDao.getAll()
     }
 
