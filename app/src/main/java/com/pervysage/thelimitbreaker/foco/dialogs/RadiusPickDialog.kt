@@ -6,6 +6,7 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.os.Handler
 import android.support.v4.app.DialogFragment
+import android.view.ContextThemeWrapper
 import com.pervysage.thelimitbreaker.foco.R
 
 class RadiusPickDialog:DialogFragment(),DialogInterface.OnClickListener{
@@ -48,13 +49,15 @@ class RadiusPickDialog:DialogFragment(),DialogInterface.OnClickListener{
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(context)
+        val contextThemeWrapper = ContextThemeWrapper(context,R.style.DialogStyle)
+        val builder = AlertDialog.Builder(contextThemeWrapper)
         builder.setSingleChoiceItems(
                 arrayOf("500 m","1 km","2 km","5 km"),
                 iniCheckedItem,
                 this
 
         )
+
         val dialog = builder.create()
         dialog.window.setBackgroundDrawableResource(R.drawable.dialog_background)
 

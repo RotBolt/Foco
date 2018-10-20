@@ -41,7 +41,7 @@ class DriveModeRecogReceiver : BroadcastReceiver() {
 
                             val notifyMsg = "DriveMode Started"
                             val contentText="Blocking Unwanted Calls"
-                            sendDriveModeNotification(notifyMsg,contentText,context)
+                            sendDriveModeNotification(notifyMsg,contentText,true,context)
                         } else if (event.transitionType == ActivityTransition.ACTIVITY_TRANSITION_EXIT) {
                             sharedPrefs?.edit()?.putBoolean(
                                     context.getString(R.string.DM_STATUS),
@@ -53,7 +53,7 @@ class DriveModeRecogReceiver : BroadcastReceiver() {
                             am.setStreamVolume(AudioManager.STREAM_RING,maxVolume,AudioManager.FLAG_PLAY_SOUND)
 
                             val notifyMsg = "DriveMode Stopped"
-                            sendDriveModeNotification(notifyMsg,"Service Stopped",context)
+                            sendDriveModeNotification(notifyMsg,"Service Stopped",false,context)
                         }
                     }
                 }

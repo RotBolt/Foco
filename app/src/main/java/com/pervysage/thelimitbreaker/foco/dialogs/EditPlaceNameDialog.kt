@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
+import android.view.ContextThemeWrapper
 import android.view.WindowManager
 import android.widget.EditText
 import android.widget.TextView
@@ -24,7 +25,8 @@ class EditPlaceNameDialog : DialogFragment() {
         val itemView = li?.inflate(R.layout.layout_place_name_dialog, null)
         etPlaceName = itemView!!.findViewById(R.id.etPlaceName)
         etPlaceName.setText(iniName, TextView.BufferType.EDITABLE)
-        val builder = AlertDialog.Builder(context)
+        val contextThemeWrapper = ContextThemeWrapper(context,R.style.DialogStyle)
+        val builder = AlertDialog.Builder(contextThemeWrapper)
         builder.setTitle("Enter place name")
                 .setView(itemView)
                 .setPositiveButton("Ok", null)
