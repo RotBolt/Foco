@@ -9,10 +9,9 @@ import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
 import com.google.android.gms.location.GeofencingEvent
 import com.pervysage.thelimitbreaker.foco.R
-import com.pervysage.thelimitbreaker.foco.database.PlacePrefsDao_Impl
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
-import com.pervysage.thelimitbreaker.foco.utils.sendNotification
+import com.pervysage.thelimitbreaker.foco.utils.sendGeofenceNotification
 
 
 class GeoActionsIntentService : JobIntentService() {
@@ -58,12 +57,12 @@ class GeoActionsIntentService : JobIntentService() {
                 val placePrefs = repo.getPlacePref(lat, lng)
                 val notifyMsg = "Entered : ${placePrefs.name} "
                 toggleService(true,placePrefs)
-                sendNotification(notifyMsg, Geofence.GEOFENCE_TRANSITION_ENTER, baseContext)
+                sendGeofenceNotification(notifyMsg, Geofence.GEOFENCE_TRANSITION_ENTER, baseContext)
                 break
             }
         }else if(geofenceEvent.geofenceTransition==Geofence.GEOFENCE_TRANSITION_EXIT){
             toggleService(false,null)
-            sendNotification("Exit", Geofence.GEOFENCE_TRANSITION_EXIT, baseContext)
+            sendGeofenceNotification("Exit", Geofence.GEOFENCE_TRANSITION_EXIT, baseContext)
         }
     }
 

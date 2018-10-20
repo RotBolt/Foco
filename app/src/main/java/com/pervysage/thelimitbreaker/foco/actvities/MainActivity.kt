@@ -27,19 +27,12 @@ class MainActivity : AppCompatActivity() {
 
     private val TAG = "MainActivity"
 
-    private var updateLeftOver: (() -> Unit)? = null
-
-    fun setOnUpdateLeftOver(l: () -> Unit) {
-        updateLeftOver = l
-    }
-
     private val pickPlace = {
         val intentBuilder = PlacePicker.IntentBuilder()
         startActivityForResult(intentBuilder.build(this), PLACE_PICK_REQUEST)
     }
 
     private var onDMStatusChanged: ((Boolean) -> Unit)? = null
-
     fun setOnDMStatusChangeListener(l: (Boolean) -> Unit) {
         onDMStatusChanged = l
     }
@@ -47,13 +40,6 @@ class MainActivity : AppCompatActivity() {
     private var onAddNewPlace: (() -> Unit)? = null
     fun setOnAddNewPlaceListener(l: () -> Unit) {
         onAddNewPlace = l
-    }
-
-    override fun onPause() {
-        super.onPause()
-        updateLeftOver?.run {
-            this()
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -129,7 +115,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
-
     }
 
 
@@ -171,7 +156,6 @@ class MainActivity : AppCompatActivity() {
                 )
                 if (repository.insertPref(placePrefs))
                     onAddNewPlace?.invoke()
-
             }
             nameDialog.show(supportFragmentManager, "EditPlaceName")
         }

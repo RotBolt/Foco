@@ -23,7 +23,7 @@ import com.pervysage.thelimitbreaker.foco.dialogs.RadiusPickDialog
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.MyListView
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.ViewManager
 import com.pervysage.thelimitbreaker.foco.utils.GeoWorkerUtil
-import com.pervysage.thelimitbreaker.foco.utils.sendNotification
+import com.pervysage.thelimitbreaker.foco.utils.sendGeofenceNotification
 
 class PlacePrefsAdapter(private val context: Context, private var placePrefList: List<PlacePrefs>, private val listView: MyListView) : BaseAdapter() {
 
@@ -96,7 +96,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
         if (lat == placePref.latitude.toString() && lng == placePref.longitude.toString()) {
             val notificationManagerCompat = NotificationManagerCompat.from(context)
             notificationManagerCompat.cancel(0)
-            sendNotification("Service Stopped for ${placePref.name}", -1, context)
+            sendGeofenceNotification("Service Stopped for ${placePref.name}", -1, context)
 
             val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             am.ringerMode = AudioManager.RINGER_MODE_NORMAL
@@ -460,7 +460,5 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
                 workOnDelete(placePref)
             }
         }
-
     }
-
 }
