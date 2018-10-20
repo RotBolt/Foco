@@ -21,10 +21,7 @@ interface PlacePrefsDao{
     fun delete(placePrefs: PlacePrefs)
 
     @Query("SELECT * FROM place_prefs")
-    fun getAllPrefs(): LiveData<List<PlacePrefs>>
-
-    @Query("SELECT * FROM place_prefs")
-    fun getAllPrefsBackGround(): List<PlacePrefs>
+    fun getAllPrefs(): List<PlacePrefs>
 
 
 

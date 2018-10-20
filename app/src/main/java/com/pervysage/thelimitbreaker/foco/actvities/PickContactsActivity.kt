@@ -1,7 +1,6 @@
 package com.pervysage.thelimitbreaker.foco.actvities
 
 import android.app.Activity
-import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.support.v7.app.AppCompatActivity
@@ -11,7 +10,6 @@ import com.pervysage.thelimitbreaker.foco.adapters.ContactAdapter
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import kotlinx.android.synthetic.main.activity_pick_conatcts.*
-import java.lang.StringBuilder
 import java.util.*
 
 class PickContactsActivity : AppCompatActivity() {
@@ -26,14 +24,14 @@ class PickContactsActivity : AppCompatActivity() {
 
     private val marked = ArrayList<ContactInfo>()
 
-    private lateinit var repo: Repository
+    private lateinit var repository: Repository
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pick_conatcts)
 
-        repo = Repository.getInstance(application)
+        repository = Repository.getInstance(application)
 
         val contactAdapter = ContactAdapter(getAllContacts(), this)
         rvContacts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
@@ -73,8 +71,8 @@ class PickContactsActivity : AppCompatActivity() {
                     while (cursor.moveToNext()) {
                         val number = getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER))
 
-                        val info = ContactInfo(obj.name,number)
-                        repo.insertContact(info)
+                        val info = ContactInfo(obj.name, number)
+                        repository.insertContact(info)
 
                     }
                 }
@@ -121,21 +119,13 @@ class PickContactsActivity : AppCompatActivity() {
     }
 
     private fun getOrderedContactMap(): HashMap<String, ArrayList<String>> {
-        val list = repo.getMyContacts()
-        list.observe(this, object : Observer<List<com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo>> {
-            override fun onChanged(t: List<com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo>?) {
-                list.removeObserver(this)
-            }
-        })
-        val l = list.value
+        val list = repository.getAllContacts()
         val orderedMap = HashMap<String, ArrayList<String>>()
-        l?.run {
-            for (info in l) {
-                var numbers = orderedMap[info.name]
-                if (numbers == null) numbers = ArrayList()
-                numbers.add(info.number)
-                orderedMap[info.name] = numbers
-            }
+        for (info in list) {
+            var numbers = orderedMap[info.name]
+            if (numbers == null) numbers = ArrayList()
+            numbers.add(info.number)
+            orderedMap[info.name] = numbers
         }
         return orderedMap
     }
