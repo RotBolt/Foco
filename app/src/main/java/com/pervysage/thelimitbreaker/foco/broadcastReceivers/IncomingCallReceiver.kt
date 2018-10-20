@@ -32,13 +32,16 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 Context.MODE_PRIVATE
         )
         val serviceStatus = sharedPref.getBoolean(context.getString(R.string.SERVICE_STATUS), false)
-        if (serviceStatus) {
-            val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            tm.listen(MyPhoneStateListener(context, tm), PhoneStateListener.LISTEN_CALL_STATE)
-        }
+        val dmStatus = sharedPref.getBoolean(context.getString(R.string.DM_STATUS), false)
+        val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        if (dmStatus)
+            tm.listen(MyPhoneStateListener(context, tm, true), PhoneStateListener.LISTEN_CALL_STATE)
+        else if (serviceStatus)
+            tm.listen(MyPhoneStateListener(context, tm, false), PhoneStateListener.LISTEN_CALL_STATE)
+
     }
 
-    class MyPhoneStateListener(private val context: Context, tm: TelephonyManager) : PhoneStateListener() {
+    class MyPhoneStateListener(private val context: Context, tm: TelephonyManager, private val isDriveMode: Boolean) : PhoneStateListener() {
         private val TAG = "PhoneStateListener"
         private var method1: Method = tm.javaClass.getDeclaredMethod("getITelephony")
         private var iTelephony: Any
@@ -166,7 +169,11 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 }
             } else {
                 // check contact group
-                val activeContactGroup = sharedPref.getString(context.getString(R.string.ACTIVE_CONTACT_GROUP), "")
+                var activeContactGroup = if (!isDriveMode)
+                    sharedPref.getString(context.getString(R.string.ACTIVE_CONTACT_GROUP), "")
+                else
+                    sharedPref.getString(context.getString(R.string.DM_ACTIVE_GROUP), "")
+
                 when (activeContactGroup) {
                     "All Contacts" -> {
                         startMotionUtil(phoneNumber)
@@ -220,7 +227,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     null
             )
 
-            cursor?.run{
+            cursor?.run {
                 if (count > 0) {
                     moveToNext()
                     return getString(
@@ -242,7 +249,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
                             CallLog.Calls.DATE
                     ),
                     "${CallLog.Calls.TYPE} != ? AND ${CallLog.Calls.NUMBER} LIKE ?",
-                    arrayOf("${CallLog.Calls.OUTGOING_TYPE}",phoneNumber),
+                    arrayOf("${CallLog.Calls.OUTGOING_TYPE}", phoneNumber),
                     CallLog.Calls.DEFAULT_SORT_ORDER
             )
 

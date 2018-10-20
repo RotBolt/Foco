@@ -2,6 +2,7 @@ package com.pervysage.thelimitbreaker.foco.fragments
 
 
 import android.content.Context
+import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
@@ -14,25 +15,33 @@ import android.widget.ArrayAdapter
 import com.pervysage.thelimitbreaker.foco.actvities.MainActivity
 
 import com.pervysage.thelimitbreaker.foco.R
+import com.pervysage.thelimitbreaker.foco.broadcastReceivers.DriveModeRecogReceiver
+import com.pervysage.thelimitbreaker.foco.utils.DriveActivityRecogUtil
+import com.pervysage.thelimitbreaker.foco.utils.sendDriveModeNotification
 import kotlinx.android.synthetic.main.fragment_drive_mode.*
 
 
 class DriveModeFragment : Fragment() {
 
     private var isFragEnabled = -1
+    private lateinit var driveActivityRecogUtil: DriveActivityRecogUtil
+
+    private var dmActiveGroup = ""
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        context?.run {
+            driveActivityRecogUtil = DriveActivityRecogUtil(this)
+        }
         return inflater.inflate(R.layout.fragment_drive_mode, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
-        val sharedPrefs = with(activity!!) {
-            getSharedPreferences(resources.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
-        }
 
-        val contactGroup = sharedPrefs.getString(activity!!.resources.getString(R.string.CONTACT_GROUP_KEY), "All Contacts")
+        val sharedPrefs = context?.getSharedPreferences(context?.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
+
+        val contactGroup = sharedPrefs?.getString(activity!!.resources.getString(R.string.CONTACT_GROUP_KEY), "All Contacts")
 
         val groupAdapter = ArrayAdapter(context!!,
                 android.R.layout.simple_spinner_item,
@@ -48,6 +57,7 @@ class DriveModeFragment : Fragment() {
                 }
 
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+
                     var group = "All Contacts"
                     when (position) {
                         0 -> {
@@ -64,7 +74,8 @@ class DriveModeFragment : Fragment() {
                             group = "None"
                         }
                     }
-                    sharedPrefs.edit().putString(activity!!.resources.getString(R.string.CONTACT_GROUP_KEY), group).apply()
+                    dmActiveGroup = group
+                    sharedPrefs?.edit()?.putString(context.getString(R.string.DM_ACTIVE_GROUP), group)?.apply()
                 }
             }
 
@@ -72,12 +83,15 @@ class DriveModeFragment : Fragment() {
                 "All Contacts" -> setSelection(0)
                 "Priority Contacts" -> setSelection(1)
                 "None" -> setSelection(2)
+                else -> setSelection(0)
             }
         }
 
-        isFragEnabled = sharedPrefs.getInt(activity!!.resources.getString(R.string.DRIVE_MODE_ENABLED), -1)
+        isFragEnabled = sharedPrefs?.getInt(activity!!.resources.getString(R.string.DRIVE_MODE_ENABLED), -1) ?: 0
         if (isFragEnabled == 1) {
-            ivDriveMode.setImageDrawable(ContextCompat.getDrawable(context!!, R.drawable.ic_scooter))
+            context?.run {
+                ivDriveMode.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_scooter))
+            }
         } else {
             applyState(false)
 
@@ -94,25 +108,56 @@ class DriveModeFragment : Fragment() {
 
 
     private fun applyState(state: Boolean) {
+
         if (state) {
             isFragEnabled = 1
 
-            ivDriveMode.setImageDrawable(ContextCompat.getDrawable(context!!, R.drawable.ic_scooter))
+            context?.run {
 
-            tvContactGroupLabel.setTextColor(ContextCompat.getColor(context!!, R.color.colorTextDark))
+                val sharedPrefs = this.getSharedPreferences(this.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
 
-            tvInfoBox.setTextColor(ContextCompat.getColor(context!!, R.color.colorTextDark))
+                sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), dmActiveGroup).apply()
+
+                ivDriveMode.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_scooter))
+
+                tvContactGroupLabel.setTextColor(ContextCompat.getColor(this, R.color.colorTextDark))
+
+                tvInfoBox.setTextColor(ContextCompat.getColor(this, R.color.colorTextDark))
+            }
+
+            driveActivityRecogUtil.startDriveModeRecog()
 
             groupChooser.isEnabled = true
 
         } else {
             isFragEnabled = 0
 
-            ivDriveMode.setImageDrawable(ContextCompat.getDrawable(context!!, R.drawable.ic_scooter_disabled))
+            driveActivityRecogUtil.stopDriveModeRecog()
 
-            tvContactGroupLabel.setTextColor(ContextCompat.getColor(context!!, R.color.colorTextDisable))
+            context?.run {
 
-            tvInfoBox.setTextColor(ContextCompat.getColor(context!!, R.color.colorTextDisable))
+                val sharedPrefs = this.getSharedPreferences(this.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
+
+                sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), "").apply()
+
+                val am = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+                val dmStatus = sharedPrefs.getBoolean(this.getString(R.string.DM_STATUS), false)
+
+                if (dmStatus) {
+                    sendDriveModeNotification("Drive Mode Stopped", "Service Stopped", this)
+                    am.ringerMode = AudioManager.RINGER_MODE_NORMAL
+                    val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_RING) * 0.90).toInt()
+                    am.setStreamVolume(AudioManager.STREAM_RING, maxVolume, AudioManager.FLAG_PLAY_SOUND)
+                }
+
+
+                ivDriveMode.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_scooter_disabled))
+
+                tvContactGroupLabel.setTextColor(ContextCompat.getColor(this, R.color.colorTextDisable))
+
+                tvInfoBox.setTextColor(ContextCompat.getColor(this, R.color.colorTextDisable))
+            }
 
             groupChooser.isEnabled = false
 

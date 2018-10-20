@@ -11,5 +11,7 @@
     <string name="LAT">LAT</string>
     <string name="LNG">LNG</string>
     <string name="ACTIVE_CONTACT_GROUP">active_contact_group</string>
+    <string name="DM_STATUS">dm_status</string>
+    <string name="DM_ACTIVE_GROUP">dm_Active_Group</string>
 
 </resources>
