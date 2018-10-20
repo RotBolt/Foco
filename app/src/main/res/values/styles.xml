@@ -21,4 +21,9 @@
         <item name="colorControlActivated">@color/colorActive</item>
     </style>
 
+    <style name="DialogStyle" parent="Base.Theme.AppCompat.Light.Dialog">
+        <item name="android:fontFamily">@font/maven_pro_medium</item>
+        <item name="android:textColor">@color/colorGenDark</item>
+    </style>
+
 </resources>

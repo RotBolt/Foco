@@ -44,10 +44,10 @@ class DriveModeFragment : Fragment() {
         val contactGroup = sharedPrefs?.getString(activity!!.resources.getString(R.string.CONTACT_GROUP_KEY), "All Contacts")
 
         val groupAdapter = ArrayAdapter(context!!,
-                android.R.layout.simple_spinner_item,
+                R.layout.layout_spinner_item,
                 arrayOf("All Contacts", "Priority Contacts", "None")
         )
-        groupAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        groupAdapter.setDropDownViewResource(R.layout.layout_spinner_dropdown_item)
         groupChooser.apply {
             adapter = groupAdapter
 
@@ -145,7 +145,7 @@ class DriveModeFragment : Fragment() {
                 val dmStatus = sharedPrefs.getBoolean(this.getString(R.string.DM_STATUS), false)
 
                 if (dmStatus) {
-                    sendDriveModeNotification("Drive Mode Stopped", "Service Stopped", this)
+                    sendDriveModeNotification("Drive Mode Stopped", "Service Stopped",false, this)
                     am.ringerMode = AudioManager.RINGER_MODE_NORMAL
                     val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_RING) * 0.90).toInt()
                     am.setStreamVolume(AudioManager.STREAM_RING, maxVolume, AudioManager.FLAG_PLAY_SOUND)

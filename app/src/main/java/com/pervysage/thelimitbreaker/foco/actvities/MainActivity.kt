@@ -4,13 +4,16 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Typeface
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.TabLayout
+import android.view.ContextThemeWrapper
 import com.google.android.gms.location.places.ui.PlacePicker
 import com.pervysage.thelimitbreaker.foco.adapters.PagerAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 import android.view.View
+import android.widget.TextView
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.Repository
@@ -125,16 +128,16 @@ class MainActivity : AppCompatActivity() {
 
             repository = Repository.getInstance(application)
 
-            val builder = AlertDialog.Builder(this)
+            val contextThemeWrapper = ContextThemeWrapper(this,R.style.DialogStyle)
+            val builder = AlertDialog.Builder(contextThemeWrapper)
                     .setTitle("Same Place Exists")
                     .setMessage("Same place address already exists." +
-                            " If you want to modify some values please change in that place card")
+                            " If you want to modify some values please change in that place card only.")
                     .setPositiveButton("Ok") { dialog, _ ->
                         dialog.dismiss()
                     }
             val dialog = builder.create()
             dialog.window?.setBackgroundDrawableResource(R.drawable.dialog_background)
-
             repository.setExceptionDialog(dialog)
 
             val place = PlacePicker.getPlace(this, data)

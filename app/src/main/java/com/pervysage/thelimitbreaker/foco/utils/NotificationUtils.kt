@@ -78,7 +78,7 @@ fun sendGeofenceNotification(notifyMsg: String, transitionType: Int, context: Co
 }
 
 
-fun sendDriveModeNotification(notifyMsg: String, contenttext: String, context: Context) {
+fun sendDriveModeNotification(notifyMsg: String, contenttext: String,hasEntered:Boolean, context: Context) {
 
     val mNotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -86,7 +86,7 @@ fun sendDriveModeNotification(notifyMsg: String, contenttext: String, context: C
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val name = context.getString(R.string.app_name)
         // Create the channel for the notification
-        val mChannel = NotificationChannel("channel_id", name, NotificationManager.IMPORTANCE_DEFAULT)
+        val mChannel = NotificationChannel("channel_id_dm", name, NotificationManager.IMPORTANCE_DEFAULT)
         // Set the Notification Channel for the Notification Manager.
         mNotificationManager.createNotificationChannel(mChannel)
     }
@@ -121,13 +121,16 @@ fun sendDriveModeNotification(notifyMsg: String, contenttext: String, context: C
 
     // Set the Channel ID for Android O.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        builder.setChannelId("channel_id") // Channel ID
+        builder.setChannelId("channel_id_dm") // Channel ID
     }
 
-    builder.setOngoing(true)
-            .setContentTitle(notifyMsg)
+    builder.setContentTitle(notifyMsg)
             .setContentText(contenttext)
+    if (hasEntered)
+        builder.setOngoing(true)
+    else
+        builder.setAutoCancel(true)
 
     // Issue the notification
-    mNotificationManager.notify(0, builder.build())
+    mNotificationManager.notify(1, builder.build())
 }
