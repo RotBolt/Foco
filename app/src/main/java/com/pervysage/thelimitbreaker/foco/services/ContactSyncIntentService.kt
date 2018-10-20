@@ -15,8 +15,8 @@ class ContactSyncIntentService : IntentService("ContactSyncIntentService") {
 
     override fun onHandleIntent(intent: Intent?) {
 
-        val repo = Repository.getInstance((baseContext.applicationContext) as Application)
-        val contacts = repo.getAllContactsBackground()
+        val repository = Repository.getInstance((baseContext.applicationContext) as Application)
+        val contacts = repository.getAllContacts()
 
         if (contacts.isNotEmpty()) {
             Log.d(TAG, "contacts ${contacts.size}")
@@ -50,11 +50,11 @@ class ContactSyncIntentService : IntentService("ContactSyncIntentService") {
                     val mapContactName = hashMap[contact.number]
                     mapContactName?.run {
                         if (contact.name != mapContactName) {
-                            repo.updateContact(ContactInfo(this, contact.number))
+                            repository.updateContact(ContactInfo(this, contact.number))
                         }
                     }
                 } else {
-                    repo.deleteContact(contact)
+                    repository.deleteContact(contact)
                 }
             }
         }

@@ -16,11 +16,7 @@ interface ContactsDao {
     fun delete(contactInfo:ContactInfo)
 
     @Query("SELECT * FROM contact_info ORDER BY name")
-    fun getAll(): LiveData<List<ContactInfo>>
-
-
-    @Query("SELECT * FROM contact_info ORDER BY name")
-    fun getContactsBackground(): List<ContactInfo>
+    fun getAllContacts(): List<ContactInfo>
 
     @Update
     fun update(contactInfo: ContactInfo)

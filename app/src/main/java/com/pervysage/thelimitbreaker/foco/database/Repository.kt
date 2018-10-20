@@ -3,12 +3,8 @@ package com.pervysage.thelimitbreaker.foco.database
 import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.LiveData
-import android.database.sqlite.SQLiteConstraintException
-import android.os.AsyncTask
-import android.util.Log
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
-import java.lang.Exception
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
@@ -17,9 +13,6 @@ class Repository private constructor(application: Application) {
 
     private var placePrefsDao:PlacePrefsDao
     private var contactsDao:ContactsDao
-
-    private var myContacts:LiveData<List<ContactInfo>>
-
     private var  exceptionDialog:AlertDialog?=null
     companion object {
         private var instance:Repository?=null
@@ -43,12 +36,15 @@ class Repository private constructor(application: Application) {
         return placePrefsDao.getPlacePref(lat, lng)
     }
 
-    fun getAllContactsBackground():List<ContactInfo>{
-        return contactsDao.getContactsBackground()
+    fun getAllContacts():List<ContactInfo>{
+        val executor = Executors.newSingleThreadExecutor()
+        val getAllPrefs = Callable { contactsDao.getAllContacts() }
+        val future = executor.submit(getAllPrefs)
+        return  future.get()
     }
     fun getAllPlacePrefs():List<PlacePrefs>{
         val executor = Executors.newSingleThreadExecutor()
-        val getAllPrefs = Callable { placePrefsDao.getAllPrefsBackGround() }
+        val getAllPrefs = Callable { placePrefsDao.getAllPrefs() }
         val future = executor.submit(getAllPrefs)
         return  future.get()
     }
@@ -59,7 +55,7 @@ class Repository private constructor(application: Application) {
         val future = executor.submit(getInfoTask)
         return future.get()
     }
-    fun getMyContacts():LiveData<List<ContactInfo>> = myContacts
+
 
     fun insertPref(prefs: PlacePrefs):Boolean{
         val executor= Executors.newSingleThreadExecutor()
@@ -91,49 +87,30 @@ class Repository private constructor(application: Application) {
 
 
     fun insertContact(contactInfo:ContactInfo){
-        ContactQueryAsyncTask(contactsDao,QUERY_TYPE.INSERT_CONTACT).execute(contactInfo)
+        val executor = Executors.newSingleThreadExecutor()
+        val getAllPrefs = Callable { contactsDao.insert(contactInfo) }
+        val future = executor.submit(getAllPrefs)
+        return  future.get()
     }
 
 
     fun updateContact(contactInfo: ContactInfo){
-        ContactQueryAsyncTask(contactsDao,QUERY_TYPE.UPDATE_CONTACT).execute(contactInfo)
+        val executor = Executors.newSingleThreadExecutor()
+        val getAllPrefs = Callable { contactsDao.update(contactInfo) }
+        val future = executor.submit(getAllPrefs)
+        return  future.get()
     }
-    fun deleteContact(contact:ContactInfo){
-        ContactQueryAsyncTask(contactsDao,QUERY_TYPE.DELETE_CONTACT).execute(contact)
-    }
-
-
-    enum class QUERY_TYPE{
-        INSERT_PREF,UPDATE_PREF,DELETE_PREF,INSERT_CONTACT,DELETE_CONTACT,UPDATE_CONTACT
-    }
-
-    private class ContactQueryAsyncTask(
-            private val contactsDao: ContactsDao,
-            private val queryType:Enum<QUERY_TYPE>
-    ):AsyncTask<ContactInfo,Unit,String>(){
-        override fun doInBackground(vararg params: ContactInfo): String {
-            when(queryType){
-                QUERY_TYPE.INSERT_CONTACT->{
-                    contactsDao.insert(params[0])
-                }
-                QUERY_TYPE.DELETE_CONTACT->{
-                    contactsDao.delete(params[0])
-                }
-                QUERY_TYPE.UPDATE_CONTACT->{
-                    contactsDao.update(params[0])
-                }
-            }
-
-            return "Konoyarou"
-        }
-
+    fun deleteContact(contactInfo:ContactInfo){
+        val executor = Executors.newSingleThreadExecutor()
+        val getAllPrefs = Callable { contactsDao.delete(contactInfo) }
+        val future = executor.submit(getAllPrefs)
+        return  future.get()
     }
     init {
         val dbInstance = AppDatabase.getInstance(application)
         placePrefsDao = dbInstance.placePrefsDao()
         contactsDao=dbInstance.contactInfoDao()
 
-        myContacts=contactsDao.getAll()
     }
 
 
