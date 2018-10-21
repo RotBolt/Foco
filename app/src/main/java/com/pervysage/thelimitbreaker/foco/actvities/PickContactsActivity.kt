@@ -36,6 +36,8 @@ class PickContactsActivity : AppCompatActivity() {
         val contactAdapter = ContactAdapter(getAllContacts(), this)
         rvContacts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         rvContacts.adapter = contactAdapter
+
+        fastScroller.setRecyclerView(rvContacts)
         ivClose.setOnClickListener {
             finish()
         }

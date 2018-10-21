@@ -143,8 +143,9 @@ class DriveModeFragment : Fragment() {
                 val am = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
                 val dmStatus = sharedPrefs.getBoolean(this.getString(R.string.DM_STATUS), false)
+                val serviceStatus = sharedPrefs.getBoolean(this.getString(R.string.SERVICE_STATUS),false)
 
-                if (dmStatus) {
+                if (dmStatus && !serviceStatus) {
                     sendDriveModeNotification("Drive Mode Stopped", "Service Stopped",false, this)
                     am.ringerMode = AudioManager.RINGER_MODE_NORMAL
                     val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_RING) * 0.90).toInt()
