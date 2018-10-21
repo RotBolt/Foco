@@ -87,7 +87,7 @@ class DriveModeFragment : Fragment() {
             }
         }
 
-        isFragEnabled = sharedPrefs?.getInt(activity!!.resources.getString(R.string.DRIVE_MODE_ENABLED), -1) ?: 0
+        isFragEnabled = sharedPrefs?.getInt(context?.resources?.getString(R.string.DRIVE_MODE_ENABLED), -1) ?: 0
         if (isFragEnabled == 1) {
             context?.run {
                 ivDriveMode.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_scooter))
@@ -143,10 +143,10 @@ class DriveModeFragment : Fragment() {
                 val am = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
                 val dmStatus = sharedPrefs.getBoolean(this.getString(R.string.DM_STATUS), false)
-                val serviceStatus = sharedPrefs.getBoolean(this.getString(R.string.SERVICE_STATUS),false)
+                val serviceStatus = sharedPrefs.getBoolean(this.getString(R.string.SERVICE_STATUS), false)
 
                 if (dmStatus && !serviceStatus) {
-                    sendDriveModeNotification("Drive Mode Stopped", "Service Stopped",false, this)
+                    sendDriveModeNotification("Drive Mode Stopped", "Service Stopped", false, this)
                     am.ringerMode = AudioManager.RINGER_MODE_NORMAL
                     val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_RING) * 0.90).toInt()
                     am.setStreamVolume(AudioManager.STREAM_RING, maxVolume, AudioManager.FLAG_PLAY_SOUND)

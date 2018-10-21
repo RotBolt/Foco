@@ -9,7 +9,7 @@ import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.adapters.ContactAdapter
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
-import kotlinx.android.synthetic.main.activity_pick_conatcts.*
+import kotlinx.android.synthetic.main.activity_pick_contacts.*
 import java.util.*
 
 class PickContactsActivity : AppCompatActivity() {
@@ -29,7 +29,7 @@ class PickContactsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_pick_conatcts)
+        setContentView(R.layout.activity_pick_contacts)
 
         repository = Repository.getInstance(application)
 

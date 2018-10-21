@@ -274,9 +274,9 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
                 fm = (context as FragmentActivity).supportFragmentManager,
                 onNameChange = {
                     val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
-                    val lat = sharedPrefs.getFloat(context.getString(R.string.LAT), 0.0f)
-                    val lng = sharedPrefs.getFloat(context.getString(R.string.LNG), 0.0f)
-                    if (lat != 0.0f && lng != 0.0f) {
+                    val lat = sharedPrefs.getString(context.getString(R.string.LAT), "")
+                    val lng = sharedPrefs.getString(context.getString(R.string.LNG), "")
+                    if (lat == placePrefs.latitude.toString() && lng == placePrefs.longitude.toString()-) {
                         sharedPrefs.edit().putString(context.getString(R.string.ACTIVE_NAME), placePrefs.name).commit()
                     }
                 }

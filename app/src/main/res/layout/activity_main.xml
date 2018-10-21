@@ -53,11 +53,11 @@
 
     <ImageView
         android:id="@+id/ivContacts"
-        android:src="@drawable/ic_contacts"
+        android:src="@drawable/ic_group"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
         android:elevation="7dp"
         android:padding="7dp"
-        android:scaleX="0.75"
-        android:scaleY="0.75"
         app:layout_constraintBottom_toBottomOf="@+id/tvFragTitle"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toStartOf="@id/ivAction"

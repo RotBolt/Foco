@@ -27,6 +27,7 @@
     </style>
 
     <style name="BubbleTextStyle" parent="android:TextAppearance.Medium">
+        <item name="android:textSize">28sp</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:fontFamily">@font/maven_pro_medium</item>
     </style>
