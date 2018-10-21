@@ -48,9 +48,12 @@ class DriveModeRecogReceiver : BroadcastReceiver() {
                                     false
                             )?.apply()
 
-                            am.ringerMode=AudioManager.RINGER_MODE_NORMAL
-                            val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_RING)*0.90).toInt()
-                            am.setStreamVolume(AudioManager.STREAM_RING,maxVolume,AudioManager.FLAG_PLAY_SOUND)
+                            val serviceStatus = sharedPrefs?.getBoolean(context.getString(R.string.SERVICE_STATUS),false)?:false
+                            if (!serviceStatus) {
+                                am.ringerMode = AudioManager.RINGER_MODE_NORMAL
+                                val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_RING) * 0.90).toInt()
+                                am.setStreamVolume(AudioManager.STREAM_RING, maxVolume, AudioManager.FLAG_PLAY_SOUND)
+                            }
 
                             val notifyMsg = "DriveMode Stopped"
                             sendDriveModeNotification(notifyMsg,"Service Stopped",false,context)

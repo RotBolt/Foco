@@ -10,12 +10,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.actvities.PickContactsActivity
 import java.util.*
 
 
-class ContactAdapter(private val list: List<PickContactsActivity.ContactInfo>, private val context: Context) : RecyclerView.Adapter<ContactAdapter.ViewHolder>() {
+class ContactAdapter(private val list: List<PickContactsActivity.ContactInfo>, private val context: Context)
+    : RecyclerView.Adapter<ContactAdapter.ViewHolder>() ,SectionTitleProvider{
+    override fun getSectionTitle(position: Int): String {
+        return list[position].name.substring(0,1)
+    }
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): ViewHolder {
         val li = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
