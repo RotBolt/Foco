@@ -29,6 +29,26 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View) {
         when (v.id) {
             R.id.btnGrantPerm -> {
+
+                var permissions = arrayOf(
+                        android.Manifest.permission.ACCESS_FINE_LOCATION,
+                        android.Manifest.permission.READ_CONTACTS,
+                        android.Manifest.permission.READ_PHONE_STATE,
+                        android.Manifest.permission.READ_CALL_LOG,
+                        android.Manifest.permission.CALL_PHONE,
+                        android.Manifest.permission.SEND_SMS
+                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    permissions = arrayOf(
+                            android.Manifest.permission.ACCESS_FINE_LOCATION,
+                            android.Manifest.permission.READ_CONTACTS,
+                            android.Manifest.permission.READ_PHONE_STATE,
+                            android.Manifest.permission.READ_CALL_LOG,
+                            android.Manifest.permission.CALL_PHONE,
+                            android.Manifest.permission.SEND_SMS,
+                            android.Manifest.permission.ANSWER_PHONE_CALLS
+                    )
+                }
                 if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                         || ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
                         || ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
@@ -37,14 +57,7 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
                         || ContextCompat.checkSelfPermission(this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(
                             this,
-                            arrayOf(
-                                    android.Manifest.permission.ACCESS_FINE_LOCATION,
-                                    android.Manifest.permission.READ_CONTACTS,
-                                    android.Manifest.permission.READ_PHONE_STATE,
-                                    android.Manifest.permission.READ_CALL_LOG,
-                                    android.Manifest.permission.CALL_PHONE,
-                                    android.Manifest.permission.SEND_SMS
-                            ),
+                            permissions,
                             PERM_REQUEST
                     )
                 }
@@ -91,7 +104,7 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_permissions)
 
-        val sharedPrefs = getSharedPreferences(getString(R.string.SHARED_PREF_KEY),Context.MODE_PRIVATE)
+        val sharedPrefs = getSharedPreferences(getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
         sharedPrefs.edit().clear().commit()
         btnNext.isEnabled = false
         btnGrantDND.setOnClickListener(this)
