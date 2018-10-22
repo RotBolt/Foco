@@ -4,16 +4,16 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.graphics.Typeface
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.TabLayout
+import android.util.Log
 import android.view.ContextThemeWrapper
 import com.google.android.gms.location.places.ui.PlacePicker
 import com.pervysage.thelimitbreaker.foco.adapters.PagerAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 import android.view.View
-import android.widget.TextView
+import android.widget.PopupMenu
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.Repository
@@ -80,8 +80,28 @@ class MainActivity : AppCompatActivity() {
             pickPlace()
         }
 
-        ivContacts.setOnClickListener {
-            startActivity(Intent(this@MainActivity, MyContactsActivity::class.java))
+        ivOptions.setOnClickListener { _ ->
+            Log.d(TAG,"Pop Up")
+            val popup = PopupMenu(this,ivOptions)
+            val menuInflater = popup.menuInflater
+            menuInflater.inflate(R.menu.menu,popup.menu)
+            popup.setOnMenuItemClickListener {
+                when(it?.itemId){
+                    R.id.action_settings->{
+                        startActivity(Intent(this@MainActivity, SettingsActivity::class.java))
+                        true
+                    }
+                    R.id.action_priority->{
+                        startActivity(Intent(this@MainActivity, MyContactsActivity::class.java))
+                        true
+                    }
+                    else->{
+                        false
+                    }
+
+                }
+            }
+            popup.show()
         }
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {

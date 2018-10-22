@@ -105,7 +105,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
             with(sharedPrefs.edit()) {
                 putString(context.getString(R.string.ACTIVE_NAME), "")
                 putString(context.getString(R.string.ACTIVE_CONTACT_GROUP), "")
-                putBoolean(context.getString(R.string.SERVICE_STATUS), false)
+                putBoolean(context.getString(R.string.GEO_STATUS), false)
                 putString(context.getString(R.string.LAT), "")
                 putString(context.getString(R.string.LNG), "")
             }.apply()
@@ -276,7 +276,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
                     val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
                     val lat = sharedPrefs.getString(context.getString(R.string.LAT), "")
                     val lng = sharedPrefs.getString(context.getString(R.string.LNG), "")
-                    if (lat == placePrefs.latitude.toString() && lng == placePrefs.longitude.toString()-) {
+                    if (lat == placePrefs.latitude.toString() && lng == placePrefs.longitude.toString()) {
                         sharedPrefs.edit().putString(context.getString(R.string.ACTIVE_NAME), placePrefs.name).commit()
                     }
                 }

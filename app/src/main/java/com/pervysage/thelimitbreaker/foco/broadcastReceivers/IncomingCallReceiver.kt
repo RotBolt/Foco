@@ -12,7 +12,6 @@ import android.provider.CallLog
 import android.provider.ContactsContract
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
-import android.telecom.Call
 import android.telephony.PhoneStateListener
 import android.telephony.SmsManager
 import android.telephony.TelephonyManager
@@ -31,7 +30,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 context.getString(R.string.SHARED_PREF_KEY),
                 Context.MODE_PRIVATE
         )
-        val serviceStatus = sharedPref.getBoolean(context.getString(R.string.SERVICE_STATUS), false)
+        val serviceStatus = sharedPref.getBoolean(context.getString(R.string.GEO_STATUS), false)
         val dmStatus = sharedPref.getBoolean(context.getString(R.string.DM_STATUS), false)
         val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         if (dmStatus)
@@ -93,8 +92,9 @@ class IncomingCallReceiver : BroadcastReceiver() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 am.requestAudioFocus(focusRequest)
             } else {
-                am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
             }
+
 
         }
 
@@ -106,10 +106,12 @@ class IncomingCallReceiver : BroadcastReceiver() {
             }
         }
 
-        private fun startMotionUtil(phoneNumber: String) {
+        private fun startMotionUtil(phoneNumber: String, smsToCallerStatus: Boolean) {
+
             motionUtil.setAction {
                 methodEndCall.invoke(iTelephony)
-                sendSMS(phoneNumber)
+                if (smsToCallerStatus)
+                    sendSMS(phoneNumber)
             }
             motionUtil.setShakeACtion {
                 if (tts.isSpeaking) tts.stop()
@@ -155,17 +157,22 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     context.getString(R.string.SHARED_PREF_KEY),
                     Context.MODE_PRIVATE
             )
+
+            val allowCallerStatus = sharedPref.getBoolean(context.getString(R.string.ALLOW_CALLER_STATUS), true)
+            val smsToCallerStatus = sharedPref.getBoolean(context.getString(R.string.SMS_TO_CALLER), false)
+
             name = checkNumber(phoneNumber)
 
             // exist in contacts or not
             if (name.isEmpty()) {
-                if (!isUnder15Min(phoneNumber)) {
-                    methodEndCall.invoke(iTelephony)
-                    sendSMS(phoneNumber)
-                } else {
-                    startMotionUtil(phoneNumber)
+                if (allowCallerStatus && isUnder15Min(phoneNumber)) {
+                    startMotionUtil(phoneNumber,smsToCallerStatus)
                     toSay = "This might be important call"
                     speak()
+                } else {
+                    methodEndCall.invoke(iTelephony)
+                    if (smsToCallerStatus)
+                        sendSMS(phoneNumber)
                 }
             } else {
                 // check contact group
@@ -176,7 +183,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
                 when (activeContactGroup) {
                     "All Contacts" -> {
-                        startMotionUtil(phoneNumber)
+                        startMotionUtil(phoneNumber,smsToCallerStatus)
                         toSay = "Call from $name"
                         speak()
                     }
@@ -186,18 +193,20 @@ class IncomingCallReceiver : BroadcastReceiver() {
                         val contactInfo = repo.getInfoFromNumber(numberParam)
                         if (contactInfo != null) {
                             this@MyPhoneStateListener.name = name
-                            startMotionUtil(phoneNumber)
+                            startMotionUtil(phoneNumber,smsToCallerStatus)
                             toSay = "Call from $name"
                             speak()
 
                         } else {
-                            if (!isUnder15Min(phoneNumber)) {
-                                methodEndCall.invoke(iTelephony)
-                                sendSMS(phoneNumber)
-                            } else {
-                                startMotionUtil(phoneNumber)
+                            if (allowCallerStatus && isUnder15Min(phoneNumber)) {
+                                startMotionUtil(phoneNumber,smsToCallerStatus)
                                 toSay = "This might be important call. Call from $name"
                                 speak()
+
+                            } else {
+                                methodEndCall.invoke(iTelephony)
+                                if (smsToCallerStatus)
+                                    sendSMS(phoneNumber)
                             }
                         }
 

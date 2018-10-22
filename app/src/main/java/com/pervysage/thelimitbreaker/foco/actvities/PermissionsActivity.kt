@@ -91,6 +91,8 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_permissions)
 
+        val sharedPrefs = getSharedPreferences(getString(R.string.SHARED_PREF_KEY),Context.MODE_PRIVATE)
+        sharedPrefs.edit().clear().commit()
         btnNext.isEnabled = false
         btnGrantDND.setOnClickListener(this)
         btnGrantPerm.setOnClickListener(this)
