@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Foco</string>
 
-    <string name="API_KEY">AIzaSyBJr2KIWctyhBQZMyKRnmlEZt0RcVDgMoc</string>
+
 
     <string name="SHARED_PREF_KEY">pref_key</string>
     <string name="DRIVE_MODE_ENABLED">drive_key</string>
