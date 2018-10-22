@@ -6,7 +6,6 @@ import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +14,6 @@ import android.widget.ArrayAdapter
 import com.pervysage.thelimitbreaker.foco.actvities.MainActivity
 
 import com.pervysage.thelimitbreaker.foco.R
-import com.pervysage.thelimitbreaker.foco.broadcastReceivers.DriveModeRecogReceiver
 import com.pervysage.thelimitbreaker.foco.utils.DriveActivityRecogUtil
 import com.pervysage.thelimitbreaker.foco.utils.sendDriveModeNotification
 import kotlinx.android.synthetic.main.fragment_drive_mode.*
@@ -41,12 +39,14 @@ class DriveModeFragment : Fragment() {
 
         val sharedPrefs = context?.getSharedPreferences(context?.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
 
-        val contactGroup = sharedPrefs?.getString(activity!!.resources.getString(R.string.CONTACT_GROUP_KEY), "All Contacts")
+        val contactGroup = sharedPrefs?.getString(context?.resources?.getString(R.string.DM_ACTIVE_GROUP), "All Contacts")
 
         val groupAdapter = ArrayAdapter(context!!,
                 R.layout.layout_spinner_item,
                 arrayOf("All Contacts", "Priority Contacts", "None")
         )
+
+
         groupAdapter.setDropDownViewResource(R.layout.layout_spinner_dropdown_item)
         groupChooser.apply {
             adapter = groupAdapter
@@ -140,10 +140,12 @@ class DriveModeFragment : Fragment() {
 
                 sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), "").apply()
 
+
+
                 val am = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
                 val dmStatus = sharedPrefs.getBoolean(this.getString(R.string.DM_STATUS), false)
-                val serviceStatus = sharedPrefs.getBoolean(this.getString(R.string.SERVICE_STATUS), false)
+                val serviceStatus = sharedPrefs.getBoolean(this.getString(R.string.GEO_STATUS), false)
 
                 if (dmStatus && !serviceStatus) {
                     sendDriveModeNotification("Drive Mode Stopped", "Service Stopped", false, this)

@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
     <uses-permission
         android:name="android.permission.REBOOT"
@@ -28,8 +28,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/API_KEY" />
 
-        <activity android:name=".actvities.MainActivity">
-        </activity>
+        <activity android:name=".actvities.MainActivity"></activity>
         <activity android:name=".actvities.MyContactsActivity" />
         <activity android:name=".actvities.PickContactsActivity" />
 
@@ -47,7 +46,6 @@
             android:name=".broadcastReceivers.GeoBroadcastReceiver"
             android:enabled="true"
             android:exported="true" />
-
         <receiver
             android:name=".broadcastReceivers.DriveModeRecogReceiver"
             android:enabled="true"
@@ -67,7 +65,8 @@
             android:exported="false" />
 
         <activity android:name=".actvities.PermissionsActivity" />
-        <activity android:name=".actvities.SplashActivity"
+        <activity
+            android:name=".actvities.SplashActivity"
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -75,6 +74,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".actvities.SettingsActivity"></activity>
     </application>
 
 </manifest>

@@ -70,19 +70,21 @@ class GeoActionsIntentService : JobIntentService() {
     private fun toggleService(doStart: Boolean,placePrefs:PlacePrefs?){
         val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val sharedPref = baseContext.getSharedPreferences(getString(R.string.SHARED_PREF_KEY),Context.MODE_PRIVATE)
+        val dmStatus = sharedPref.getBoolean(baseContext.getString(R.string.DM_STATUS),false)
+        val ringerVolume = sharedPref.getInt(baseContext.getString(R.string.RINGER_VOLUME),90)
         if (doStart){
             am.ringerMode=AudioManager.RINGER_MODE_SILENT
             am.setStreamVolume(AudioManager.STREAM_RING,0,AudioManager.FLAG_PLAY_SOUND)
-            val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*0.90).toInt()
-            am.setStreamVolume(AudioManager.STREAM_MUSIC,maxVolume,AudioManager.FLAG_PLAY_SOUND)
-        }else{
+            val setVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*0.01*ringerVolume
+            am.setStreamVolume(AudioManager.STREAM_MUSIC,setVolume.toInt(),AudioManager.FLAG_PLAY_SOUND)
+        }else if (!dmStatus){
             am.ringerMode=AudioManager.RINGER_MODE_NORMAL
-            val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_RING)*0.90).toInt()
-            am.setStreamVolume(AudioManager.STREAM_RING,maxVolume,AudioManager.FLAG_PLAY_SOUND)
+            val setVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*0.01*ringerVolume
+            am.setStreamVolume(AudioManager.STREAM_RING,setVolume.toInt(),AudioManager.FLAG_PLAY_SOUND)
         }
 
         with(sharedPref.edit()){
-            putBoolean(getString(R.string.SERVICE_STATUS),doStart)
+            putBoolean(getString(R.string.GEO_STATUS),doStart)
             putString(getString(R.string.ACTIVE_NAME),placePrefs?.name?:"")
             putString(getString(R.string.ACTIVE_CONTACT_GROUP),placePrefs?.contactGroup?:"")
             putString(getString(R.string.LAT),placePrefs?.latitude?.toString()?:"")

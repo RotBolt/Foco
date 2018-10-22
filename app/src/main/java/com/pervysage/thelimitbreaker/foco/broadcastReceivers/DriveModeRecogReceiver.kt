@@ -10,7 +10,6 @@ import com.google.android.gms.location.ActivityTransitionResult
 import com.google.android.gms.location.DetectedActivity
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.utils.sendDriveModeNotification
-import com.pervysage.thelimitbreaker.foco.utils.sendGeofenceNotification
 
 class DriveModeRecogReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -35,9 +34,10 @@ class DriveModeRecogReceiver : BroadcastReceiver() {
                                     true
                             )?.apply()
 
+                            val ringerVolume = sharedPrefs?.getInt(context.getString(R.string.RINGER_VOLUME),90)?:90
                             am.setStreamVolume(AudioManager.STREAM_RING, 0, AudioManager.FLAG_PLAY_SOUND)
-                            val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_MUSIC) * 0.90).toInt()
-                            am.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, AudioManager.FLAG_PLAY_SOUND)
+                            val setVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*0.01*ringerVolume
+                            am.setStreamVolume(AudioManager.STREAM_MUSIC, setVolume.toInt(), AudioManager.FLAG_PLAY_SOUND)
 
                             val notifyMsg = "DriveMode Started"
                             val contentText="Blocking Unwanted Calls"
@@ -48,11 +48,12 @@ class DriveModeRecogReceiver : BroadcastReceiver() {
                                     false
                             )?.apply()
 
-                            val serviceStatus = sharedPrefs?.getBoolean(context.getString(R.string.SERVICE_STATUS),false)?:false
+                            val serviceStatus = sharedPrefs?.getBoolean(context.getString(R.string.GEO_STATUS),false)?:false
                             if (!serviceStatus) {
                                 am.ringerMode = AudioManager.RINGER_MODE_NORMAL
-                                val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_RING) * 0.90).toInt()
-                                am.setStreamVolume(AudioManager.STREAM_RING, maxVolume, AudioManager.FLAG_PLAY_SOUND)
+                                val ringerVolume = sharedPrefs?.getInt(context.getString(R.string.RINGER_VOLUME),90)?:90
+                                val setVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*0.01*ringerVolume
+                                am.setStreamVolume(AudioManager.STREAM_RING, setVolume.toInt(), AudioManager.FLAG_PLAY_SOUND)
                             }
 
                             val notifyMsg = "DriveMode Stopped"
