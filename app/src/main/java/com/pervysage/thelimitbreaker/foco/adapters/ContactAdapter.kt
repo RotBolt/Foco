@@ -16,7 +16,7 @@ import com.pervysage.thelimitbreaker.foco.actvities.PickContactsActivity
 import java.util.*
 
 
-class ContactAdapter(private val list: List<PickContactsActivity.ContactInfo>, private val context: Context)
+class ContactAdapter(private val list: List<PickContactsActivity.ContactModel>, private val context: Context)
     : RecyclerView.Adapter<ContactAdapter.ViewHolder>() ,SectionTitleProvider{
     override fun getSectionTitle(position: Int): String {
         return list[position].name.substring(0,1)
@@ -27,9 +27,9 @@ class ContactAdapter(private val list: List<PickContactsActivity.ContactInfo>, p
         return ViewHolder(li.inflate(R.layout.layout_contacts, p0, false), context, onContactCheck)
     }
 
-    private lateinit var onContactCheck:(PickContactsActivity.ContactInfo)->Unit
+    private lateinit var onContactCheck:(PickContactsActivity.ContactModel)->Unit
 
-    fun setOnContactCheckListener(l:(PickContactsActivity.ContactInfo)->Unit){
+    fun setOnContactCheckListener(l:(PickContactsActivity.ContactModel)->Unit){
         onContactCheck=l
     }
 
@@ -39,7 +39,7 @@ class ContactAdapter(private val list: List<PickContactsActivity.ContactInfo>, p
         p0.bind(list[p1])
     }
 
-    class ViewHolder(itemView: View, private val context: Context, private val onContactCheck:(PickContactsActivity.ContactInfo)->Unit) : RecyclerView.ViewHolder(itemView) {
+    class ViewHolder(itemView: View, private val context: Context, private val onContactCheck:(PickContactsActivity.ContactModel)->Unit) : RecyclerView.ViewHolder(itemView) {
         private val tvPersonName = itemView.findViewById<TextView>(R.id.tvPersonName)
         private val ivChecked = itemView.findViewById<ImageView>(R.id.ivChecked)
         private val tvInitial = itemView.findViewById<TextView>(R.id.tvInitial)
@@ -70,7 +70,7 @@ class ContactAdapter(private val list: List<PickContactsActivity.ContactInfo>, p
             return arrayOf(color,colorTrans)
         }
 
-        fun bind(info: PickContactsActivity.ContactInfo) {
+        fun bind(info: PickContactsActivity.ContactModel) {
             tvPersonName.text = info.name
             tvInitial.text= info.name[0].toUpperCase().toString()
 

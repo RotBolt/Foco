@@ -44,19 +44,24 @@ class ContactSyncIntentService : IntentService("ContactSyncIntentService") {
                     hashMap[number] = name
                 }
             }
+
+            val listUpdate = ArrayList<ContactInfo>()
+            val listDelete = ArrayList<ContactInfo>()
             for (contact in contacts) {
 
                 if (hashMap.containsKey(contact.number)) {
                     val mapContactName = hashMap[contact.number]
                     mapContactName?.run {
                         if (contact.name != mapContactName) {
-                            repository.updateContact(ContactInfo(this, contact.number))
+                            listUpdate.add(ContactInfo(this, contact.number))
                         }
                     }
                 } else {
-                    repository.deleteContact(contact)
+                    listDelete.add(contact)
                 }
             }
+            repository.updateContact(*listUpdate.toTypedArray())
+            repository.deleteContact(*listDelete.toTypedArray())
         }
     }
 
