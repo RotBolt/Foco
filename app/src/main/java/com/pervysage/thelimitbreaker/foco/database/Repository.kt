@@ -32,7 +32,7 @@ class Repository private constructor(application: Application) {
         exceptionDialog=exDialog
     }
 
-    fun getPlacePref(lat:Double,lng:Double):PlacePrefs{
+    fun getPlacePref(lat:Double,lng:Double):PlacePrefs?{
         return placePrefsDao.getPlacePref(lat, lng)
     }
 

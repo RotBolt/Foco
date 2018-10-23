@@ -2,9 +2,11 @@ package com.pervysage.thelimitbreaker.foco.actvities
 
 import android.content.Context
 import android.media.AudioManager
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.SeekBar
 import com.pervysage.thelimitbreaker.foco.R
 import kotlinx.android.synthetic.main.activity_settings.*
@@ -33,10 +35,16 @@ class SettingsActivity : AppCompatActivity() {
             sharedPrefs.edit().putBoolean(getString(R.string.SMS_TO_CALLER), isChecked).apply()
         }
 
-        val flipToEnd = sharedPrefs.getBoolean(getString(R.string.FLIP_TO_END_STATUS),true)
-        switchFlipToEnd.isChecked=flipToEnd
-        switchFlipToEnd.setOnCheckedChangeListener { _, isChecked ->
-            sharedPrefs.edit().putBoolean(getString(R.string.FLIP_TO_END_STATUS),isChecked).apply()
+        if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.O_MR1) {
+            val flipToEnd = sharedPrefs.getBoolean(getString(R.string.FLIP_TO_END_STATUS), true)
+            switchFlipToEnd.isChecked = flipToEnd
+            switchFlipToEnd.setOnCheckedChangeListener { _, isChecked ->
+                sharedPrefs.edit().putBoolean(getString(R.string.FLIP_TO_END_STATUS), isChecked).apply()
+            }
+        }else{
+            flipToEndContainer.visibility= View.GONE
+            shakeToMuteContainer.visibility=View.GONE
+            sharedPrefs.edit().putBoolean(getString(R.string.FLIP_TO_END_STATUS),false).apply()
         }
 
         var volumeLevel = sharedPrefs.getInt(getString(R.string.RINGER_VOLUME), 90)

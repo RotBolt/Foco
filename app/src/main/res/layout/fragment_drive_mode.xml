@@ -18,29 +18,37 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/tvContactGroupLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
-        android:layout_marginTop="24dp"
-        android:fontFamily="@font/maven_pro_medium"
-        android:text="Contact Group :"
-        android:textColor="@color/colorTextDark"
-        android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ivDriveMode" />
+    <LinearLayout
+        android:id="@+id/contactGroupContainer"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        app:layout_constraintTop_toBottomOf="@id/ivDriveMode"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:gravity="center_horizontal"
+        android:layout_height="wrap_content">
 
-    <Spinner
-        android:id="@+id/groupChooser"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="48dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/tvContactGroupLabel"
-        app:layout_constraintTop_toBottomOf="@id/ivDriveMode"></Spinner>
+        <TextView
+            android:id="@+id/tvContactGroupLabel"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/maven_pro_medium"
+            android:gravity="center_horizontal"
+            android:text="Contact Group"
+            android:textColor="@color/colorTextDark"
+            android:textSize="16sp" />
+
+        <Spinner
+            android:id="@+id/groupChooser"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="wrap_content">
+        </Spinner>
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tvInfoBox"
@@ -58,7 +66,7 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvContactGroupLabel" />
+        app:layout_constraintTop_toBottomOf="@+id/contactGroupContainer" />
 
 
 </android.support.constraint.ConstraintLayout>
