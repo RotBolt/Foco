@@ -1,17 +1,20 @@
 package com.pervysage.thelimitbreaker.foco.actvities
 
-import android.app.Activity
+import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.View
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.adapters.MyContactsAdapter
 import com.pervysage.thelimitbreaker.foco.database.Repository
+import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import com.pervysage.thelimitbreaker.foco.dialogs.ContactInfoDialog
 import com.pervysage.thelimitbreaker.foco.services.ContactSyncIntentService
 import kotlinx.android.synthetic.main.activity_my_contacts.*
+import kotlin.collections.ArrayList
 
 class MyContactsActivity : AppCompatActivity() {
 
@@ -42,32 +45,47 @@ class MyContactsActivity : AppCompatActivity() {
 
         repository = Repository.getInstance(application)
 
-
-        val contacts = repository.getAllContacts()
-        areContactEmpty=contacts.isEmpty()
-        toggleViews()
-        contactAdapter = MyContactsAdapter(contacts,this)
-        contactAdapter.setOnContactClickListener { name, numbers, colors ->
-            val dialog = ContactInfoDialog()
-            dialog.setParams(name, numbers, colors)
-            dialog.setOnContactDeleteListener {
-                for (contact in contacts) {
-                    if (name == contact.name) {
-                        repository.deleteContact(contact)
-                        val list = repository.getAllContacts()
-                        contactAdapter.updateList(list)
-                    }
-                }
-                dialog.dismiss()
-            }
-            dialog.show(supportFragmentManager, "ContactInfoDialog")
-        }
+        contactAdapter = MyContactsAdapter(ArrayList(),this)
 
         rvMyContacts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         rvMyContacts.adapter = contactAdapter
 
+        val contactsLive = repository.getAllContactsLive()
+        contactsLive.observe(this, Observer<List<ContactInfo>> {
+            it?.run {
+                 val sortedList=sortedBy {
+                    it.name
+                }
+                Log.d("PUI","list changes $it")
+                areContactEmpty=this.isEmpty()
+                toggleViews()
+                contactAdapter.updateList(sortedList)
+            }
+        })
+
+        contactAdapter.setOnContactClickListener { name, numbers, colors ->
+
+            val dialog = ContactInfoDialog()
+            dialog.setParams(name, numbers, colors)
+            dialog.setOnContactDeleteListener {
+                contactsLive.value?.run {
+                    val list = ArrayList<ContactInfo>()
+                    for (contact in this) {
+                        if (name == contact.name) {
+                            list.add(contact)
+                        }
+                    }
+                    repository.deleteContact(*list.toTypedArray())
+                    dialog.dismiss()
+                }
+
+            }
+            dialog.show(supportFragmentManager, "ContactInfoDialog")
+        }
+
+
         ivAddContact.setOnClickListener {
-            startActivityForResult(Intent(this@MyContactsActivity, PickContactsActivity::class.java),PICK_CONTACTS_REQUEST)
+            startActivity(Intent(this@MyContactsActivity, PickContactsActivity::class.java))
         }
 
         ivBack.setOnClickListener {
@@ -78,17 +96,5 @@ class MyContactsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         startService(Intent(this, ContactSyncIntentService::class.java))
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode==PICK_CONTACTS_REQUEST){
-            if (resultCode== Activity.RESULT_OK){
-                val list = repository.getAllContacts()
-                areContactEmpty=list.isEmpty()
-                toggleViews()
-                contactAdapter.updateList(list)
-            }
-        }
     }
 }

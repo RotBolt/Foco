@@ -5,24 +5,26 @@ import android.os.Bundle
 import android.provider.ContactsContract
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.adapters.ContactAdapter
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import kotlinx.android.synthetic.main.activity_pick_contacts.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 class PickContactsActivity : AppCompatActivity() {
 
     private var count = 0
 
-    data class ContactInfo(
+    data class ContactModel(
             val name: String,
             val lookUpKey: String,
             var isChecked: Boolean
     )
 
-    private val marked = ArrayList<ContactInfo>()
+    private val marked = ArrayList<ContactModel>()
 
     private lateinit var repository: Repository
 
@@ -61,6 +63,7 @@ class PickContactsActivity : AppCompatActivity() {
                     ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER
             )
             val selection = "${ContactsContract.Contacts.LOOKUP_KEY} = ? AND ${ContactsContract.Data.MIMETYPE} = ?"
+            Log.d("PickContactActivity","size ${marked.size}")
             for (obj in marked) {
                 val cursor = contentResolver.query(
                         ContactsContract.Data.CONTENT_URI,
@@ -69,14 +72,15 @@ class PickContactsActivity : AppCompatActivity() {
                         arrayOf(obj.lookUpKey, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE),
                         null
                 )
+                Log.d("PickContact","cursor size : ${cursor.count}")
                 cursor?.run {
+                    val list = ArrayList<ContactInfo>()
                     while (cursor.moveToNext()) {
                         val number = getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER))
-
                         val info = ContactInfo(obj.name, number)
-                        repository.insertContact(info)
-
+                        list.add(info)
                     }
+                    repository.insertContact(*list.toTypedArray())
                 }
             }
 
@@ -85,8 +89,8 @@ class PickContactsActivity : AppCompatActivity() {
         }
     }
 
-    private fun getAllContacts(): List<ContactInfo> {
-        val contactList = ArrayList<ContactInfo>()
+    private fun getAllContacts(): List<ContactModel> {
+        val contactList = ArrayList<ContactModel>()
         val contactMap = HashMap<String, String>()
         val oldMap = getOrderedContactMap()
 
@@ -112,7 +116,7 @@ class PickContactsActivity : AppCompatActivity() {
             }
         }
         contactMap.mapTo(contactList) {
-            ContactInfo(it.key, it.value, false)
+            ContactModel(it.key, it.value, false)
         }
         contactList.sortWith(Comparator { o1, o2 ->
             o1.name.compareTo(o2.name)

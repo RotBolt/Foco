@@ -1,7 +1,6 @@
 package com.pervysage.thelimitbreaker.foco.database
 
 import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
 import android.arch.persistence.room.*
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 
@@ -10,16 +9,19 @@ import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 interface ContactsDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(contactInfo:ContactInfo)
+    fun insert(vararg contactInfo:ContactInfo)
 
     @Delete
-    fun delete(contactInfo:ContactInfo)
+    fun delete(vararg contactInfo:ContactInfo)
 
     @Query("SELECT * FROM contact_info ORDER BY name")
     fun getAllContacts(): List<ContactInfo>
 
+    @Query("SELECT * FROM contact_info ORDER BY name")
+    fun getAllContactsLive(): LiveData<List<ContactInfo>>
+
     @Update
-    fun update(contactInfo: ContactInfo)
+    fun update(vararg contactInfo: ContactInfo)
 
     @Query("SELECT * FROM contact_info WHERE number LIKE :number")
     fun getInfoFromNumber(number:String):ContactInfo?

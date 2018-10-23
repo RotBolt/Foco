@@ -65,19 +65,26 @@
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvMyContacts"
-        app:layout_constraintTop_toBottomOf="@id/titleBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </android.support.v7.widget.RecyclerView>
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleBar"></android.support.v7.widget.RecyclerView>
+
     <ImageView
         android:id="@+id/ivContactHeader"
-        app:layout_constraintTop_toBottomOf="@id/titleBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:padding="21dp"
         android:scaleX="0.85"
         android:scaleY="0.85"
         android:src="@drawable/ic_my_contacts"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleBar" />
 
     <TextView
         android:id="@+id/tvNoContacts"
