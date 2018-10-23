@@ -33,6 +33,12 @@ class SettingsActivity : AppCompatActivity() {
             sharedPrefs.edit().putBoolean(getString(R.string.SMS_TO_CALLER), isChecked).apply()
         }
 
+        val flipToEnd = sharedPrefs.getBoolean(getString(R.string.FLIP_TO_END_STATUS),true)
+        switchFlipToEnd.isChecked=flipToEnd
+        switchFlipToEnd.setOnCheckedChangeListener { _, isChecked ->
+            sharedPrefs.edit().putBoolean(getString(R.string.FLIP_TO_END_STATUS),isChecked).apply()
+        }
+
         var volumeLevel = sharedPrefs.getInt(getString(R.string.RINGER_VOLUME), 90)
 
         val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager

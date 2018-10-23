@@ -162,4 +162,93 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/flipToEndContainer"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/RingerContainer"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_weight="5"
+            android:padding="8dp"
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:fontFamily="@font/maven_pro_medium"
+                android:text="Flip to end call"
+                android:textSize="16sp"
+                android:padding="4dp"
+                android:textColor="@color/colorGenDark"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:fontFamily="@font/maven_pro"
+                android:padding="4dp"
+                android:text="Just flip the phone to hang up the phone"
+                android:textColor="@color/colorTextDisable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/switchFlipToEnd"
+            android:padding="8dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/shakeToMuteContainer"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/flipToEndContainer"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_weight="5"
+            android:padding="8dp"
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:fontFamily="@font/maven_pro_medium"
+                android:text="Shake to mute the caller name"
+                android:textSize="16sp"
+                android:padding="4dp"
+                android:textColor="@color/colorGenDark"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:fontFamily="@font/maven_pro"
+                android:padding="4dp"
+                android:text="@string/SHAKE_TO_MUTE_INFO"
+                android:textColor="@color/colorTextDisable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/switchShakeToMute"
+            android:padding="8dp"
+            android:enabled="false"
+            android:checked="true"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+
+
 </android.support.constraint.ConstraintLayout>

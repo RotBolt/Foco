@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,7 +25,7 @@ class DriveModeFragment : Fragment() {
     private var isFragEnabled = -1
     private lateinit var driveActivityRecogUtil: DriveActivityRecogUtil
 
-    private var dmActiveGroup = ""
+    private var dmActiveGroup = "All Contacts"
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -57,7 +58,7 @@ class DriveModeFragment : Fragment() {
                 }
 
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-
+                    Log.d("DRIVE_MODE_FRAG","item $position")
                     var group = "All Contacts"
                     when (position) {
                         0 -> {
@@ -116,6 +117,7 @@ class DriveModeFragment : Fragment() {
 
                 val sharedPrefs = this.getSharedPreferences(this.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
 
+                Log.d("DRIVE_MODE_FRAG","$dmActiveGroup")
                 sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), dmActiveGroup).apply()
 
                 ivDriveMode.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_scooter))
@@ -139,8 +141,6 @@ class DriveModeFragment : Fragment() {
                 val sharedPrefs = this.getSharedPreferences(this.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
 
                 sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), "").apply()
-
-
 
                 val am = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 

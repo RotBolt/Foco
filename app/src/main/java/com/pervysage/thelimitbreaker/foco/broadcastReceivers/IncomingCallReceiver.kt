@@ -112,16 +112,19 @@ class IncomingCallReceiver : BroadcastReceiver() {
             }
         }
 
-        private fun startMotionUtil(phoneNumber: String, smsToCallerStatus: Boolean) {
+        private fun startMotionUtil(phoneNumber: String, smsToCallerStatus: Boolean, flipToEnd: Boolean) {
 
             motionUtil.setAction {
 
-                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O)
-                    methodEndCall.invoke(iTelephony)
-                else
-                    teleCom.endCall()
-                if (smsToCallerStatus)
-                    sendSMS(phoneNumber)
+                if (flipToEnd) {
+                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O)
+                        methodEndCall.invoke(iTelephony)
+                    else
+                        teleCom.endCall()
+                    if (smsToCallerStatus)
+                        sendSMS(phoneNumber)
+                }
+
             }
             motionUtil.setShakeACtion {
                 if (tts.isSpeaking) tts.stop()
@@ -170,13 +173,13 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
             val allowCallerStatus = sharedPref.getBoolean(context.getString(R.string.ALLOW_CALLER_STATUS), true)
             val smsToCallerStatus = sharedPref.getBoolean(context.getString(R.string.SMS_TO_CALLER), false)
+            val flipToEnd = sharedPref.getBoolean(context.getString(R.string.FLIP_TO_END_STATUS), true)
 
             name = checkNumber(phoneNumber)
-
             // exist in contacts or not
             if (name.isEmpty()) {
                 if (allowCallerStatus && isUnder15Min(phoneNumber)) {
-                    startMotionUtil(phoneNumber, smsToCallerStatus)
+                    startMotionUtil(phoneNumber, smsToCallerStatus,flipToEnd)
                     toSay = "This might be important call"
                     speak()
                 } else {
@@ -189,11 +192,11 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 var activeContactGroup = if (!isDriveMode)
                     sharedPref.getString(context.getString(R.string.ACTIVE_CONTACT_GROUP), "")
                 else
-                    sharedPref.getString(context.getString(R.string.DM_ACTIVE_GROUP), "")
+                    sharedPref.getString(context.getString(R.string.DM_ACTIVE_GROUP), "All Contacts")
 
                 when (activeContactGroup) {
                     "All Contacts" -> {
-                        startMotionUtil(phoneNumber, smsToCallerStatus)
+                        startMotionUtil(phoneNumber, smsToCallerStatus,flipToEnd)
                         toSay = "Call from $name"
                         speak()
                     }
@@ -203,13 +206,13 @@ class IncomingCallReceiver : BroadcastReceiver() {
                         val contactInfo = repo.getInfoFromNumber(numberParam)
                         if (contactInfo != null) {
                             this@MyPhoneStateListener.name = name
-                            startMotionUtil(phoneNumber, smsToCallerStatus)
+                            startMotionUtil(phoneNumber, smsToCallerStatus,flipToEnd)
                             toSay = "Call from $name"
                             speak()
 
                         } else {
                             if (allowCallerStatus && isUnder15Min(phoneNumber)) {
-                                startMotionUtil(phoneNumber, smsToCallerStatus)
+                                startMotionUtil(phoneNumber, smsToCallerStatus,flipToEnd)
                                 toSay = "This might be important call. Call from $name"
                                 speak()
 
