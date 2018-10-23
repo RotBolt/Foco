@@ -34,10 +34,10 @@ class DeviceMotionUtil(context: Context) : SensorEventListener {
 
     private lateinit var action: () -> Unit
 
-    private lateinit var shakeAction:()->Unit
+    private lateinit var shakeAction: () -> Unit
 
-    fun setShakeACtion(l:()->Unit){
-        shakeAction=l
+    fun setShakeACtion(l: () -> Unit) {
+        shakeAction = l
     }
 
     fun setAction(a: () -> Unit) {
@@ -51,12 +51,6 @@ class DeviceMotionUtil(context: Context) : SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (event!!.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-            Log.d(TAG, """
-
-                x: ${event.values[0]}
-                y: ${event.values[1]}
-                z: ${event.values[2]}
-            """.trimIndent())
             if (event.values[2] > 5 && event.values[1] < 3 && event.values[1] > -3) {
                 initialFaceDown = false
             }
@@ -65,6 +59,7 @@ class DeviceMotionUtil(context: Context) : SensorEventListener {
                     Log.d(TAG, "isActionDone $isActionDone")
                     if (!isActionDone) {
                         isActionDone = true
+                        Thread.sleep(500)
                         action()
                     }
                 }
@@ -91,8 +86,7 @@ class DeviceMotionUtil(context: Context) : SensorEventListener {
     }
 
     fun startMotionListener() {
-        Log.d(TAG,"startMotionListener")
-
+        Log.d(TAG, "startMotionListener")
         sensorManager.registerListener(
                 this,
                 acceleroSensor,
@@ -101,9 +95,10 @@ class DeviceMotionUtil(context: Context) : SensorEventListener {
         )
 
     }
+
     fun stopMotionListener() {
-        Log.d(TAG,"stopMotionListener")
-        sensorManager.unregisterListener(this,acceleroSensor)
+        Log.d(TAG, "stopMotionListener")
+        sensorManager.unregisterListener(this, acceleroSensor)
     }
 
 

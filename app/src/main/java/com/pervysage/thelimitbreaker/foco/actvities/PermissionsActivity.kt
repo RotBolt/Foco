@@ -36,7 +36,8 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
                         android.Manifest.permission.READ_PHONE_STATE,
                         android.Manifest.permission.READ_CALL_LOG,
                         android.Manifest.permission.CALL_PHONE,
-                        android.Manifest.permission.SEND_SMS
+                        android.Manifest.permission.SEND_SMS,
+                        android.Manifest.permission.WAKE_LOCK
                 )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     permissions = arrayOf(
@@ -46,6 +47,7 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
                             android.Manifest.permission.READ_CALL_LOG,
                             android.Manifest.permission.CALL_PHONE,
                             android.Manifest.permission.SEND_SMS,
+                            android.Manifest.permission.WAKE_LOCK,
                             android.Manifest.permission.ANSWER_PHONE_CALLS
                     )
                 }

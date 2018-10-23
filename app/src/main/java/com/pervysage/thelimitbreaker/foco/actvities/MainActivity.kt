@@ -35,6 +35,8 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(intentBuilder.build(this), PLACE_PICK_REQUEST)
     }
 
+
+
     private var onDMStatusChanged: ((Boolean) -> Unit)? = null
     fun setOnDMStatusChangeListener(l: (Boolean) -> Unit) {
         onDMStatusChanged = l
@@ -55,6 +57,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val pagerAdapter = PagerAdapter(supportFragmentManager, tabLayout.tabCount)
+
 
         viewPager.apply {
             adapter = pagerAdapter

@@ -12,7 +12,8 @@
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SEND_SMS" />
-    <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS"/>
+    <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
     <uses-permission
         android:name="android.permission.REBOOT"
@@ -29,12 +30,15 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/API_KEY" />
 
-        <activity android:name=".actvities.MainActivity"
-            android:screenOrientation="portrait"></activity>
-        <activity android:name=".actvities.MyContactsActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".actvities.PickContactsActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".actvities.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".actvities.MyContactsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".actvities.PickContactsActivity"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".services.GeoActionsIntentService"
@@ -68,20 +72,23 @@
             android:name=".services.ContactSyncIntentService"
             android:exported="false" />
 
-        <activity android:name=".actvities.PermissionsActivity"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".actvities.PermissionsActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".actvities.SplashActivity"
             android:noHistory="true"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".actvities.SettingsActivity"
-            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".actvities.SettingsActivity"
+            android:screenOrientation="portrait" />
+
     </application>
 
 </manifest>
