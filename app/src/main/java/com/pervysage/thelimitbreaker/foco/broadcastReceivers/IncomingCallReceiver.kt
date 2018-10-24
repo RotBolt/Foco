@@ -27,9 +27,9 @@ class IncomingCallReceiver : BroadcastReceiver() {
     companion object {
         private var receivedOnce = false
         private lateinit var tm: TelephonyManager
-        private lateinit var phoneStateListener: MyPhoneStateListener
     }
 
+    private lateinit var phoneStateListener: MyPhoneStateListener
 
     override fun onReceive(context: Context, intent: Intent) {
         if (!receivedOnce) {
@@ -51,7 +51,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
     }
 
-    class MyPhoneStateListener(private val context: Context, tm: TelephonyManager, private val isDriveMode: Boolean) : PhoneStateListener() {
+    inner class MyPhoneStateListener(private val context: Context, tm: TelephonyManager, private val isDriveMode: Boolean) : PhoneStateListener() {
 
         private var method1: Method = tm.javaClass.getDeclaredMethod("getITelephony")
         private var iTelephony: Any
