@@ -7,7 +7,6 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
-import android.support.v7.view.menu.ActionMenuItemView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

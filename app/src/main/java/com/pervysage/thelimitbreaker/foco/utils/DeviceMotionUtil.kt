@@ -5,11 +5,8 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.util.Log
 
 class DeviceMotionUtil(context: Context) : SensorEventListener {
-
-    private val TAG = "DeviceMotionUtil"
 
     private var isActionDone = false
     private var initialFaceDown = true
@@ -56,7 +53,7 @@ class DeviceMotionUtil(context: Context) : SensorEventListener {
             }
             if (!initialFaceDown) {
                 if (event.values[2] < -8 && event.values[1] < 3 && event.values[1] > -3) {
-                    Log.d(TAG, "isActionDone $isActionDone")
+
                     if (!isActionDone) {
                         isActionDone = true
                         Thread.sleep(500)
@@ -86,7 +83,6 @@ class DeviceMotionUtil(context: Context) : SensorEventListener {
     }
 
     fun startMotionListener() {
-        Log.d(TAG, "startMotionListener")
         sensorManager.registerListener(
                 this,
                 acceleroSensor,
@@ -97,7 +93,6 @@ class DeviceMotionUtil(context: Context) : SensorEventListener {
     }
 
     fun stopMotionListener() {
-        Log.d(TAG, "stopMotionListener")
         sensorManager.unregisterListener(this, acceleroSensor)
     }
 

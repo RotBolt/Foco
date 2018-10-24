@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.provider.ContactsContract
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.widget.Toast
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.adapters.ContactAdapter
@@ -64,7 +63,6 @@ class PickContactsActivity : AppCompatActivity() {
                     ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER
             )
             val selection = "${ContactsContract.Contacts.LOOKUP_KEY} = ? AND ${ContactsContract.Data.MIMETYPE} = ?"
-            Log.d("PickContactActivity","size ${marked.size}")
             for (obj in marked) {
                 val cursor = contentResolver.query(
                         ContactsContract.Data.CONTENT_URI,
@@ -73,7 +71,6 @@ class PickContactsActivity : AppCompatActivity() {
                         arrayOf(obj.lookUpKey, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE),
                         null
                 )
-                Log.d("PickContact","cursor size : ${cursor.count}")
                 cursor?.run {
                     if (cursor.count>0) {
                         val list = ArrayList<ContactInfo>()

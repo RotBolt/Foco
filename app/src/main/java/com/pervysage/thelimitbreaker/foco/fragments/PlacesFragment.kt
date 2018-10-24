@@ -15,7 +15,6 @@ import kotlinx.android.synthetic.main.fragment_places.*
 class PlacesFragment : Fragment() {
 
     private lateinit var repository: Repository
-    private var isNew = false
     private var isPlaceListEmpty = false
 
 

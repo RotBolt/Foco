@@ -5,6 +5,7 @@ import android.content.Intent
 import android.media.AudioManager
 import android.support.v4.app.JobIntentService
 import android.util.Log
+import com.crashlytics.android.Crashlytics
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
 import com.google.android.gms.location.GeofencingEvent
@@ -16,8 +17,6 @@ import com.pervysage.thelimitbreaker.foco.utils.sendGeofenceNotification
 
 class GeoActionsIntentService : JobIntentService() {
 
-    private val TAG = "GeoActions"
-
     companion object {
         private val JOB_ID = 2505
 
@@ -28,20 +27,20 @@ class GeoActionsIntentService : JobIntentService() {
 
 
     override fun onHandleWork(intent: Intent) {
-        Log.d(TAG, "intent came ")
         val geofenceEvent = GeofencingEvent.fromIntent(intent)
         if (geofenceEvent.hasError()) {
-            Log.d(TAG, "Error")
+
             val errorCode = geofenceEvent.errorCode
             when (errorCode) {
                 GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE -> {
-                    Log.e(TAG, "Geofence Not available")
+                    Crashlytics.log("Geoactions : Geofence Not available")
                 }
                 GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES -> {
-                    Log.e(TAG, "Too Many Geofences")
+                    Crashlytics.log("Geoactions : Too many geofences")
+
                 }
                 GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS -> {
-                    Log.e(TAG, "Geofence too many pending intents")
+                    Crashlytics.log("Geoactions: Too many pending intents ")
                 }
             }
             return

@@ -4,30 +4,22 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.content.IntentSender
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.TabLayout
-import android.util.Log
+import android.support.v7.app.AppCompatActivity
 import android.view.ContextThemeWrapper
-import com.google.android.gms.location.places.ui.PlacePicker
-import com.pervysage.thelimitbreaker.foco.adapters.PagerAdapter
-import kotlinx.android.synthetic.main.activity_main.*
 import android.view.View
 import android.widget.PopupMenu
 import com.crashlytics.android.Crashlytics
-import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.LocationSettingsRequest
-import com.google.android.gms.location.LocationSettingsResponse
-import com.google.android.gms.location.SettingsClient
-import com.google.android.gms.tasks.Task
+import com.google.android.gms.location.places.ui.PlacePicker
 import com.pervysage.thelimitbreaker.foco.R
-import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
+import com.pervysage.thelimitbreaker.foco.adapters.PagerAdapter
 import com.pervysage.thelimitbreaker.foco.database.Repository
+import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.entities.generateGeoKey
 import com.pervysage.thelimitbreaker.foco.dialogs.EditPlaceNameDialog
 import io.fabric.sdk.android.Fabric
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -36,8 +28,6 @@ class MainActivity : AppCompatActivity() {
     private val PLACE_PICK_REQUEST = 1
 
     private lateinit var repository: Repository
-
-    private val TAG = "MainActivity"
 
     private val pickPlace = {
         val intentBuilder = PlacePicker.IntentBuilder()
@@ -97,7 +87,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         ivOptions.setOnClickListener { _ ->
-            Log.d(TAG, "Pop Up")
             val popup = PopupMenu(this, ivOptions)
             val menuInflater = popup.menuInflater
             menuInflater.inflate(R.menu.menu, popup.menu)

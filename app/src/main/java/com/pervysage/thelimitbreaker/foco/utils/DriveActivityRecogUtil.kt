@@ -3,7 +3,8 @@ package com.pervysage.thelimitbreaker.foco.utils
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.util.Log
+import android.widget.Toast
+import com.crashlytics.android.Crashlytics
 import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionRequest
@@ -46,11 +47,11 @@ class DriveActivityRecogUtil(private val context:Context){
 
         val task=activityRecogClient.requestActivityTransitionUpdates(activityTransitRequest,pendingIntent)
         task.addOnSuccessListener {
-            Log.i("DriveModeActivity","Successfully Added")
+           Toast.makeText(context,"Drive Mode Activated",Toast.LENGTH_SHORT).show()
         }
         task.addOnFailureListener {
-            Log.i("DriveModeActivity","Successfully Failed adding")
-
+            Crashlytics.log("DriveActivity Recog $it")
+            Toast.makeText(context,"Oops, something went wrong. Please try again",Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -64,11 +65,11 @@ class DriveActivityRecogUtil(private val context:Context){
         val task = activityRecogClient.removeActivityTransitionUpdates(pendingIntent)
 
         task.addOnSuccessListener {
-            Log.i("DriveModeActivity","Successfully Removed")
+            Toast.makeText(context,"Drive Mode Deactivated",Toast.LENGTH_SHORT).show()
         }
         task.addOnFailureListener {
-            Log.i("DriveModeActivity","Successfully Failed removing")
-
+            Crashlytics.log("DriveActivity Recog $it")
+            Toast.makeText(context,"Oops, something went wrong. Please try again",Toast.LENGTH_SHORT).show()
         }
     }
 }

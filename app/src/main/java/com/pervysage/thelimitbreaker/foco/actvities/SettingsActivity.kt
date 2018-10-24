@@ -3,9 +3,8 @@ package com.pervysage.thelimitbreaker.foco.actvities
 import android.content.Context
 import android.media.AudioManager
 import android.os.Build
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.SeekBar
 import com.pervysage.thelimitbreaker.foco.R
@@ -64,7 +63,6 @@ class SettingsActivity : AppCompatActivity() {
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                Log.d("PUI","volume $volumeLevel")
                 sharedPrefs.edit().putInt(getString(R.string.RINGER_VOLUME), volumeLevel).apply()
                 val setVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*0.01*volumeLevel
                 am.setStreamVolume(AudioManager.STREAM_MUSIC,setVolume.toInt(),AudioManager.FLAG_PLAY_SOUND)

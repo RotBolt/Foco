@@ -4,7 +4,8 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.util.Log
+import android.widget.Toast
+import com.crashlytics.android.Crashlytics
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
@@ -14,8 +15,6 @@ import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 
 class GeoWorkerUtil(private val context: Context){
     private val geofenceClient = LocationServices.getGeofencingClient(context)
-
-    private val TAG="GeoWorkerUtil"
 
     @SuppressLint("MissingPermission")
     fun addPlaceForMonitoring(placePrefs: PlacePrefs){
@@ -28,11 +27,9 @@ class GeoWorkerUtil(private val context: Context){
         }.build()
 
         geofenceClient.addGeofences(getGeofenceRequest(thisGeofence),getPendingIntent(placePrefs.geoKey))
-                .addOnSuccessListener {
-                    Log.d(TAG,"Geofence Added")
-                }
                 .addOnFailureListener {
-                    Log.d(TAG,"Geofence Add Failed $it")
+                    Crashlytics.log("GeoWorkerUtil $it")
+                    Toast.makeText(context,"Oops, something went wrong. Please try again", Toast.LENGTH_SHORT).show()
                 }
 
     }
@@ -40,11 +37,9 @@ class GeoWorkerUtil(private val context: Context){
     fun removePlaceFromMonitoring(placePrefs: PlacePrefs):Task<Void>{
         val requestID=placePrefs.geoKey
         return geofenceClient.removeGeofences(getPendingIntent(requestID))
-                .addOnSuccessListener {
-                    Log.d(TAG,"Removed Successfully")
-                }
                 .addOnFailureListener {
-                    Log.d(TAG,"Successfully Failed $it")
+                    Crashlytics.log("GeoWorkerUtil $it")
+                    Toast.makeText(context,"Oops, something went wrong. Please try again", Toast.LENGTH_SHORT).show()
                 }
 
     }
@@ -55,7 +50,8 @@ class GeoWorkerUtil(private val context: Context){
                     addPlaceForMonitoring(placePrefs)
                 }
                 .addOnFailureListener {
-                    Log.d(TAG,"Successfully Failed during Updating $it")
+                    Crashlytics.log("GeoWorkerUtil $it")
+                    Toast.makeText(context,"Oops, something went wrong. Please try again", Toast.LENGTH_SHORT).show()
                 }
     }
 

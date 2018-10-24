@@ -2,10 +2,7 @@ package com.pervysage.thelimitbreaker.foco.broadcastReceivers
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.app.job.JobInfo
-import android.app.job.JobScheduler
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.media.AudioFocusRequest
@@ -15,19 +12,16 @@ import android.provider.CallLog
 import android.provider.ContactsContract
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
-import android.telecom.TelecomManager
 import android.telephony.PhoneStateListener
 import android.telephony.SmsManager
 import android.telephony.TelephonyManager
-import android.util.Log
-import com.pervysage.thelimitbreaker.foco.utils.DeviceMotionUtil
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.Repository
+import com.pervysage.thelimitbreaker.foco.utils.DeviceMotionUtil
 import java.lang.reflect.Method
 import java.util.*
 
 class IncomingCallReceiver : BroadcastReceiver() {
-    private val TAG = "IncomingCallReceiver"
 
     companion object {
         private var receivedOnce = false
@@ -37,8 +31,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d(TAG, "onReceive")
-        Log.d(TAG, "receivedonce $receivedOnce")
         if (!receivedOnce) {
             receivedOnce = true
             val sharedPref = context.getSharedPreferences(
@@ -49,7 +41,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
             val dmStatus = sharedPref.getBoolean(context.getString(R.string.DM_STATUS), false)
             tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
             phoneStateListener = MyPhoneStateListener(context, tm, dmStatus)
-            val serviceStatus = sharedPref.getBoolean(context.getString(R.string.GEO_STATUS), false)
             tm.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
 
         }
@@ -57,11 +48,10 @@ class IncomingCallReceiver : BroadcastReceiver() {
     }
 
     class MyPhoneStateListener(private val context: Context, tm: TelephonyManager, private val isDriveMode: Boolean) : PhoneStateListener() {
-        private val TAG = "PhoneStateListener"
+
         private var method1: Method = tm.javaClass.getDeclaredMethod("getITelephony")
         private var iTelephony: Any
         private var methodEndCall: Method
-        //        private var silenceRinger: Method
         private var am: AudioManager
         private var focusRequest: AudioFocusRequest? = null
 
@@ -70,8 +60,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
             method1.isAccessible = true
             iTelephony = method1.invoke(tm)
             methodEndCall = iTelephony.javaClass.getDeclaredMethod("endCall")
-//            if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.O)
-//            silenceRinger = iTelephony.javaClass.getDeclaredMethod("silenceRinger")
+//
             am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -92,7 +81,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
         override fun onCallStateChanged(state: Int, phoneNumber: String?) {
             if (state == TelephonyManager.CALL_STATE_RINGING) {
-                Log.d(TAG, "incoming call $phoneNumber")
                 phoneNumber?.run {
                     handleIncomingCall(this)
                 }
@@ -202,7 +190,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
             // exist in contacts or not
             if (name.isEmpty()) {
                 if (allowCallerStatus && isUnder15Min(phoneNumber)) {
-                    Log.d(TAG, "motionUtil from Unknown")
                     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
                         startMotionUtil(phoneNumber, smsToCallerStatus, flipToEnd)
                     toSay = "This might be important call"
@@ -261,9 +248,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     "None" -> {
                         methodEndCall.invoke(iTelephony)
                     }
-                    else -> {
-                        Log.e(TAG, "No Contact group set")
-                    }
                 }
             }
         }
@@ -273,7 +257,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
             if (phoneNumber.contains("+91"))
                 number = phoneNumber.substring(3)
 
-            Log.d(TAG, "checking ${phoneNumber.substring(3)}")
             val cursor = context.contentResolver.query(
                     ContactsContract.Data.CONTENT_URI,
                     arrayOf(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER),
@@ -309,15 +292,12 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     CallLog.Calls.DEFAULT_SORT_ORDER
             )
 
-            Log.d(TAG, "call count ${cursor?.count}")
-
 
             cursor?.run {
                 if (count > 0) {
                     val currentTime = System.currentTimeMillis()
                     while (moveToNext()) {
                         val time = getLong(getColumnIndexOrThrow(CallLog.Calls.DATE))
-                        Log.d(TAG, "$currentTime - $time = ${currentTime - time} | ${15 * 60 * 1000}")
                         if (currentTime - time <= (15 * 60 * 1000)) return true
                     }
                 }

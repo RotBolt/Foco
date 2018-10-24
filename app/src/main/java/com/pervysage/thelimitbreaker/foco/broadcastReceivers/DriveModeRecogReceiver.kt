@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
-import android.util.Log
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionResult
 import com.google.android.gms.location.DetectedActivity
@@ -14,7 +13,7 @@ import com.pervysage.thelimitbreaker.foco.utils.sendDriveModeNotification
 class DriveModeRecogReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
 
-        Log.d("DriveModeReceiver","intent came")
+
         if (ActivityTransitionResult.hasResult(intent)) {
             val result = ActivityTransitionResult.extractResult(intent)
             if (result != null) {

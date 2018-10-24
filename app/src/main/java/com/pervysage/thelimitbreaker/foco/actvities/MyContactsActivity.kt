@@ -20,8 +20,6 @@ class MyContactsActivity : AppCompatActivity() {
 
     private var areContactEmpty = true
 
-    private var PICK_CONTACTS_REQUEST=2801
-
     private lateinit var contactAdapter:MyContactsAdapter
 
     private fun toggleViews() {
@@ -56,7 +54,7 @@ class MyContactsActivity : AppCompatActivity() {
                  val sortedList=sortedBy {
                     it.name
                 }
-                Log.d("PUI","list changes $it")
+
                 areContactEmpty=this.isEmpty()
                 toggleViews()
                 contactAdapter.updateList(sortedList)

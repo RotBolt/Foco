@@ -6,15 +6,13 @@ import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import com.pervysage.thelimitbreaker.foco.actvities.MainActivity
-
 import com.pervysage.thelimitbreaker.foco.R
+import com.pervysage.thelimitbreaker.foco.actvities.MainActivity
 import com.pervysage.thelimitbreaker.foco.utils.DriveActivityRecogUtil
 import com.pervysage.thelimitbreaker.foco.utils.sendDriveModeNotification
 import kotlinx.android.synthetic.main.fragment_drive_mode.*
@@ -58,7 +56,6 @@ class DriveModeFragment : Fragment() {
                 }
 
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    Log.d("DRIVE_MODE_FRAG","item $position")
                     var group = "All Contacts"
                     when (position) {
                         0 -> {
@@ -117,7 +114,6 @@ class DriveModeFragment : Fragment() {
 
                 val sharedPrefs = this.getSharedPreferences(this.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
 
-                Log.d("DRIVE_MODE_FRAG","$dmActiveGroup")
                 sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), dmActiveGroup).apply()
 
                 ivDriveMode.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_scooter))

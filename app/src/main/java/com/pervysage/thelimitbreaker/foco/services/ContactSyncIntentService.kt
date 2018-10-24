@@ -11,15 +11,12 @@ import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 
 class ContactSyncIntentService : IntentService("ContactSyncIntentService") {
 
-    private val TAG = "ContactSync"
-
     override fun onHandleIntent(intent: Intent?) {
 
         val repository = Repository.getInstance((baseContext.applicationContext) as Application)
         val contacts = repository.getAllContacts()
 
         if (contacts.isNotEmpty()) {
-            Log.d(TAG, "contacts ${contacts.size}")
             val selectionArgs = ArrayList<String>()
             for (contact in contacts) {
                 selectionArgs.add(contact.number)

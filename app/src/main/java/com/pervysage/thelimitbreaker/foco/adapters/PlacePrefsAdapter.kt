@@ -27,7 +27,6 @@ import com.pervysage.thelimitbreaker.foco.utils.sendGeofenceNotification
 
 class PlacePrefsAdapter(private val context: Context, private var placePrefList: List<PlacePrefs>, private val listView: MyListView) : BaseAdapter() {
 
-    private val TAG = "PrefsAdapter"
     private val viewManager = ViewManager(listView)
     private val geoWorkerUtil = GeoWorkerUtil(context)
     private val repository = Repository.getInstance(context.applicationContext as Application)
