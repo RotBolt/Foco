@@ -40,9 +40,12 @@ class IncomingCallReceiver : BroadcastReceiver() {
             )
 
             val dmStatus = sharedPref.getBoolean(context.getString(R.string.DM_STATUS), false)
-            tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            phoneStateListener = MyPhoneStateListener(context, tm, dmStatus)
-            tm.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
+            val serviceStatus = sharedPref.getBoolean(context.getString(R.string.GEO_STATUS),false)
+            if (serviceStatus || dmStatus) {
+                tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+                phoneStateListener = MyPhoneStateListener(context, tm, dmStatus)
+                tm.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
+            }
 
         }
 
@@ -113,13 +116,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
         }
 
-        private fun removeAudioFocus() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                am.abandonAudioFocusRequest(focusRequest)
-            } else {
-                am.abandonAudioFocus(null)
-            }
-        }
 
         private fun startMotionUtil(phoneNumber: String, smsToCallerStatus: Boolean, flipToEnd: Boolean) {
 
