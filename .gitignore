@@ -10,3 +10,4 @@
 /captures
 .externalNativeBuild
 /app/src/main/res/values/api.xml
+/app/google-services.json

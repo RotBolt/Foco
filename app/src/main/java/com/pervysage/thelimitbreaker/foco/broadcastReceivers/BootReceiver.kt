@@ -27,8 +27,9 @@ class BootReceiver : BroadcastReceiver() {
         }
 
         val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
-       val isDriveModeEnabled= sharedPrefs?.getInt(context.resources.getString(R.string.DRIVE_MODE_ENABLED), -1) ?: 0
-        if (isDriveModeEnabled==1){
+        val isDriveModeEnabled = sharedPrefs?.getInt(context.resources.getString(R.string.DRIVE_MODE_ENABLED), -1)
+                ?: 0
+        if (isDriveModeEnabled == 1) {
             DriveActivityRecogUtil(context).startDriveModeRecog()
         }
     }
