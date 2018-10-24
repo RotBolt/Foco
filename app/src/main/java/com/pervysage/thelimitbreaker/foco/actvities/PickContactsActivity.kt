@@ -6,6 +6,7 @@ import android.provider.ContactsContract
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
+import android.widget.Toast
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.adapters.ContactAdapter
 import com.pervysage.thelimitbreaker.foco.database.Repository
@@ -74,13 +75,17 @@ class PickContactsActivity : AppCompatActivity() {
                 )
                 Log.d("PickContact","cursor size : ${cursor.count}")
                 cursor?.run {
-                    val list = ArrayList<ContactInfo>()
-                    while (cursor.moveToNext()) {
-                        val number = getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER))
-                        val info = ContactInfo(obj.name, number)
-                        list.add(info)
+                    if (cursor.count>0) {
+                        val list = ArrayList<ContactInfo>()
+                        while (cursor.moveToNext()) {
+                            val number = getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER))
+                            val info = ContactInfo(obj.name, number)
+                            list.add(info)
+                        }
+                        repository.insertContact(*list.toTypedArray())
+                    }else{
+                        Toast.makeText(this@PickContactsActivity,"No Number found for ${obj.name}",Toast.LENGTH_SHORT).show()
                     }
-                    repository.insertContact(*list.toTypedArray())
                 }
             }
 

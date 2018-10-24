@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.IntentSender
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.TabLayout
@@ -14,11 +15,19 @@ import com.pervysage.thelimitbreaker.foco.adapters.PagerAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 import android.view.View
 import android.widget.PopupMenu
+import com.crashlytics.android.Crashlytics
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.LocationSettingsResponse
+import com.google.android.gms.location.SettingsClient
+import com.google.android.gms.tasks.Task
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.database.entities.generateGeoKey
 import com.pervysage.thelimitbreaker.foco.dialogs.EditPlaceNameDialog
+import io.fabric.sdk.android.Fabric
 
 
 class MainActivity : AppCompatActivity() {
@@ -34,7 +43,6 @@ class MainActivity : AppCompatActivity() {
         val intentBuilder = PlacePicker.IntentBuilder()
         startActivityForResult(intentBuilder.build(this), PLACE_PICK_REQUEST)
     }
-
 
 
     private var onDMStatusChanged: ((Boolean) -> Unit)? = null
@@ -55,6 +63,11 @@ class MainActivity : AppCompatActivity() {
             addTab(newTab().setIcon(R.drawable.ic_place))
             addTab(newTab().setIcon(R.drawable.ic_motorcycle))
         }
+
+        Fabric.with(Fabric.Builder(this)
+                .kits(Crashlytics())
+                .debuggable(true)  // Enables Crashlytics debugger
+                .build())
 
         val pagerAdapter = PagerAdapter(supportFragmentManager, tabLayout.tabCount)
 
@@ -84,21 +97,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         ivOptions.setOnClickListener { _ ->
-            Log.d(TAG,"Pop Up")
-            val popup = PopupMenu(this,ivOptions)
+            Log.d(TAG, "Pop Up")
+            val popup = PopupMenu(this, ivOptions)
             val menuInflater = popup.menuInflater
-            menuInflater.inflate(R.menu.menu,popup.menu)
+            menuInflater.inflate(R.menu.menu, popup.menu)
             popup.setOnMenuItemClickListener {
-                when(it?.itemId){
-                    R.id.action_settings->{
+                when (it?.itemId) {
+                    R.id.action_settings -> {
                         startActivity(Intent(this@MainActivity, SettingsActivity::class.java))
                         true
                     }
-                    R.id.action_priority->{
+                    R.id.action_priority -> {
                         startActivity(Intent(this@MainActivity, MyContactsActivity::class.java))
                         true
                     }
-                    else->{
+                    else -> {
                         false
                     }
 
@@ -151,7 +164,7 @@ class MainActivity : AppCompatActivity() {
 
             repository = Repository.getInstance(application)
 
-            val contextThemeWrapper = ContextThemeWrapper(this,R.style.DialogStyle)
+            val contextThemeWrapper = ContextThemeWrapper(this, R.style.DialogStyle)
             val builder = AlertDialog.Builder(contextThemeWrapper)
                     .setTitle("Same Place Exists")
                     .setMessage("Same place address already exists." +

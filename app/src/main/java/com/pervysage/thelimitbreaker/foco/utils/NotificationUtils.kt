@@ -10,7 +10,6 @@ import android.os.Build
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.TaskStackBuilder
 import android.support.v4.content.ContextCompat
-import com.google.android.gms.location.DetectedActivity
 import com.google.android.gms.location.Geofence
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.actvities.MainActivity
@@ -64,7 +63,7 @@ fun sendGeofenceNotification(notifyMsg: String, transitionType: Int, context: Co
     when (transitionType) {
         Geofence.GEOFENCE_TRANSITION_ENTER -> builder.setOngoing(true)
                 .setContentTitle(notifyMsg)
-                .setContentText("At your service")
+                .setContentText("foco at your service")
         Geofence.GEOFENCE_TRANSITION_EXIT -> builder.setAutoCancel(true)
                 .setContentTitle(notifyMsg)
                 .setContentText("Service finished for now")
@@ -78,7 +77,7 @@ fun sendGeofenceNotification(notifyMsg: String, transitionType: Int, context: Co
 }
 
 
-fun sendDriveModeNotification(notifyMsg: String, contenttext: String,hasEntered:Boolean, context: Context) {
+fun sendDriveModeNotification(notifyMsg: String, contentText: String, hasEntered:Boolean, context: Context) {
 
     val mNotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -125,7 +124,7 @@ fun sendDriveModeNotification(notifyMsg: String, contenttext: String,hasEntered:
     }
 
     builder.setContentTitle(notifyMsg)
-            .setContentText(contenttext)
+            .setContentText(contentText)
     if (hasEntered)
         builder.setOngoing(true)
     else

@@ -4,6 +4,8 @@ import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.LiveData
 import android.os.AsyncTask
+import com.crashlytics.android.Crashlytics
+import com.crashlytics.android.core.CrashlyticsCore
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import java.util.concurrent.Callable
