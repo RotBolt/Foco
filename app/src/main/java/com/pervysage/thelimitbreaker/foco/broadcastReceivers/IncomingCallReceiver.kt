@@ -12,6 +12,7 @@ import android.provider.CallLog
 import android.provider.ContactsContract
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.telecom.TelecomManager
 import android.telephony.PhoneStateListener
 import android.telephony.SmsManager
 import android.telephony.TelephonyManager
@@ -54,6 +55,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
         private var methodEndCall: Method
         private var am: AudioManager
         private var focusRequest: AudioFocusRequest? = null
+        private var teleCom: TelecomManager
 
 
         init {
@@ -66,6 +68,8 @@ class IncomingCallReceiver : BroadcastReceiver() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK).build()
             }
+
+            teleCom = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
         }
 
         private var tts: TextToSpeech = TextToSpeech(context.applicationContext, TextToSpeech.OnInitListener {
@@ -197,6 +201,8 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 } else {
                     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
                         methodEndCall.invoke(iTelephony)
+                    else
+                        teleCom.endCall()
 
                     if (smsToCallerStatus)
                         sendSMS(phoneNumber)
@@ -238,7 +244,8 @@ class IncomingCallReceiver : BroadcastReceiver() {
                             } else {
                                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
                                     methodEndCall.invoke(iTelephony)
-
+                                else
+                                    teleCom.endCall()
                                 if (smsToCallerStatus)
                                     sendSMS(phoneNumber)
                             }
@@ -246,7 +253,10 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
                     }
                     "None" -> {
-                        methodEndCall.invoke(iTelephony)
+                        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
+                            methodEndCall.invoke(iTelephony)
+                        else
+                            teleCom.endCall()
                     }
                 }
             }

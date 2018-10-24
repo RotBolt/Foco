@@ -91,13 +91,13 @@ class DriveModeFragment : Fragment() {
                 ivDriveMode.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_scooter))
             }
         } else {
-            applyState(false)
+            applyState(false, true)
 
         }
 
         activity?.run {
             if (this is MainActivity) {
-                setOnDMStatusChangeListener { applyState(it) }
+                setOnDMStatusChangeListener { applyState(it, false) }
             }
         }
 
@@ -105,7 +105,7 @@ class DriveModeFragment : Fragment() {
     }
 
 
-    private fun applyState(state: Boolean) {
+    private fun applyState(state: Boolean, justInit: Boolean) {
 
         if (state) {
             isFragEnabled = 1
@@ -123,14 +123,16 @@ class DriveModeFragment : Fragment() {
                 tvInfoBox.setTextColor(ContextCompat.getColor(this, R.color.colorTextDark))
             }
 
-            driveActivityRecogUtil.startDriveModeRecog()
+            if (!justInit)
+                driveActivityRecogUtil.startDriveModeRecog()
 
             groupChooser.isEnabled = true
 
         } else {
             isFragEnabled = 0
 
-            driveActivityRecogUtil.stopDriveModeRecog()
+            if (!justInit)
+                driveActivityRecogUtil.stopDriveModeRecog()
 
             context?.run {
 
