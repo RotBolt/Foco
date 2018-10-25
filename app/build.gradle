@@ -30,7 +30,7 @@ android {
     }
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.example.thelimitbreaker.foco"
+        applicationId "com.pervysage.thelimitbreaker.foco"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
