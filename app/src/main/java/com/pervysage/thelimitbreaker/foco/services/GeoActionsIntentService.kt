@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
 import android.support.v4.app.JobIntentService
-import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
@@ -53,10 +52,15 @@ class GeoActionsIntentService : JobIntentService() {
                 val (latStr, lngStr) = geoID.split(",")
                 val lat = latStr.toDouble()
                 val lng = lngStr.toDouble()
-                val placePrefs = repo.getPlacePref(lat, lng)
-                val notifyMsg = "Entered : ${placePrefs?.name?:"Work Place"} "
-                toggleService(true,placePrefs)
-                sendGeofenceNotification(notifyMsg, Geofence.GEOFENCE_TRANSITION_ENTER, baseContext)
+                try {
+                    val placePrefs = repo.getPlacePref(lat, lng)
+                    val notifyMsg = "Entered : ${placePrefs.name}"
+                    toggleService(true,placePrefs)
+                    sendGeofenceNotification(notifyMsg, Geofence.GEOFENCE_TRANSITION_ENTER, baseContext)
+                }catch (e:Exception){
+                    Crashlytics.logException(e)
+                }
+
                 break
             }
         }else if(geofenceEvent.geofenceTransition==Geofence.GEOFENCE_TRANSITION_EXIT){
@@ -73,12 +77,10 @@ class GeoActionsIntentService : JobIntentService() {
         val dmStatus = sharedPref.getBoolean(baseContext.getString(R.string.DM_STATUS),false)
         val ringerVolume = sharedPref.getInt(baseContext.getString(R.string.RINGER_VOLUME),90)
         if (doStart){
-            am.ringerMode=AudioManager.RINGER_MODE_SILENT
             am.setStreamVolume(AudioManager.STREAM_RING,0,AudioManager.FLAG_PLAY_SOUND)
             val setVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*0.01*ringerVolume
             am.setStreamVolume(AudioManager.STREAM_MUSIC,setVolume.toInt(),AudioManager.FLAG_PLAY_SOUND)
         }else if (!dmStatus){
-            am.ringerMode=AudioManager.RINGER_MODE_NORMAL
             val setVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*0.01*ringerVolume
             am.setStreamVolume(AudioManager.STREAM_RING,setVolume.toInt(),AudioManager.FLAG_PLAY_SOUND)
         }
@@ -89,7 +91,7 @@ class GeoActionsIntentService : JobIntentService() {
             putString(getString(R.string.ACTIVE_CONTACT_GROUP),placePrefs?.contactGroup?:"")
             putString(getString(R.string.LAT),placePrefs?.latitude?.toString()?:"")
             putString(getString(R.string.LNG),placePrefs?.longitude?.toString()?:"")
-        }.apply()
+        }.commit()
     }
 
 

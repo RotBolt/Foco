@@ -73,7 +73,7 @@ class DriveModeFragment : Fragment() {
                         }
                     }
                     dmActiveGroup = group
-                    sharedPrefs?.edit()?.putString(context.getString(R.string.DM_ACTIVE_GROUP), group)?.apply()
+                    sharedPrefs?.edit()?.putString(context.getString(R.string.DM_ACTIVE_GROUP), group)?.commit()
                 }
             }
 
@@ -114,7 +114,7 @@ class DriveModeFragment : Fragment() {
 
                 val sharedPrefs = this.getSharedPreferences(this.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
 
-                sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), dmActiveGroup).apply()
+                sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), dmActiveGroup).commit()
 
                 ivDriveMode.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_scooter))
 
@@ -138,15 +138,18 @@ class DriveModeFragment : Fragment() {
 
                 val sharedPrefs = this.getSharedPreferences(this.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
 
-                sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), "").apply()
+                sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), "").commit()
 
                 val am = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
                 val dmStatus = sharedPrefs.getBoolean(this.getString(R.string.DM_STATUS), false)
-                val serviceStatus = sharedPrefs.getBoolean(this.getString(R.string.GEO_STATUS), false)
+                val geoStatus = sharedPrefs.getBoolean(this.getString(R.string.GEO_STATUS), false)
 
-                if (dmStatus && !serviceStatus) {
+                if (dmStatus) {
                     sendDriveModeNotification("Drive Mode Stopped", "Service Stopped", false, this)
+                    sharedPrefs.edit().putBoolean(getString(R.string.DM_STATUS),false).commit()
+                }
+                if (dmStatus && !geoStatus) {
                     am.ringerMode = AudioManager.RINGER_MODE_NORMAL
                     val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_RING) * 0.90).toInt()
                     am.setStreamVolume(AudioManager.STREAM_RING, maxVolume, AudioManager.FLAG_PLAY_SOUND)

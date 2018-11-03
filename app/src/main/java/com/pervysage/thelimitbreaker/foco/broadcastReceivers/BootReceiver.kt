@@ -1,9 +1,12 @@
 package com.pervysage.thelimitbreaker.foco.broadcastReceivers
 
+import android.app.AlertDialog
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.location.LocationManager
+import android.provider.Settings
 import android.util.Log
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.Repository
@@ -14,12 +17,12 @@ class BootReceiver : BroadcastReceiver() {
 
 
     override fun onReceive(context: Context, intent: Intent) {
+        Log.d("myBootReceiver","onReceive")
         val repo = Repository.getInstance((context.applicationContext) as Application)
         val placePrefs = repo.getAllPlacePrefs()
         val geoWorker = GeoWorkerUtil(context)
         for (pref in placePrefs) {
-            if (pref.active == 1)
-                geoWorker.addPlaceForMonitoring(pref)
+            if (pref.active == 1) geoWorker.addPlaceForMonitoring(pref)
         }
 
         val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)

@@ -8,6 +8,8 @@ import android.content.Intent
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
+import android.os.Bundle
+import android.os.Handler
 import android.provider.CallLog
 import android.provider.ContactsContract
 import android.speech.tts.TextToSpeech
@@ -16,11 +18,13 @@ import android.telecom.TelecomManager
 import android.telephony.PhoneStateListener
 import android.telephony.SmsManager
 import android.telephony.TelephonyManager
+import android.util.Log
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.utils.DeviceMotionUtil
 import java.lang.reflect.Method
 import java.util.*
+import kotlin.collections.HashMap
 
 class IncomingCallReceiver : BroadcastReceiver() {
 
@@ -40,7 +44,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
             )
 
             val dmStatus = sharedPref.getBoolean(context.getString(R.string.DM_STATUS), false)
-            val serviceStatus = sharedPref.getBoolean(context.getString(R.string.GEO_STATUS),false)
+            val serviceStatus = sharedPref.getBoolean(context.getString(R.string.GEO_STATUS), false)
             if (serviceStatus || dmStatus) {
                 tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
                 phoneStateListener = MyPhoneStateListener(context, tm, dmStatus)
@@ -59,7 +63,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
         private var am: AudioManager
         private var focusRequest: AudioFocusRequest? = null
         private var teleCom: TelecomManager
-
 
         init {
             method1.isAccessible = true
@@ -99,7 +102,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 tts.stop()
                 tts.shutdown()
                 tts.setOnUtteranceProgressListener(null)
-
             }
 
         }
@@ -118,20 +120,16 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
 
         private fun startMotionUtil(phoneNumber: String, smsToCallerStatus: Boolean, flipToEnd: Boolean) {
-
             motionUtil.setAction {
-
                 if (flipToEnd) {
-                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
-                        methodEndCall.invoke(iTelephony)
+                    methodEndCall.invoke(iTelephony)
 
                     if (smsToCallerStatus) {
                         sendSMS(phoneNumber)
                     }
                 }
-
             }
-            motionUtil.setShakeACtion {
+            motionUtil.setShakeAction {
                 if (tts.isSpeaking) tts.stop()
             }
             motionUtil.startMotionListener()
@@ -139,10 +137,12 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
         private fun speak() {
             gainAudioFocus()
+            am.setStreamVolume(AudioManager.STREAM_MUSIC,am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),AudioManager.FLAG_VIBRATE)
             tts.apply {
-                language = Locale.ENGLISH
+                language = Locale("hin", "IN")
+
                 setSpeechRate(0.70f)
-                speak(toSay, TextToSpeech.QUEUE_FLUSH, null, "Pui")
+                speak(toSay, TextToSpeech.QUEUE_ADD,null,"pui")
                 setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onError(utteranceId: String?) {
                         // TODO Not Implemented
@@ -153,7 +153,14 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     }
 
                     override fun onDone(utteranceId: String?) {
-                        tts.speak(toSay, TextToSpeech.QUEUE_FLUSH, null, "Pui")
+
+                        val sec = System.currentTimeMillis()
+                        while (System.currentTimeMillis() - sec <= 1500) {
+                        }
+                        am.setStreamVolume(AudioManager.STREAM_MUSIC,am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),AudioManager.FLAG_VIBRATE)
+                        tts.speak(toSay, TextToSpeech.QUEUE_ADD, null,"pui")
+
+
                     }
                 })
             }
@@ -205,7 +212,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 }
             } else {
                 // check contact group
-                var activeContactGroup = if (!isDriveMode)
+                val activeContactGroup = if (!isDriveMode)
                     sharedPref.getString(context.getString(R.string.ACTIVE_CONTACT_GROUP), "All Contacts")
                 else
                     sharedPref.getString(context.getString(R.string.DM_ACTIVE_GROUP), "All Contacts")

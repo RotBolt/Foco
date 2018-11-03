@@ -5,6 +5,7 @@ import android.app.Application
 import android.arch.lifecycle.LiveData
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
+import java.lang.Exception
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
@@ -36,8 +37,9 @@ class Repository private constructor(application: Application) {
         exceptionDialog = exDialog
     }
 
-    fun getPlacePref(lat: Double, lng: Double): PlacePrefs? {
-        return placePrefsDao.getPlacePref(lat, lng)
+    fun getPlacePref(lat: Double, lng: Double): PlacePrefs {
+
+        return placePrefsDao.getPlacePref(lat, lng) ?: throw Exception("Place Doesn't Exist")
     }
 
     fun getAllContacts(): List<ContactInfo> {

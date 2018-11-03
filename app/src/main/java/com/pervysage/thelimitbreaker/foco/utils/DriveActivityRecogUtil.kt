@@ -50,7 +50,7 @@ class DriveActivityRecogUtil(private val context:Context){
            Toast.makeText(context,"Drive Mode Activated",Toast.LENGTH_SHORT).show()
         }
         task.addOnFailureListener {
-            Crashlytics.log("DriveActivity Recog $it")
+            Crashlytics.logException(it)
             Toast.makeText(context,"Oops, something went wrong. Please try again",Toast.LENGTH_SHORT).show()
         }
     }
@@ -68,7 +68,7 @@ class DriveActivityRecogUtil(private val context:Context){
             Toast.makeText(context,"Drive Mode Deactivated",Toast.LENGTH_SHORT).show()
         }
         task.addOnFailureListener {
-            Crashlytics.log("DriveActivity Recog $it")
+            Crashlytics.logException(it)
             Toast.makeText(context,"Oops, something went wrong. Please try again",Toast.LENGTH_SHORT).show()
         }
     }

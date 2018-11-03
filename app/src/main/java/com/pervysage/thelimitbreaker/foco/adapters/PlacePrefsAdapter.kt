@@ -1,19 +1,25 @@
 package com.pervysage.thelimitbreaker.foco.adapters
 
+import android.app.AlertDialog
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.location.LocationManager
 import android.media.AudioManager
 import android.support.v4.app.FragmentActivity
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.SwitchCompat
+import android.util.Log
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.crashlytics.android.Crashlytics
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
@@ -31,9 +37,13 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
     private val geoWorkerUtil = GeoWorkerUtil(context)
     private val repository = Repository.getInstance(context.applicationContext as Application)
 
+    private val locationService = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
     private var lastExpandPos = -1
 
     private var lastExpandName = ""
+
+    private var toExecuteGeo = true
 
     private lateinit var onListEmpty: (Boolean) -> Unit
 
@@ -75,6 +85,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
 
     fun refreshList(list: List<PlacePrefs>, newAdded: Boolean) {
         placePrefList = list
+
         notifyDataSetChanged()
         if (placePrefList.isEmpty()) {
             onListEmpty(true)
@@ -83,7 +94,17 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
             placePrefList[placePrefList.size - 1].isExpanded = true
             listView.setSelection(placePrefList.size - 1)
             geoWorkerUtil.addPlaceForMonitoring(placePrefs = placePrefList[placePrefList.size - 1])
+                    .addOnFailureListener {
+                        placePrefList[placePrefList.size - 1].active = 0
+
+                        Toast.makeText(context, "Oops !! GPS lost, Please check location settings", Toast.LENGTH_LONG).show()
+                        repository.updatePref(placePrefList[placePrefList.size - 1].copy(isExpanded = false, active = 0))
+                    }
+                    .addOnSuccessListener {
+                        Toast.makeText(context, "Service turned on for ${placePrefList[placePrefList.size - 1].name}", Toast.LENGTH_SHORT).show()
+                    }
         }
+
     }
 
     private fun revertPrefsForActivePlace(placePref: PlacePrefs) {
@@ -114,6 +135,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
     private fun manageView(itemView: View?, placePrefs: PlacePrefs, position: Int) {
 
         itemView?.run {
+
             if (placePrefs.isExpanded)
                 doWorkInExpand(this, placePrefs, position)
             else
@@ -128,7 +150,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
 
                 } else {
                     var viewToCollapse: View? = null
-                    var prevPrefs = if (lastExpandPos != -1) placePrefList[lastExpandPos] else null
+                    val prevPrefs = if (lastExpandPos != -1) placePrefList[lastExpandPos] else null
 
                     /*
                      Checking whether previous expanded card is currently on screen or not
@@ -185,37 +207,15 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
         }
         bodyHolder.extraContent.visibility = View.VISIBLE
 
+
+
+
         headHolder.bindData(placePrefs, position)
         bodyHolder.bindData(placePrefs)
 
-        headHolder.setOnNameChangeListener(
-                placePref = placePrefs,
-                fm = (context as FragmentActivity).supportFragmentManager,
-                onNameChange = {
-                    val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
-                    val lat = sharedPrefs.getString(context.getString(R.string.LAT), "")
-                    val lng = sharedPrefs.getString(context.getString(R.string.LNG), "")
-                    if (lat == placePrefs.latitude.toString() && lng == placePrefs.longitude.toString()) {
-                        sharedPrefs.edit().putString(context.getString(R.string.ACTIVE_NAME), placePrefs.name).commit()
-                    }
-                }
-        )
+        setPrefsListeners(headHolder,placePrefs,true)
 
-        headHolder.setOnSwitchChangeListener(
-                placePref = placePrefs,
-                onSwitchChange = { isOn, placePrefs ->
-                    placePrefs.active = if (isOn) 1 else 0
-                    headHolder.showEnabled(isOn, true, context)
-                    if (isOn)
-                        geoWorkerUtil.addPlaceForMonitoring(placePrefs)
-                    else {
-                        geoWorkerUtil.removePlaceFromMonitoring(placePrefs)
-                        revertPrefsForActivePlace(placePrefs)
-                    }
-                    val prefsTBU = placePrefs.copy(isExpanded = false)
-                    repository.updatePref(prefsTBU)
-                }
-        )
+        (context as FragmentActivity)
 
         bodyHolder.setOnContactGroupPickListener(placePrefs, context.supportFragmentManager) {
             placePrefs.contactGroup = it
@@ -264,17 +264,26 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
             viewDivider.visibility = View.VISIBLE
             showEnabled(placePrefs.active == 1, false, context)
         }
+
         placePrefs.isExpanded = false
         bodyHolder.extraContent.visibility = View.GONE
         headHolder.bindData(placePrefs, position)
 
+        setPrefsListeners(headHolder,placePrefs,false)
+    }
+
+    private fun setPrefsListeners(headHolder: HeadHolder, placePrefs: PlacePrefs, isExpanding: Boolean) {
+
+        (context as FragmentActivity)
+
         headHolder.setOnNameChangeListener(
                 placePref = placePrefs,
-                fm = (context as FragmentActivity).supportFragmentManager,
+                fm = context.supportFragmentManager,
                 onNameChange = {
                     val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
                     val lat = sharedPrefs.getString(context.getString(R.string.LAT), "")
                     val lng = sharedPrefs.getString(context.getString(R.string.LNG), "")
+                    repository.updatePref(placePrefs.copy(name = placePrefs.name))
                     if (lat == placePrefs.latitude.toString() && lng == placePrefs.longitude.toString()) {
                         sharedPrefs.edit().putString(context.getString(R.string.ACTIVE_NAME), placePrefs.name).commit()
                     }
@@ -285,19 +294,56 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
                 placePref = placePrefs,
                 onSwitchChange = { isOn, placePrefs ->
 
-                    placePrefs.active = if (isOn) 1 else 0
-                    headHolder.showEnabled(isOn, false, context)
-                    if (isOn)
+                    if (isOn && toExecuteGeo) {
                         geoWorkerUtil.addPlaceForMonitoring(placePrefs)
-                    else {
+                                .addOnSuccessListener {
+                                    Toast.makeText(context, "Service turned on for ${placePrefs.name}", Toast.LENGTH_SHORT).show()
+                                    placePrefs.active = 1
+                                    if (!isExpanding)
+                                        headHolder.showEnabled(true, false, context)
+                                    repository.updatePref(placePrefs.copy(isExpanded = false))
+                                }.addOnFailureListener {
+                                    Crashlytics.logException(it)
+                                    showFailDialog(context)
+                                    toExecuteGeo = false
+                                    headHolder.serviceSwitch.isChecked = false
+                                }
+
+                    } else if (toExecuteGeo) {
                         geoWorkerUtil.removePlaceFromMonitoring(placePrefs)
-                        revertPrefsForActivePlace(placePrefs)
+                                .addOnSuccessListener {
+                                    Toast.makeText(context, "Service turned off for ${placePrefs.name}", Toast.LENGTH_SHORT).show()
+                                    placePrefs.active = 0
+                                    if (!isExpanding)
+                                        headHolder.showEnabled(false, false, context)
+                                    revertPrefsForActivePlace(placePrefs)
+                                    repository.updatePref(placePrefs.copy(active = 0, isExpanded = false))
+                                }
+                                .addOnFailureListener {
+                                    Crashlytics.logException(it)
+                                    showFailDialog(context)
+                                    toExecuteGeo = false
+                                    headHolder.serviceSwitch.isChecked = false
+                                }
                     }
-                    val prefsTBU = placePrefs.copy(isExpanded = false)
-                    repository.updatePref(prefsTBU)
+                    toExecuteGeo = true
                 }
         )
+    }
 
+    private fun showFailDialog(context: Context) {
+        val contextThemeWrapper = ContextThemeWrapper(context, R.style.DialogStyle)
+        val builder = AlertDialog.Builder(contextThemeWrapper)
+                .setTitle("Oops")
+                .setMessage("Please Turn on location ")
+                .setPositiveButton("Turn On") { dialog, _ ->
+                    dialog.dismiss()
+                    context.startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+        builder.create().show()
     }
 
     private class HeadHolder(itemView: View) {
@@ -388,10 +434,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
                 }
                 dialog.show(fm, "EditPlaceName")
             }
-
         }
-
-
     }
 
     private class BodyHolder(itemView: View) {
