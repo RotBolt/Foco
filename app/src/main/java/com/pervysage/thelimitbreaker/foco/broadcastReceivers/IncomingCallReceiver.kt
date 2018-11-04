@@ -8,8 +8,10 @@ import android.content.Intent
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
+import android.os.Bundle
 import android.provider.CallLog
 import android.provider.ContactsContract
+import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.telecom.TelecomManager
@@ -28,7 +30,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
     companion object {
         private var receivedOnce = false
         private lateinit var tm: TelephonyManager
-        private var volumeLevel=65
+        private var volumeLevel = 65
     }
 
     private lateinit var phoneStateListener: MyPhoneStateListener
@@ -101,14 +103,19 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 tts.stop()
                 tts.shutdown()
                 tts.setOnUtteranceProgressListener(null)
-                val sec = System.currentTimeMillis()
-                while (System.currentTimeMillis() - sec <= 1500) {
+                makeWait()
+                while (am.getStreamVolume(AudioManager.STREAM_MUSIC) != volumeLevel){
+                    makeWait(150)
+                    am.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_VIBRATE)
                 }
-                am.setStreamVolume(AudioManager.STREAM_MUSIC,volumeLevel,AudioManager.FLAG_VIBRATE)
-
-
             }
 
+        }
+
+        private fun makeWait(time:Long=1500){
+            val sec = System.currentTimeMillis()
+            while (System.currentTimeMillis() - sec <= time) {
+            }
         }
 
         private fun gainAudioFocus() {
@@ -139,12 +146,15 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
         private fun speak() {
             gainAudioFocus()
-            am.setStreamVolume(AudioManager.STREAM_MUSIC,am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),AudioManager.FLAG_VIBRATE)
+            while (am.getStreamVolume(AudioManager.STREAM_MUSIC) != am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)) {
+                makeWait(150)
+                am.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, AudioManager.FLAG_VIBRATE)
+            }
             tts.apply {
                 language = Locale("hin", "IN")
 
                 setSpeechRate(0.70f)
-                speak(toSay, TextToSpeech.QUEUE_ADD,null,"pui")
+                speak(toSay, TextToSpeech.QUEUE_ADD, null, "pui")
                 setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onError(utteranceId: String?) {
                         // TODO Not Implemented
@@ -155,12 +165,9 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     }
 
                     override fun onDone(utteranceId: String?) {
-
-                        val sec = System.currentTimeMillis()
-                        while (System.currentTimeMillis() - sec <= 1500) {
-                        }
-                        am.setStreamVolume(AudioManager.STREAM_MUSIC,am.getStreamMaxVolume(AudioManager.STREAM_MUSIC),AudioManager.FLAG_VIBRATE)
-                        tts.speak(toSay, TextToSpeech.QUEUE_ADD, null,"pui")
+                        makeWait()
+                        am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), AudioManager.FLAG_VIBRATE)
+                        tts.speak(toSay, TextToSpeech.QUEUE_ADD, null, "pui")
 
 
                     }
@@ -196,7 +203,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
             val flipToEnd = sharedPref.getBoolean(context.getString(R.string.FLIP_TO_END_STATUS), true)
 
 
-            volumeLevel=am.getStreamVolume(AudioManager.STREAM_MUSIC)
+            volumeLevel = am.getStreamVolume(AudioManager.STREAM_MUSIC)
 
             name = checkNumber(phoneNumber)
             // exist in contacts or not
