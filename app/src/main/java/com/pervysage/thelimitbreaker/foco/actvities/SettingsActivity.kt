@@ -45,31 +45,5 @@ class SettingsActivity : AppCompatActivity() {
             shakeToMuteContainer.visibility=View.GONE
             sharedPrefs.edit().putBoolean(getString(R.string.FLIP_TO_END_STATUS),false).apply()
         }
-
-        var volumeLevel = sharedPrefs.getInt(getString(R.string.RINGER_VOLUME), 90)
-
-        val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
-
-        ringerVolumeController.progress = volumeLevel
-
-        ringerVolumeController.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                volumeLevel = progress
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                sharedPrefs.edit().putInt(getString(R.string.RINGER_VOLUME), volumeLevel).apply()
-                val setVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*0.01*volumeLevel
-                am.setStreamVolume(AudioManager.STREAM_MUSIC,setVolume.toInt(),AudioManager.FLAG_PLAY_SOUND)
-            }
-
-        })
-
-
     }
 }

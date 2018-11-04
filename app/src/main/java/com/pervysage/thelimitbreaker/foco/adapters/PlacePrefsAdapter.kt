@@ -13,7 +13,6 @@ import android.support.v4.app.FragmentManager
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.SwitchCompat
-import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
@@ -110,8 +109,8 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
     private fun revertPrefsForActivePlace(placePref: PlacePrefs) {
 
         val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
-        val lat = sharedPrefs.getString(context.getString(R.string.LAT), "")
-        val lng = sharedPrefs.getString(context.getString(R.string.LNG), "")
+        val lat = sharedPrefs.getString(context.getString(R.string.ACTIVE_LAT), "")
+        val lng = sharedPrefs.getString(context.getString(R.string.ACTIVE_LNG), "")
 
         if (lat == placePref.latitude.toString() && lng == placePref.longitude.toString()) {
             val notificationManagerCompat = NotificationManagerCompat.from(context)
@@ -126,8 +125,8 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
                 putString(context.getString(R.string.ACTIVE_NAME), "")
                 putString(context.getString(R.string.ACTIVE_CONTACT_GROUP), "")
                 putBoolean(context.getString(R.string.GEO_STATUS), false)
-                putString(context.getString(R.string.LAT), "")
-                putString(context.getString(R.string.LNG), "")
+                putString(context.getString(R.string.ACTIVE_LAT), "")
+                putString(context.getString(R.string.ACTIVE_LNG), "")
             }.apply()
         }
     }
@@ -223,8 +222,8 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
             val prefsTBU = placePrefs.copy(isExpanded = false)
 
             val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
-            val lat = sharedPrefs.getString(context.getString(R.string.LAT), "")
-            val lng = sharedPrefs.getString(context.getString(R.string.LNG), "")
+            val lat = sharedPrefs.getString(context.getString(R.string.ACTIVE_LAT), "")
+            val lng = sharedPrefs.getString(context.getString(R.string.ACTIVE_LNG), "")
             if (lat == placePrefs.latitude.toString() && lng == placePrefs.longitude.toString()) {
                 sharedPrefs.edit().putString(context.getString(R.string.ACTIVE_CONTACT_GROUP), it).commit()
             }
@@ -281,8 +280,8 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
                 fm = context.supportFragmentManager,
                 onNameChange = {
                     val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
-                    val lat = sharedPrefs.getString(context.getString(R.string.LAT), "")
-                    val lng = sharedPrefs.getString(context.getString(R.string.LNG), "")
+                    val lat = sharedPrefs.getString(context.getString(R.string.ACTIVE_LAT), "")
+                    val lng = sharedPrefs.getString(context.getString(R.string.ACTIVE_LNG), "")
                     repository.updatePref(placePrefs.copy(name = placePrefs.name))
                     if (lat == placePrefs.latitude.toString() && lng == placePrefs.longitude.toString()) {
                         sharedPrefs.edit().putString(context.getString(R.string.ACTIVE_NAME), placePrefs.name).commit()

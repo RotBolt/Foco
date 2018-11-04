@@ -142,29 +142,6 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
-            <LinearLayout
-                android:padding="16dp"
-                android:id="@+id/RingerContainer"
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:fontFamily="@font/maven_pro_medium"
-                    android:text="Ringer Volume"
-                    android:textSize="16sp"
-                    android:padding="4dp"
-                    android:textColor="@color/colorGenDark"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-                <SeekBar
-                    android:id="@+id/ringerVolumeController"
-                    android:layout_marginTop="12dp"
-                    android:padding="4dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/flipToEndContainer"

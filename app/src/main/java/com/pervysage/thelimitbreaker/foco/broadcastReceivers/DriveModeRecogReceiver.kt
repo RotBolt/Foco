@@ -35,11 +35,7 @@ class DriveModeRecogReceiver : BroadcastReceiver() {
                                         true
                                 )?.commit()
 
-                                val ringerVolume = sharedPrefs?.getInt(context.getString(R.string.RINGER_VOLUME), 90)
-                                        ?: 90
                                 am.setStreamVolume(AudioManager.STREAM_RING, 0, AudioManager.FLAG_PLAY_SOUND)
-                                val setVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC) * 0.01 * ringerVolume
-                                am.setStreamVolume(AudioManager.STREAM_MUSIC, setVolume.toInt(), AudioManager.FLAG_PLAY_SOUND)
 
                                 val notifyMsg = "DriveMode Started"
                                 val contentText = "Blocking Unwanted Calls"
@@ -52,16 +48,12 @@ class DriveModeRecogReceiver : BroadcastReceiver() {
                                         false
                                 )?.commit()
 
+
                                 val geoStatus = sharedPrefs?.getBoolean(context.getString(R.string.GEO_STATUS), false)
                                         ?: false
                                 if (!geoStatus) {
-                                    am.ringerMode = AudioManager.RINGER_MODE_NORMAL
-                                    val ringerVolume = sharedPrefs?.getInt(context.getString(R.string.RINGER_VOLUME), 90)
-                                            ?: 90
-                                    val setVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC) * 0.01 * ringerVolume
-                                    am.setStreamVolume(AudioManager.STREAM_RING, setVolume.toInt(), AudioManager.FLAG_PLAY_SOUND)
+                                    am.setStreamVolume(AudioManager.STREAM_RING, am.getStreamMaxVolume(AudioManager.STREAM_RING), AudioManager.FLAG_PLAY_SOUND)
                                 }
-
                                 val notifyMsg = "DriveMode Stopped"
                                 sendDriveModeNotification(notifyMsg, "Service Stopped", false, context)
                             }

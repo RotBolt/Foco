@@ -75,22 +75,18 @@ class GeoActionsIntentService : JobIntentService() {
         val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val sharedPref = baseContext.getSharedPreferences(getString(R.string.SHARED_PREF_KEY),Context.MODE_PRIVATE)
         val dmStatus = sharedPref.getBoolean(baseContext.getString(R.string.DM_STATUS),false)
-        val ringerVolume = sharedPref.getInt(baseContext.getString(R.string.RINGER_VOLUME),90)
         if (doStart){
             am.setStreamVolume(AudioManager.STREAM_RING,0,AudioManager.FLAG_PLAY_SOUND)
-            val setVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*0.01*ringerVolume
-            am.setStreamVolume(AudioManager.STREAM_MUSIC,setVolume.toInt(),AudioManager.FLAG_PLAY_SOUND)
         }else if (!dmStatus){
-            val setVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*0.01*ringerVolume
-            am.setStreamVolume(AudioManager.STREAM_RING,setVolume.toInt(),AudioManager.FLAG_PLAY_SOUND)
+            am.setStreamVolume(AudioManager.STREAM_RING,am.getStreamMaxVolume(AudioManager.STREAM_RING),AudioManager.FLAG_PLAY_SOUND)
         }
 
         with(sharedPref.edit()){
             putBoolean(getString(R.string.GEO_STATUS),doStart)
             putString(getString(R.string.ACTIVE_NAME),placePrefs?.name?:"")
             putString(getString(R.string.ACTIVE_CONTACT_GROUP),placePrefs?.contactGroup?:"")
-            putString(getString(R.string.LAT),placePrefs?.latitude?.toString()?:"")
-            putString(getString(R.string.LNG),placePrefs?.longitude?.toString()?:"")
+            putString(getString(R.string.ACTIVE_LAT),placePrefs?.latitude?.toString()?:"")
+            putString(getString(R.string.ACTIVE_LNG),placePrefs?.longitude?.toString()?:"")
         }.commit()
     }
 

@@ -8,8 +8,6 @@ import android.content.Intent
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
-import android.os.Bundle
-import android.os.Handler
 import android.provider.CallLog
 import android.provider.ContactsContract
 import android.speech.tts.TextToSpeech
@@ -24,13 +22,13 @@ import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.utils.DeviceMotionUtil
 import java.lang.reflect.Method
 import java.util.*
-import kotlin.collections.HashMap
 
 class IncomingCallReceiver : BroadcastReceiver() {
 
     companion object {
         private var receivedOnce = false
         private lateinit var tm: TelephonyManager
+        private var volumeLevel=65
     }
 
     private lateinit var phoneStateListener: MyPhoneStateListener
@@ -62,20 +60,20 @@ class IncomingCallReceiver : BroadcastReceiver() {
         private var methodEndCall: Method
         private var am: AudioManager
         private var focusRequest: AudioFocusRequest? = null
-        private var teleCom: TelecomManager
+        private var telecomManager: TelecomManager
 
         init {
             method1.isAccessible = true
             iTelephony = method1.invoke(tm)
             methodEndCall = iTelephony.javaClass.getDeclaredMethod("endCall")
-//
+
             am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK).build()
             }
 
-            teleCom = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+            telecomManager = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
         }
 
         private var tts: TextToSpeech = TextToSpeech(context.applicationContext, TextToSpeech.OnInitListener {
@@ -99,9 +97,16 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 tm.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE)
                 receivedOnce = false
                 motionUtil.stopMotionListener()
+
                 tts.stop()
                 tts.shutdown()
                 tts.setOnUtteranceProgressListener(null)
+                val sec = System.currentTimeMillis()
+                while (System.currentTimeMillis() - sec <= 1500) {
+                }
+                am.setStreamVolume(AudioManager.STREAM_MUSIC,volumeLevel,AudioManager.FLAG_VIBRATE)
+
+
             }
 
         }
@@ -114,10 +119,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
             } else {
                 am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
             }
-
-
         }
-
 
         private fun startMotionUtil(phoneNumber: String, smsToCallerStatus: Boolean, flipToEnd: Boolean) {
             motionUtil.setAction {
@@ -193,19 +195,23 @@ class IncomingCallReceiver : BroadcastReceiver() {
             val smsToCallerStatus = sharedPref.getBoolean(context.getString(R.string.SMS_TO_CALLER), false)
             val flipToEnd = sharedPref.getBoolean(context.getString(R.string.FLIP_TO_END_STATUS), true)
 
+
+            volumeLevel=am.getStreamVolume(AudioManager.STREAM_MUSIC)
+
             name = checkNumber(phoneNumber)
             // exist in contacts or not
             if (name.isEmpty()) {
                 if (allowCallerStatus && isUnder15Min(phoneNumber)) {
                     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
                         startMotionUtil(phoneNumber, smsToCallerStatus, flipToEnd)
+
                     toSay = "This might be important call"
                     speak()
                 } else {
                     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
                         methodEndCall.invoke(iTelephony)
                     else
-                        teleCom.endCall()
+                        telecomManager.endCall()
 
                     if (smsToCallerStatus)
                         sendSMS(phoneNumber)
@@ -221,6 +227,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     "All Contacts" -> {
                         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
                             startMotionUtil(phoneNumber, smsToCallerStatus, flipToEnd)
+
                         toSay = "Call from $name"
                         speak()
 
@@ -248,7 +255,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
                                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
                                     methodEndCall.invoke(iTelephony)
                                 else
-                                    teleCom.endCall()
+                                    telecomManager.endCall()
                                 if (smsToCallerStatus)
                                     sendSMS(phoneNumber)
                             }
@@ -259,7 +266,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
                         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
                             methodEndCall.invoke(iTelephony)
                         else
-                            teleCom.endCall()
+                            telecomManager.endCall()
                     }
                 }
             }
@@ -304,7 +311,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     arrayOf("${CallLog.Calls.OUTGOING_TYPE}", phoneNumber),
                     CallLog.Calls.DEFAULT_SORT_ORDER
             )
-
 
             cursor?.run {
                 if (count > 0) {
