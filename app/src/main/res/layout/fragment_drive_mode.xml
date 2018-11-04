@@ -68,5 +68,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/contactGroupContainer" />
 
+    <Button
+        android:id="@+id/btnSeePriority"
+        app:layout_constraintTop_toBottomOf="@id/tvInfoBox"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp"
+        android:drawableLeft="@drawable/ic_person"
+        android:drawableTint="@color/group_chooser_color"
+        android:text=" See Priority"
+        android:textAllCaps="false"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:background="@drawable/info_box_background"
+        android:fontFamily="@font/maven_pro_medium"
+        android:textColor="@color/group_chooser_color"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
 
 </android.support.constraint.ConstraintLayout>

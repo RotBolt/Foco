@@ -123,7 +123,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
 
             with(sharedPrefs.edit()) {
                 putString(context.getString(R.string.ACTIVE_NAME), "")
-                putString(context.getString(R.string.ACTIVE_CONTACT_GROUP), "")
+                putString(context.getString(R.string.GEO_ACTIVE_GROUP), "")
                 putBoolean(context.getString(R.string.GEO_STATUS), false)
                 putString(context.getString(R.string.ACTIVE_LAT), "")
                 putString(context.getString(R.string.ACTIVE_LNG), "")
@@ -225,7 +225,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
             val lat = sharedPrefs.getString(context.getString(R.string.ACTIVE_LAT), "")
             val lng = sharedPrefs.getString(context.getString(R.string.ACTIVE_LNG), "")
             if (lat == placePrefs.latitude.toString() && lng == placePrefs.longitude.toString()) {
-                sharedPrefs.edit().putString(context.getString(R.string.ACTIVE_CONTACT_GROUP), it).commit()
+                sharedPrefs.edit().putString(context.getString(R.string.GEO_ACTIVE_GROUP), it).commit()
             }
             repository.updatePref(prefsTBU)
         }

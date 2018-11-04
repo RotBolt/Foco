@@ -84,7 +84,7 @@ class GeoActionsIntentService : JobIntentService() {
         with(sharedPref.edit()){
             putBoolean(getString(R.string.GEO_STATUS),doStart)
             putString(getString(R.string.ACTIVE_NAME),placePrefs?.name?:"")
-            putString(getString(R.string.ACTIVE_CONTACT_GROUP),placePrefs?.contactGroup?:"")
+            putString(getString(R.string.GEO_ACTIVE_GROUP),placePrefs?.contactGroup?:"")
             putString(getString(R.string.ACTIVE_LAT),placePrefs?.latitude?.toString()?:"")
             putString(getString(R.string.ACTIVE_LNG),placePrefs?.longitude?.toString()?:"")
         }.commit()

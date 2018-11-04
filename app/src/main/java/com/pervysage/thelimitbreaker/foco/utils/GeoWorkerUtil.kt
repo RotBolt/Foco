@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import com.crashlytics.android.Crashlytics
 import com.google.android.gms.location.Geofence
@@ -18,6 +19,7 @@ class GeoWorkerUtil(private val context: Context){
 
     @SuppressLint("MissingPermission")
     fun addPlaceForMonitoring(placePrefs: PlacePrefs):Task<Void>{
+        Log.i("GeoWorkUtil","adding geofence")
         val geoID = "${placePrefs.latitude},${placePrefs.longitude}"
         val thisGeofence = Geofence.Builder().apply {
             setRequestId(geoID)

@@ -92,6 +92,14 @@
         <activity
             android:name=".actvities.SettingsActivity"
             android:screenOrientation="portrait" />
+
+        <service
+            android:name=".services.GeofenceReAddService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE">
+        </service>
+
     </application>
 
 </manifest>

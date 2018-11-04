@@ -7,7 +7,7 @@
     <string name="ACTIVE_NAME">active_name</string>
     <string name="ACTIVE_LAT">LAT</string>
     <string name="ACTIVE_LNG">LNG</string>
-    <string name="ACTIVE_CONTACT_GROUP">active_contact_group</string>
+    <string name="GEO_ACTIVE_GROUP">active_contact_group</string>
     <string name="DM_STATUS">dm_status</string>
     <string name="DM_ACTIVE_GROUP">dm_Active_Group</string>
     <string name="ALLOW_CALLER_STATUS">under_15_min</string>

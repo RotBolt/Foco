@@ -2,6 +2,7 @@ package com.pervysage.thelimitbreaker.foco.fragments
 
 
 import android.content.Context
+import android.content.Intent
 import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -13,6 +14,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.actvities.MainActivity
+import com.pervysage.thelimitbreaker.foco.actvities.MyContactsActivity
 import com.pervysage.thelimitbreaker.foco.utils.DriveActivityRecogUtil
 import com.pervysage.thelimitbreaker.foco.utils.sendDriveModeNotification
 import kotlinx.android.synthetic.main.fragment_drive_mode.*
@@ -60,15 +62,17 @@ class DriveModeFragment : Fragment() {
                     when (position) {
                         0 -> {
                             tvInfoBox.text = "Receive calls from all contacts in your contact list"
+                            btnSeePriority.visibility=View.GONE
                             group = "All Contacts"
                         }
                         1 -> {
                             tvInfoBox.text = "Receive calls from Priority People only"
+                            btnSeePriority.visibility=View.VISIBLE
                             group = "Priority Contacts"
                         }
                         2 -> {
                             tvInfoBox.text = "Total Silence !"
-                            tvInfoBox.visibility = View.VISIBLE
+                            btnSeePriority.visibility=View.GONE
                             group = "None"
                         }
                     }
@@ -83,6 +87,10 @@ class DriveModeFragment : Fragment() {
                 "None" -> setSelection(2)
                 else -> setSelection(0)
             }
+        }
+
+        btnSeePriority.setOnClickListener {
+            startActivity(Intent(context,MyContactsActivity::class.java))
         }
 
         isFragEnabled = sharedPrefs?.getInt(context?.resources?.getString(R.string.DRIVE_MODE_ENABLED), -1) ?: 0
@@ -116,6 +124,8 @@ class DriveModeFragment : Fragment() {
 
                 sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), dmActiveGroup).commit()
 
+                btnSeePriority.isEnabled=true
+
                 ivDriveMode.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_scooter))
 
                 tvContactGroupLabel.setTextColor(ContextCompat.getColor(this, R.color.colorTextDark))
@@ -139,6 +149,8 @@ class DriveModeFragment : Fragment() {
                 val sharedPrefs = this.getSharedPreferences(this.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
 
                 sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), "").commit()
+
+                btnSeePriority.isEnabled=false
 
                 val am = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
