@@ -7,10 +7,10 @@
     android:layout_height="wrap_content">
 
     <ImageView
-        android:padding="15dp"
+        android:padding="18dp"
+        android:scaleY="0.85"
+        android:scaleX="0.85"
         android:id="@+id/ivWorkHeader"
-        android:scaleY="0.75"
-        android:scaleX="0.75"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
@@ -22,21 +22,20 @@
         android:layout_below="@id/ivWorkHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
         <TextView
+            android:background="?attr/selectableItemBackground"
             android:id="@+id/tvPlaceTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="21dp"
-            android:background="?attr/selectableItemBackground"
-            android:fontFamily="@font/maven_pro"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="18dp"
             android:padding="8dp"
             android:text="Place name"
+            android:fontFamily="@font/maven_pro"
+            android:textStyle="bold"
             android:textColor="@color/colorTextDark"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textSize="18sp" />
 
         <android.support.v7.widget.SwitchCompat
             android:id="@+id/serviceSwitch"
@@ -44,12 +43,10 @@
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/tvPlaceTitle"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="4dp"
+            android:layout_marginRight="8dp"
             android:checked="true"
-            android:scaleY="0.85"
-            android:scaleX="0.85"
             android:focusable="false"
-            android:padding="4dp" />
+            android:padding="8dp" />
 
         <TextView
             android:id="@+id/tvDetails"
@@ -59,7 +56,7 @@
             android:fontFamily="@font/maven_pro"
             android:layout_below="@id/tvPlaceTitle"
             android:layout_alignParentLeft="true"
-            android:layout_marginLeft="4dp"
+            android:layout_marginLeft="8dp"
             android:textSize="12sp"
             android:textColor="@color/colorTextDark"
             android:layout_width="wrap_content"
@@ -70,10 +67,10 @@
             android:layout_below="@id/serviceSwitch"
             android:src="@drawable/ic_expand_more"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="4dp"
-            android:padding="4dp"
-            android:scaleX="0.75"
-            android:scaleY="0.75"
+            android:layout_marginRight="8dp"
+            android:padding="8dp"
+            android:scaleX="0.85"
+            android:scaleY="0.85"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -81,7 +78,7 @@
             android:id="@+id/divideContainer"
             android:padding="8dp"
             android:layout_below="@id/tvDetails"
-            android:layout_marginLeft="4dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginBottom="12dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
@@ -89,8 +86,8 @@
                 android:id="@+id/listDivider"
                 android:background="@drawable/reg_background"
                 android:padding="8dp"
-                android:layout_width="50dp"
-                android:layout_height="2dp"/>
+                android:layout_width="60dp"
+                android:layout_height="3dp"/>
         </FrameLayout>
 
         <RelativeLayout
@@ -105,9 +102,9 @@
             android:layout_height="wrap_content">
 
             <ImageView
-                android:scaleX="0.75"
-                android:scaleY="0.75"
-                android:padding="4dp"
+                android:padding="8dp"
+                android:scaleY="0.90"
+                android:scaleX="0.90"
                 android:id="@+id/iconPlace"
                 android:src="@drawable/ic_place"
                 android:layout_width="wrap_content"
@@ -116,18 +113,18 @@
             <TextView
                 app:theme="@style/TextStyle"
                 android:id="@+id/tvAddress"
-                android:textSize="12sp"
                 android:gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="14sp"
                 android:layout_toRightOf="@id/iconPlace"
                 android:text="Address" />
 
             <ImageView
                 android:id="@+id/iconRadius"
-                android:scaleX="0.75"
-                android:scaleY="0.75"
-                android:padding="4dp"
+                android:padding="8dp"
+                android:scaleY="0.90"
+                android:scaleX="0.90"
                 android:layout_below="@id/tvAddress"
                 android:src="@drawable/ic_radius"
                 android:layout_width="wrap_content"
@@ -135,6 +132,7 @@
 
             <TextView
                 android:id="@+id/tvRadius"
+                android:textSize="14sp"
                 android:gravity="center_vertical"
                 android:background="?attr/selectableItemBackground"
                 android:layout_width="wrap_content"
@@ -143,13 +141,12 @@
                 android:layout_below="@id/tvAddress"
                 android:layout_toRightOf="@id/iconRadius"
                 android:text="Radius"
-                android:textSize="12sp"
                 app:theme="@style/TextStyle" />
             <ImageView
                 android:id="@+id/iconGroup"
-                android:scaleX="0.75"
-                android:scaleY="0.75"
-                android:padding="4dp"
+                android:padding="8dp"
+                android:scaleY="0.90"
+                android:scaleX="0.90"
                 android:src="@drawable/ic_group"
                 android:layout_below="@id/iconRadius"
                 android:layout_width="wrap_content"
@@ -163,10 +160,9 @@
                 android:layout_below="@id/iconRadius"
                 android:layout_alignBottom="@+id/iconGroup"
                 android:gravity="center_vertical"
+                android:textSize="14sp"
                 android:layout_toRightOf="@id/iconGroup"
                 android:text="All Contacts"
-                android:textSize="12sp"
-
                 app:theme="@style/TextStyle" />
             <View
                 android:id="@+id/childDivider"
@@ -178,9 +174,9 @@
 
             <ImageView
                 android:id="@+id/ic_delete"
-                android:scaleX="0.75"
-                android:scaleY="0.75"
-                android:padding="4dp"
+                android:padding="8dp"
+                android:scaleY="0.90"
+                android:scaleX="0.90"
                 android:src="@drawable/ic_delete"
                 android:layout_below="@id/childDivider"
                 android:layout_marginTop="4dp"
@@ -198,7 +194,7 @@
                 android:layout_toRightOf="@id/ic_delete"
                 android:background="?attr/selectableItemBackground"
                 android:text="Delete"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 app:theme="@style/TextStyle" />
 
             <ImageView
@@ -210,8 +206,8 @@
                 android:layout_alignParentRight="true"
                 android:layout_gravity="center"
                 android:layout_marginTop="4dp"
-                android:scaleX="0.75"
-                android:scaleY="0.75"
+                android:scaleX="0.85"
+                android:scaleY="0.85"
                 android:padding="4dp"
                 android:src="@drawable/ic_collapse" />
 

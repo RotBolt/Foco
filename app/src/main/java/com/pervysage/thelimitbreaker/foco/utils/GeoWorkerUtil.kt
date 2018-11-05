@@ -36,11 +36,13 @@ class GeoWorkerUtil(private val context: Context){
         return geofenceClient.removeGeofences(getPendingIntent(requestID))
     }
 
-    fun updatePlacePrefsForMonitoring(placePrefs: PlacePrefs):Task<Void>{
-       return removePlaceFromMonitoring(placePrefs)
+    fun updatePlacePrefsForMonitoring(placePrefs: PlacePrefs,onSuccess:()->Unit,onFailure:()->Unit){
+        removePlaceFromMonitoring(placePrefs)
                 .addOnSuccessListener {
                     addPlaceForMonitoring(placePrefs)
-                }
+                            .addOnSuccessListener { onSuccess() }
+                            .addOnFailureListener { onFailure() }
+                }.addOnFailureListener { onFailure() }
     }
 
     private fun getGeofenceRequest(geofence: Geofence):GeofencingRequest{

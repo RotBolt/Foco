@@ -16,12 +16,9 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
-
-        val notifyManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val dndAccessResult =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) notifyManager.isNotificationPolicyAccessGranted
-                else true
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val dndAccess = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) notificationManager.isNotificationPolicyAccessGranted
+        else true
 
         val permResult =
                 ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
@@ -32,12 +29,12 @@ class SplashActivity : AppCompatActivity() {
 
         Handler().postDelayed(
                 {
-                    if (permResult && dndAccessResult){
-                        startActivity(Intent(this,MainActivity::class.java))
-                    }else{
-                        startActivity(Intent(this,PermissionsActivity::class.java))
+                    if (permResult && dndAccess) {
+                        startActivity(Intent(this, MainActivity::class.java))
+                    } else {
+                        startActivity(Intent(this, PermissionsActivity::class.java))
                     }
-                },1500
+                }, 1500
         )
     }
 }

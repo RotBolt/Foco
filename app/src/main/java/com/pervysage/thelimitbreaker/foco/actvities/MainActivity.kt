@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.location.LocationManager
 import android.os.Bundle
+import android.os.LocaleList
 import android.support.design.widget.TabLayout
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -22,6 +23,7 @@ import com.pervysage.thelimitbreaker.foco.database.entities.generateGeoKey
 import com.pervysage.thelimitbreaker.foco.dialogs.EditPlaceNameDialog
 import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -47,10 +49,28 @@ class MainActivity : AppCompatActivity() {
         onAddNewPlace = l
     }
 
+    private fun showFailDialog() {
+        val contextThemeWrapper = ContextThemeWrapper(this, R.style.DialogStyle)
+        val builder = AlertDialog.Builder(contextThemeWrapper)
+                .setTitle("Oops")
+                .setMessage("Please Turn on location ")
+                .setPositiveButton("Turn On") { dialog, _ ->
+                    dialog.dismiss()
+                    this.startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+
+        val dialog = builder.create()
+        dialog?.window?.setBackgroundDrawableResource(R.drawable.dialog_background)
+        dialog.show()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        Log.i("MainActivity"," smallest screen dpi ${resources.configuration.smallestScreenWidthDp}")
         with(tabLayout) {
             addTab(newTab().setIcon(R.drawable.ic_place))
             addTab(newTab().setIcon(R.drawable.ic_motorcycle))
@@ -85,8 +105,14 @@ class MainActivity : AppCompatActivity() {
         switchDriveMode.isChecked = isDriveSwitchEnabled == 1
 
         ivAction.setOnClickListener {
-            it.setOnTouchListener { _, _ -> true }
-            pickPlace()
+            val gpsEnabled = (getSystemService(Context.LOCATION_SERVICE) as LocationManager)
+                    .isProviderEnabled(LocationManager.GPS_PROVIDER)
+            if (gpsEnabled) {
+                it.setOnTouchListener { _, _ -> true }
+                pickPlace()
+            } else {
+                showFailDialog()
+            }
         }
 
         ivOptions.setOnClickListener { _ ->

@@ -46,7 +46,7 @@
             android:layout_gravity="center_vertical"
             android:singleLine="true"
             android:layout_width="0dp"
-            android:layout_weight="7"
+            android:layout_weight="10.5"
             android:layout_height="wrap_content" />
 
         <ImageView

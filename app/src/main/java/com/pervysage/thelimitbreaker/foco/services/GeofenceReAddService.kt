@@ -17,7 +17,15 @@ class GeofenceReAddService : JobService() {
     override fun onStopJob(params: JobParameters?): Boolean {
         return true
     }
-
+    private fun startNewJob(){
+        val component = ComponentName(baseContext,GeofenceReAddService::class.java)
+        val builder = JobInfo.Builder(JOB_ID,component)
+                .setBackoffCriteria(1000, JobInfo.BACKOFF_POLICY_LINEAR)
+                .setMinimumLatency(30*1000)
+        val scheduler=baseContext.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+        scheduler.cancel(JOB_ID)
+        scheduler.schedule(builder.build())
+    }
     override fun onStartJob(params: JobParameters?): Boolean {
         Log.i("GeofenceReAdd","job start")
         val gpsEnabled = (baseContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager).isProviderEnabled(LocationManager.GPS_PROVIDER)
@@ -26,17 +34,18 @@ class GeofenceReAddService : JobService() {
             val placePrefs = repo.getAllPlacePrefs()
             val geoWorker = GeoWorkerUtil(baseContext)
             for (pref in placePrefs) {
-                if (pref.active == 1) geoWorker.addPlaceForMonitoring(pref)
+                if (pref.active == 1){
+                    geoWorker.addPlaceForMonitoring(pref)
+                            .addOnFailureListener {
+                                jobFinished(params,false)
+                                startNewJob()
+                            }
+                }
             }
             jobFinished(params,false)
         }else{
             jobFinished(params,false)
-            val component = ComponentName(baseContext,GeofenceReAddService::class.java)
-            val builder = JobInfo.Builder(JOB_ID,component)
-                    .setBackoffCriteria(1000, JobInfo.BACKOFF_POLICY_LINEAR)
-                    .setMinimumLatency(30*1000)
-            val scheduler=baseContext.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-            scheduler.schedule(builder.build())
+            startNewJob()
         }
         return false
     }

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.provider.ContactsContract
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.widget.Toast
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.adapters.ContactAdapter
@@ -62,17 +63,18 @@ class PickContactsActivity : AppCompatActivity() {
             val projection = arrayOf(
                     ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER
             )
-            val selection = "${ContactsContract.Contacts.LOOKUP_KEY} = ? AND ${ContactsContract.Data.MIMETYPE} = ?"
+            val selection = "${ContactsContract.Contacts.LOOKUP_KEY} = ? AND ${ContactsContract.Contacts.DISPLAY_NAME} = ? AND ${ContactsContract.Data.MIMETYPE} = ?"
             for (obj in marked) {
                 val cursor = contentResolver.query(
                         ContactsContract.Data.CONTENT_URI,
                         projection,
                         selection,
-                        arrayOf(obj.lookUpKey, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE),
+                        arrayOf(obj.lookUpKey, obj.name, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE),
                         null
                 )
                 cursor?.run {
-                    if (cursor.count>0) {
+                    if (cursor.count > 0) {
+
                         val list = ArrayList<ContactInfo>()
                         while (cursor.moveToNext()) {
                             val number = getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER))
@@ -80,9 +82,10 @@ class PickContactsActivity : AppCompatActivity() {
                             list.add(info)
                         }
                         repository.insertContact(*list.toTypedArray())
-                    }else{
-                        Toast.makeText(this@PickContactsActivity,"No Number found for ${obj.name}",Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@PickContactsActivity, "No Number found for ${obj.name}", Toast.LENGTH_SHORT).show()
                     }
+                    close()
                 }
             }
 

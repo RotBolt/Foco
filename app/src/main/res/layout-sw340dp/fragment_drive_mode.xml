@@ -12,9 +12,9 @@
         android:id="@+id/ivDriveMode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:scaleY="0.75"
-        android:scaleX="0.75"
+        android:padding="18dp"
+        android:scaleY="0.85"
+        android:scaleX="0.85"
         android:src="@drawable/ic_scooter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -41,7 +41,7 @@
             android:gravity="center_horizontal"
             android:text="Contact Group"
             android:textColor="@color/colorTextDark"
-            android:textSize="12sp" />
+            android:textSize="14sp" />
 
         <Spinner
             android:id="@+id/groupChooser"
@@ -65,7 +65,7 @@
         android:padding="8dp"
         android:text="Receive calls from all contacts"
         android:textColor="@color/colorTextDark"
-        android:textSize="12sp"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/contactGroupContainer" />
@@ -74,13 +74,13 @@
         android:id="@+id/btnSeePriority"
         app:layout_constraintTop_toBottomOf="@id/tvInfoBox"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:text=" See Priority"
         android:drawableLeft="@drawable/ic_person"
-        android:textSize="12sp"
+        android:textSize="14sp"
         android:textAllCaps="false"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:background="@drawable/info_box_background"
         android:fontFamily="@font/maven_pro_medium"
         android:textColor="@color/group_chooser_color"

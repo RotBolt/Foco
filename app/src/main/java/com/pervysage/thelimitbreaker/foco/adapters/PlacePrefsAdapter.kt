@@ -2,6 +2,9 @@ package com.pervysage.thelimitbreaker.foco.adapters
 
 import android.app.AlertDialog
 import android.app.Application
+import android.app.job.JobInfo
+import android.app.job.JobScheduler
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.PorterDuff
@@ -27,6 +30,7 @@ import com.pervysage.thelimitbreaker.foco.dialogs.EditPlaceNameDialog
 import com.pervysage.thelimitbreaker.foco.dialogs.RadiusPickDialog
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.MyListView
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.ViewManager
+import com.pervysage.thelimitbreaker.foco.services.GeofenceReAddService
 import com.pervysage.thelimitbreaker.foco.utils.GeoWorkerUtil
 import com.pervysage.thelimitbreaker.foco.utils.sendGeofenceNotification
 
@@ -35,8 +39,6 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
     private val viewManager = ViewManager(listView)
     private val geoWorkerUtil = GeoWorkerUtil(context)
     private val repository = Repository.getInstance(context.applicationContext as Application)
-
-    private val locationService = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
     private var lastExpandPos = -1
 
@@ -118,16 +120,14 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
             sendGeofenceNotification("Service Stopped for ${placePref.name}", -1, context)
 
             val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            am.ringerMode = AudioManager.RINGER_MODE_NORMAL
-            am.setStreamVolume(AudioManager.STREAM_NOTIFICATION, am.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION), AudioManager.FLAG_PLAY_SOUND)
-
+                am.setStreamVolume(AudioManager.STREAM_RING, am.getStreamMaxVolume(AudioManager.STREAM_RING), AudioManager.FLAG_PLAY_SOUND)
             with(sharedPrefs.edit()) {
                 putString(context.getString(R.string.ACTIVE_NAME), "")
                 putString(context.getString(R.string.GEO_ACTIVE_GROUP), "")
                 putBoolean(context.getString(R.string.GEO_STATUS), false)
                 putString(context.getString(R.string.ACTIVE_LAT), "")
                 putString(context.getString(R.string.ACTIVE_LNG), "")
-            }.apply()
+            }.commit()
         }
     }
 
@@ -212,7 +212,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
         headHolder.bindData(placePrefs, position)
         bodyHolder.bindData(placePrefs)
 
-        setPrefsListeners(headHolder,placePrefs,true)
+        setPrefsListeners(headHolder, placePrefs, true)
 
         (context as FragmentActivity)
 
@@ -230,11 +230,22 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
             repository.updatePref(prefsTBU)
         }
 
-        bodyHolder.setOnRadiusPickListeners(placePrefs, context.supportFragmentManager) {
-            placePrefs.radius = it
-            val prefsTBU = placePrefs.copy(isExpanded = false)
-            geoWorkerUtil.updatePlacePrefsForMonitoring(placePrefs)
-            repository.updatePref(prefsTBU)
+        bodyHolder.setOnRadiusPickListeners(placePrefs, context.supportFragmentManager) { radiusString, radiusInt ->
+
+            geoWorkerUtil.updatePlacePrefsForMonitoring(
+                    placePrefs,
+                    {
+                        Toast.makeText(context, "Radius Updated", Toast.LENGTH_SHORT).show()
+                        placePrefs.radius = radiusInt
+                        bodyHolder.tvRadius.text = radiusString
+                        val prefsTBU = placePrefs.copy(isExpanded = false)
+                        repository.updatePref(prefsTBU)
+                    },
+                    {
+                        showFailDialog(context, isGPSUnabled())
+                    }
+            )
+
         }
 
         bodyHolder.setWorkOnDelete(placePrefs) {
@@ -268,8 +279,13 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
         bodyHolder.extraContent.visibility = View.GONE
         headHolder.bindData(placePrefs, position)
 
-        setPrefsListeners(headHolder,placePrefs,false)
+        setPrefsListeners(headHolder, placePrefs, false)
     }
+
+    private fun isGPSUnabled(): Boolean {
+        return (context.getSystemService(Context.LOCATION_SERVICE) as LocationManager).isProviderEnabled(LocationManager.GPS_PROVIDER)
+    }
+
 
     private fun setPrefsListeners(headHolder: HeadHolder, placePrefs: PlacePrefs, isExpanding: Boolean) {
 
@@ -303,7 +319,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
                                     repository.updatePref(placePrefs.copy(isExpanded = false))
                                 }.addOnFailureListener {
                                     Crashlytics.logException(it)
-                                    showFailDialog(context)
+                                    showFailDialog(context, isGPSUnabled())
                                     toExecuteGeo = false
                                     headHolder.serviceSwitch.isChecked = false
                                 }
@@ -320,7 +336,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
                                 }
                                 .addOnFailureListener {
                                     Crashlytics.logException(it)
-                                    showFailDialog(context)
+                                    showFailDialog(context, isGPSUnabled())
                                     toExecuteGeo = false
                                     headHolder.serviceSwitch.isChecked = false
                                 }
@@ -330,19 +346,28 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
         )
     }
 
-    private fun showFailDialog(context: Context) {
+    private fun showFailDialog(context: Context, isGpsEnabled: Boolean) {
         val contextThemeWrapper = ContextThemeWrapper(context, R.style.DialogStyle)
         val builder = AlertDialog.Builder(contextThemeWrapper)
                 .setTitle("Oops")
-                .setMessage("Please Turn on location ")
-                .setPositiveButton("Turn On") { dialog, _ ->
-                    dialog.dismiss()
-                    context.startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-                }
-                .setNegativeButton("Cancel") { dialog, _ ->
-                    dialog.dismiss()
-                }
-        builder.create().show()
+        if (!isGpsEnabled) {
+            builder.setMessage("Please Turn on location ")
+                    .setPositiveButton("Turn On") { dialog, _ ->
+                        dialog.dismiss()
+                        context.startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+        } else {
+            builder.setMessage("GPS Not working. Please try again later")
+                    .setPositiveButton("Ok") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+        }
+        val dialog = builder.create()
+        dialog?.window?.setBackgroundDrawableResource(R.drawable.dialog_background)
+        dialog.show()
     }
 
     private class HeadHolder(itemView: View) {
@@ -454,7 +479,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
             }
         }
 
-        fun setOnRadiusPickListeners(placePref: PlacePrefs, fm: FragmentManager, onRadiusChange: (Int) -> Unit) {
+        fun setOnRadiusPickListeners(placePref: PlacePrefs, fm: FragmentManager, onRadiusChange: (String, Int) -> Unit) {
             tvRadius.setOnClickListener {
 
                 val dialog = RadiusPickDialog()
@@ -468,9 +493,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
                         }
                 )
                 dialog.setOnRadiusPickListener { radiusString, radiusInt ->
-                    tvRadius.text = radiusString
-                    placePref.radius = radiusInt
-                    onRadiusChange(radiusInt)
+                    onRadiusChange(radiusString, radiusInt)
                 }
                 dialog.show(fm, "RadiusPick")
             }

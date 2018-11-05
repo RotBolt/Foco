@@ -42,7 +42,7 @@
             android:fontFamily="@font/maven_pro_medium"
             android:text="Priority Contacts"
             android:padding="7dp"
-            android:textSize="21sp"
+            android:textSize="24sp"
             android:layout_gravity="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -69,7 +69,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/titleBar"></android.support.v7.widget.RecyclerView>
+        app:layout_constraintTop_toBottomOf="@id/titleBar">
+    </android.support.v7.widget.RecyclerView>
 
     <ImageView
         android:id="@+id/ivContactHeader"
@@ -77,9 +78,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:padding="16dp"
-        android:scaleX="0.75"
-        android:scaleY="0.75"
+        android:padding="18dp"
+        android:scaleX="0.85"
+        android:scaleY="0.85"
         android:src="@drawable/ic_my_contacts"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -91,15 +92,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:background="@drawable/info_box_background"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
         android:textColor="@color/colorTextDark"
         android:fontFamily="@font/maven_pro_medium"
         android:text="No Contacts Selected"
         android:gravity="center"
         android:padding="8dp"
-        android:textSize="14sp"
+        android:textSize="16sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
