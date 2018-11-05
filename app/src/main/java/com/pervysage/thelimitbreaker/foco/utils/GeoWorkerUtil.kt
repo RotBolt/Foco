@@ -19,7 +19,6 @@ class GeoWorkerUtil(private val context: Context){
 
     @SuppressLint("MissingPermission")
     fun addPlaceForMonitoring(placePrefs: PlacePrefs):Task<Void>{
-        Log.i("GeoWorkUtil","adding geofence")
         val geoID = "${placePrefs.latitude},${placePrefs.longitude}"
         val thisGeofence = Geofence.Builder().apply {
             setRequestId(geoID)

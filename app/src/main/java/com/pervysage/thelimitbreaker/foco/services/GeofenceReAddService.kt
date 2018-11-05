@@ -8,7 +8,6 @@ import android.app.job.JobService
 import android.content.ComponentName
 import android.content.Context
 import android.location.LocationManager
-import android.util.Log
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.utils.GeoWorkerUtil
 
@@ -27,7 +26,6 @@ class GeofenceReAddService : JobService() {
         scheduler.schedule(builder.build())
     }
     override fun onStartJob(params: JobParameters?): Boolean {
-        Log.i("GeofenceReAdd","job start")
         val gpsEnabled = (baseContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager).isProviderEnabled(LocationManager.GPS_PROVIDER)
         if (gpsEnabled){
             val repo = Repository.getInstance((applicationContext) as Application)

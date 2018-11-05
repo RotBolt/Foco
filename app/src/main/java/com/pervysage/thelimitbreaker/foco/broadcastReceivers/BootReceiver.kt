@@ -1,27 +1,20 @@
 package com.pervysage.thelimitbreaker.foco.broadcastReceivers
 
-import android.app.Application
 import android.app.job.JobInfo
 import android.app.job.JobScheduler
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.location.LocationManager
-import android.util.Log
 import com.pervysage.thelimitbreaker.foco.R
-import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.services.GeofenceReAddService
 import com.pervysage.thelimitbreaker.foco.utils.DriveActivityRecogUtil
-import com.pervysage.thelimitbreaker.foco.utils.GeoWorkerUtil
 
 class BootReceiver : BroadcastReceiver() {
 
     private val JOB_ID = 2528
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.i("myBootReceiver", "onReceive")
-
         val component = ComponentName(context, GeofenceReAddService::class.java)
         val builder = JobInfo.Builder(JOB_ID, component)
                 .setBackoffCriteria(1000, JobInfo.BACKOFF_POLICY_LINEAR)

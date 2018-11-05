@@ -5,14 +5,12 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.pervysage.thelimitbreaker.foco.R
-import com.pervysage.thelimitbreaker.foco.actvities.MyContactsActivity
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import java.util.*
 
@@ -37,7 +35,6 @@ class MyContactsAdapter(private var list: List<ContactInfo>, private val context
 
     fun updateList(l: List<ContactInfo>) {
         list = l
-        Log.i("MyContactAdapter","list $l")
         orderedList = getOrderedList(l)
         notifyDataSetChanged()
     }

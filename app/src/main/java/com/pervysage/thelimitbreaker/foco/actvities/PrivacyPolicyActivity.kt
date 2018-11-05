@@ -1,10 +1,10 @@
-package com.pervysage.thelimitbreaker.foco
+package com.pervysage.thelimitbreaker.foco.actvities
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Html
+import com.pervysage.thelimitbreaker.foco.R
 import kotlinx.android.synthetic.main.activity_privacy_policy.*
-import kotlin.reflect.jvm.internal.impl.renderer.RenderingFormat
 
 class PrivacyPolicyActivity : AppCompatActivity() {
 

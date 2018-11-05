@@ -6,10 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.location.LocationManager
 import android.os.Bundle
-import android.os.LocaleList
 import android.support.design.widget.TabLayout
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.PopupMenu
@@ -23,7 +21,6 @@ import com.pervysage.thelimitbreaker.foco.database.entities.generateGeoKey
 import com.pervysage.thelimitbreaker.foco.dialogs.EditPlaceNameDialog
 import io.fabric.sdk.android.Fabric
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -70,7 +67,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Log.i("MainActivity"," smallest screen dpi ${resources.configuration.smallestScreenWidthDp}")
         with(tabLayout) {
             addTab(newTab().setIcon(R.drawable.ic_place))
             addTab(newTab().setIcon(R.drawable.ic_motorcycle))

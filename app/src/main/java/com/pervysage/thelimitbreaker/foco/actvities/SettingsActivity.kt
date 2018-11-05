@@ -2,13 +2,10 @@ package com.pervysage.thelimitbreaker.foco.actvities
 
 import android.content.Context
 import android.content.Intent
-import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.widget.SeekBar
-import com.pervysage.thelimitbreaker.foco.PrivacyPolicyActivity
 import com.pervysage.thelimitbreaker.foco.R
 import kotlinx.android.synthetic.main.activity_settings.*
 
@@ -38,7 +35,7 @@ class SettingsActivity : AppCompatActivity() {
 
 
         privacyPolicy.setOnClickListener{
-            startActivity(Intent(this,PrivacyPolicyActivity::class.java))
+            startActivity(Intent(this, PrivacyPolicyActivity::class.java))
         }
         if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.O_MR1) {
             val flipToEnd = sharedPrefs.getBoolean(getString(R.string.FLIP_TO_END_STATUS), true)

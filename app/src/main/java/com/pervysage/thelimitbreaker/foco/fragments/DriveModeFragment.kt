@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
-import android.graphics.PorterDuffXfermode
 import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.app.Fragment

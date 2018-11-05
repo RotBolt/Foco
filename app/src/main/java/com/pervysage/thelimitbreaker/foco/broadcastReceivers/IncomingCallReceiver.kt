@@ -16,7 +16,6 @@ import android.telecom.TelecomManager
 import android.telephony.PhoneStateListener
 import android.telephony.SmsManager
 import android.telephony.TelephonyManager
-import android.util.Log
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.utils.DeviceMotionUtil
@@ -36,7 +35,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
     private lateinit var phoneStateListener: MyPhoneStateListener
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.i("CallSpeaker","onReceive call")
         if (!receivedOnce) {
             receivedOnce = true
             val sharedPref = context.getSharedPreferences(
@@ -45,7 +43,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
             )
             val dmStatus = sharedPref.getBoolean(context.getString(R.string.DM_STATUS), false)
             val geoStatus = sharedPref.getBoolean(context.getString(R.string.GEO_STATUS), false)
-            Log.i("CallSpeaker"," drive mode $dmStatus geoStatus $geoStatus")
             if (geoStatus || dmStatus) {
                 val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
                 phoneStateListener = MyPhoneStateListener(context, tm, dmStatus)
@@ -67,7 +64,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
         private var telecomManager: TelecomManager
 
         init {
-            Log.i("CallSpeaker","init phonestatelistener")
             method1.isAccessible = true
             iTelephony = method1.invoke(tm)
             methodEndCall = iTelephony.javaClass.getDeclaredMethod("endCall")
@@ -93,9 +89,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
         private var toSay = ""
 
         override fun onCallStateChanged(state: Int, phoneNumber: String?) {
-            Log.i("CallSpeaker","number $phoneNumber ${phoneNumber==null} state : $state")
             if (state == TelephonyManager.CALL_STATE_RINGING) {
-                Log.i("CallSpeaker","number $phoneNumber")
                 phoneNumber?.run {
                     val executor = Executors.newSingleThreadExecutor()
                     val incomingCallTask = Callable { handleIncomingCall(this) }
@@ -162,7 +156,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 }
                 makeWait(150)
                 am.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, AudioManager.FLAG_VIBRATE)
-                Log.i("CallSpeaker", "volume ${am.getStreamVolume(AudioManager.STREAM_MUSIC)}")
             }
             tts.apply {
                 language = when (Locale.getDefault().country) {
@@ -213,7 +206,6 @@ class IncomingCallReceiver : BroadcastReceiver() {
         }
 
         private fun handleIncomingCall(phoneNumber: String) {
-            Log.i("CallSpeaker","incoming $phoneNumber")
             val sharedPref = context.getSharedPreferences(
                     context.getString(R.string.SHARED_PREF_KEY),
                     Context.MODE_PRIVATE
@@ -291,10 +283,17 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
                     }
                     "None" -> {
-                        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
-                            methodEndCall.invoke(iTelephony)
-                        else
-                            telecomManager.endCall()
+                        if (allowCallerStatus && executeIsUnder15Min(phoneNumber)){
+                            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
+                                startMotionUtil(phoneNumber, shakeToMuteStatus, smsToCallerStatus, flipToEnd)
+                            toSay = "This might be important call. Call from $name"
+                            speak()
+                        }else {
+                            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
+                                methodEndCall.invoke(iTelephony)
+                            else
+                                telecomManager.endCall()
+                        }
                     }
                 }
             }
