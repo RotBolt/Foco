@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import com.crashlytics.android.Crashlytics
 import com.google.android.gms.location.Geofence
@@ -17,7 +18,7 @@ class GeoWorkerUtil(private val context: Context){
     private val geofenceClient = LocationServices.getGeofencingClient(context)
 
     @SuppressLint("MissingPermission")
-    fun addPlaceForMonitoring(placePrefs: PlacePrefs){
+    fun addPlaceForMonitoring(placePrefs: PlacePrefs):Task<Void>{
         val geoID = "${placePrefs.latitude},${placePrefs.longitude}"
         val thisGeofence = Geofence.Builder().apply {
             setRequestId(geoID)
@@ -26,33 +27,21 @@ class GeoWorkerUtil(private val context: Context){
             setCircularRegion(placePrefs.latitude,placePrefs.longitude,placePrefs.radius.toFloat())
         }.build()
 
-        geofenceClient.addGeofences(getGeofenceRequest(thisGeofence),getPendingIntent(placePrefs.geoKey))
-                .addOnFailureListener {
-                    Crashlytics.log("GeoWorkerUtil $it")
-                    Toast.makeText(context,"Oops, something went wrong. Please try again", Toast.LENGTH_SHORT).show()
-                }
-
+        return geofenceClient.addGeofences(getGeofenceRequest(thisGeofence),getPendingIntent(placePrefs.geoKey))
     }
 
     fun removePlaceFromMonitoring(placePrefs: PlacePrefs):Task<Void>{
         val requestID=placePrefs.geoKey
         return geofenceClient.removeGeofences(getPendingIntent(requestID))
-                .addOnFailureListener {
-                    Crashlytics.log("GeoWorkerUtil $it")
-                    Toast.makeText(context,"Oops, something went wrong. Please try again", Toast.LENGTH_SHORT).show()
-                }
-
     }
 
-    fun updatePlacePrefsForMonitoring(placePrefs: PlacePrefs){
+    fun updatePlacePrefsForMonitoring(placePrefs: PlacePrefs,onSuccess:()->Unit,onFailure:()->Unit){
         removePlaceFromMonitoring(placePrefs)
                 .addOnSuccessListener {
                     addPlaceForMonitoring(placePrefs)
-                }
-                .addOnFailureListener {
-                    Crashlytics.log("GeoWorkerUtil $it")
-                    Toast.makeText(context,"Oops, something went wrong. Please try again", Toast.LENGTH_SHORT).show()
-                }
+                            .addOnSuccessListener { onSuccess() }
+                            .addOnFailureListener { onFailure() }
+                }.addOnFailureListener { onFailure() }
     }
 
     private fun getGeofenceRequest(geofence: Geofence):GeofencingRequest{

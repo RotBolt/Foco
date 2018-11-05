@@ -1,12 +1,11 @@
 package com.pervysage.thelimitbreaker.foco.actvities
 
 import android.content.Context
-import android.media.AudioManager
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.widget.SeekBar
 import com.pervysage.thelimitbreaker.foco.R
 import kotlinx.android.synthetic.main.activity_settings.*
 
@@ -24,52 +23,37 @@ class SettingsActivity : AppCompatActivity() {
         val allowCallerStatus = sharedPrefs.getBoolean(getString(R.string.ALLOW_CALLER_STATUS), true)
         switchAllowCaller.isChecked = allowCallerStatus
         switchAllowCaller.setOnCheckedChangeListener { _, isChecked ->
-            sharedPrefs.edit().putBoolean(getString(R.string.ALLOW_CALLER_STATUS), isChecked).apply()
+            sharedPrefs.edit().putBoolean(getString(R.string.ALLOW_CALLER_STATUS), isChecked).commit()
         }
 
 
         val smsToCallerStatus = sharedPrefs.getBoolean(getString(R.string.SMS_TO_CALLER), false)
         switchSMSToCaller.isChecked = smsToCallerStatus
         switchSMSToCaller.setOnCheckedChangeListener { _, isChecked ->
-            sharedPrefs.edit().putBoolean(getString(R.string.SMS_TO_CALLER), isChecked).apply()
+            sharedPrefs.edit().putBoolean(getString(R.string.SMS_TO_CALLER), isChecked).commit()
         }
 
+
+        privacyPolicy.setOnClickListener{
+            startActivity(Intent(this, PrivacyPolicyActivity::class.java))
+        }
         if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.O_MR1) {
             val flipToEnd = sharedPrefs.getBoolean(getString(R.string.FLIP_TO_END_STATUS), true)
             switchFlipToEnd.isChecked = flipToEnd
             switchFlipToEnd.setOnCheckedChangeListener { _, isChecked ->
-                sharedPrefs.edit().putBoolean(getString(R.string.FLIP_TO_END_STATUS), isChecked).apply()
+                sharedPrefs.edit().putBoolean(getString(R.string.FLIP_TO_END_STATUS), isChecked).commit()
+            }
+
+            val shakeToMuteStatus = sharedPrefs.getBoolean(getString(R.string.SHAKE_STATUS),true)
+            switchShakeToMute.isChecked=shakeToMuteStatus
+            switchShakeToMute.setOnCheckedChangeListener { _, isChecked ->
+                sharedPrefs.edit().putBoolean(getString(R.string.SHAKE_STATUS),isChecked).commit()
             }
         }else{
             flipToEndContainer.visibility= View.GONE
             shakeToMuteContainer.visibility=View.GONE
-            sharedPrefs.edit().putBoolean(getString(R.string.FLIP_TO_END_STATUS),false).apply()
+            sharedPrefs.edit().putBoolean(getString(R.string.FLIP_TO_END_STATUS),false).commit()
+            sharedPrefs.edit().putBoolean(getString(R.string.SHAKE_STATUS),false).commit()
         }
-
-        var volumeLevel = sharedPrefs.getInt(getString(R.string.RINGER_VOLUME), 90)
-
-        val am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
-
-        ringerVolumeController.progress = volumeLevel
-
-        ringerVolumeController.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                volumeLevel = progress
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                sharedPrefs.edit().putInt(getString(R.string.RINGER_VOLUME), volumeLevel).apply()
-                val setVolume = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*0.01*volumeLevel
-                am.setStreamVolume(AudioManager.STREAM_MUSIC,setVolume.toInt(),AudioManager.FLAG_PLAY_SOUND)
-            }
-
-        })
-
-
     }
 }

@@ -20,7 +20,7 @@ class MyContactsActivity : AppCompatActivity() {
 
     private var areContactEmpty = true
 
-    private lateinit var contactAdapter:MyContactsAdapter
+    private lateinit var contactAdapter: MyContactsAdapter
 
     private fun toggleViews() {
         if (areContactEmpty) {
@@ -43,19 +43,16 @@ class MyContactsActivity : AppCompatActivity() {
 
         repository = Repository.getInstance(application)
 
-        contactAdapter = MyContactsAdapter(ArrayList(),this)
+        contactAdapter = MyContactsAdapter(ArrayList(), this)
 
         rvMyContacts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         rvMyContacts.adapter = contactAdapter
 
         val contactsLive = repository.getAllContactsLive()
-        contactsLive.observe(this, Observer<List<ContactInfo>> {
+        contactsLive.observe(this, Observer<List<ContactInfo>> { it ->
             it?.run {
-                 val sortedList=sortedBy {
-                    it.name
-                }
-
-                areContactEmpty=this.isEmpty()
+                val sortedList = sortedBy { it.name }
+                areContactEmpty = this.isEmpty()
                 toggleViews()
                 contactAdapter.updateList(sortedList)
             }

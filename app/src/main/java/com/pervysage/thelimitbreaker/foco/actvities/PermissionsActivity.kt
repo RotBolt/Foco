@@ -19,11 +19,9 @@ import kotlinx.android.synthetic.main.activity_permissions.*
 class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
 
     private var permResult = false
-    private var dndAccessResult = false
-
     private val PERM_REQUEST = 1
 
-
+    private var dndAccess = false
     override fun onClick(v: View) {
         when (v.id) {
             R.id.btnGrantPerm -> {
@@ -62,16 +60,17 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
                     )
                 }
             }
+
+            R.id.btnNext -> startActivity(Intent(this, MainActivity::class.java)
+                    .apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    })
             R.id.btnGrantDND -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     val intent = Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
                     startActivity(intent)
                 }
             }
-            R.id.btnNext -> startActivity(Intent(this, MainActivity::class.java)
-                    .apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                    })
         }
     }
 
@@ -107,18 +106,23 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
         val sharedPrefs = getSharedPreferences(getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
         sharedPrefs.edit().clear().commit()
         btnNext.isEnabled = false
-        btnGrantDND.setOnClickListener(this)
         btnGrantPerm.setOnClickListener(this)
+        btnGrantDND.setOnClickListener(this)
 
     }
 
     override fun onResume() {
         super.onResume()
-        val notifyManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        dndAccessResult =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) notifyManager.isNotificationPolicyAccessGranted
-                else true
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        dndAccess = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) notificationManager.isNotificationPolicyAccessGranted
+        else true
+
+        if (Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
+            tvDNDAccess.visibility=View.GONE
+            btnGrantDND.visibility=View.GONE
+        }
 
         permResult =
                 ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
@@ -128,8 +132,8 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
                 && ContextCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED
 
         if (permResult) {
-            val drawable = ContextCompat.getDrawable(this, R.drawable.reg_background)!!.mutate()
-            drawable.colorFilter = PorterDuffColorFilter(
+            val drawable = ContextCompat.getDrawable(this, R.drawable.reg_background)?.mutate()
+            drawable?.colorFilter = PorterDuffColorFilter(
                     ContextCompat.getColor(this, R.color.colorActive),
                     PorterDuff.Mode.SRC_ATOP
             )
@@ -138,7 +142,7 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
             btnGrantPerm.setOnClickListener(null)
         }
 
-        if (dndAccessResult) {
+        if (dndAccess) {
             val drawable = ContextCompat.getDrawable(this, R.drawable.reg_background)!!.mutate()
             drawable.colorFilter = PorterDuffColorFilter(
                     ContextCompat.getColor(this, R.color.colorActive),
@@ -149,11 +153,11 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
             btnGrantDND.setOnClickListener(null)
         }
 
-        if (permResult && dndAccessResult) {
+        if (permResult && dndAccess) {
             btnNext.apply {
                 isEnabled = true
-                val drawable = ContextCompat.getDrawable(this@PermissionsActivity, R.drawable.reg_background)!!.mutate()
-                drawable.colorFilter = PorterDuffColorFilter(
+                val drawable = ContextCompat.getDrawable(this@PermissionsActivity, R.drawable.reg_background)?.mutate()
+                drawable?.colorFilter = PorterDuffColorFilter(
                         ContextCompat.getColor(this@PermissionsActivity, R.color.colorActive),
                         PorterDuff.Mode.SRC_ATOP
                 )

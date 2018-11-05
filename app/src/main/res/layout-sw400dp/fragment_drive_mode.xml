@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp"
+    android:background="@android:color/white"
+    tools:context=".fragments.DriveModeFragment">
+
+    <ImageView
+        android:id="@+id/ivDriveMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="21dp"
+        android:src="@drawable/ic_scooter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/contactGroupContainer"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        app:layout_constraintTop_toBottomOf="@id/ivDriveMode"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:gravity="center_horizontal"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tvContactGroupLabel"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/maven_pro_medium"
+            android:gravity="center_horizontal"
+            android:text="Contact Group"
+            android:textColor="@color/colorTextDark"
+            android:textSize="16sp" />
+
+        <Spinner
+            android:id="@+id/groupChooser"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="wrap_content">
+        </Spinner>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvInfoBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="24dp"
+        android:background="@drawable/info_box_background"
+        android:fontFamily="@font/maven_pro_medium"
+        android:gravity="center"
+        android:padding="8dp"
+        android:text="Receive calls from all contacts"
+        android:textColor="@color/colorTextDark"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/contactGroupContainer" />
+
+    <Button
+        android:id="@+id/btnSeePriority"
+        app:layout_constraintTop_toBottomOf="@id/tvInfoBox"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp"
+        android:text=" See Priority"
+        android:drawableLeft="@drawable/ic_person"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:background="@drawable/info_box_background"
+        android:fontFamily="@font/maven_pro_medium"
+        android:textColor="@color/group_chooser_color"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
+</android.support.constraint.ConstraintLayout>

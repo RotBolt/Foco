@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".actvities.PrivacyPolicyActivity">
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="match_parent"
+                android:src="@drawable/ic_monkey"
+                android:paddingTop="10dp"
+                android:scaleX="0.65"
+                android:scaleY="0.65"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:text="@string/app_name"
+                android:fontFamily="@font/maven_pro_medium"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:textColor="@color/colorGenDark"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:text="V 1.0"
+                android:fontFamily="@font/maven_pro"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:textColor="@color/colorGenDark"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:padding="8dp"
+                android:autoLink="all"
+                android:id="@+id/tvPrivacyPolicy"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </LinearLayout>
+
+
+    </ScrollView>
+
+</FrameLayout>

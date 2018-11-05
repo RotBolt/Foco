@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:layout_height="match_parent"
+    tools:context="com.pervysage.thelimitbreaker.foco.actvities.PermissionsActivity">
+
+    <TextView
+        android:id="@+id/tvAppTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/maven_pro_medium"
+        android:paddingLeft="16dp"
+        android:paddingBottom="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Getting Started ..."
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvMessageLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/maven_pro_medium"
+        android:padding="16dp"
+        android:text="Please give following permissions"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/tvAppTitle"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <android.support.constraint.ConstraintLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginTop="12dp"
+
+        android:padding="8dp"
+        android:background="@drawable/reg_background"
+        android:backgroundTint="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvMessageLabel">
+
+        <TextView
+            android:id="@+id/tvPermCalls"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textSize="14sp"
+            android:padding="8dp"
+            android:drawableLeft="@drawable/ic_call"
+            android:drawableTint="@color/colorGenDark"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/maven_pro_medium"
+            android:text="  Access Phone Calls"
+            android:textColor="@color/colorGenDark"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvPermContacts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textSize="14sp"
+            android:padding="8dp"
+            android:drawableLeft="@drawable/ic_group"
+            android:drawableTint="@color/colorGenDark"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/maven_pro_medium"
+            android:text="  Access Contacts"
+            android:textColor="@color/colorGenDark"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvPermCalls" />
+
+        <TextView
+            android:id="@+id/tvPermLocations"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textSize="14sp"
+            android:padding="8dp"
+            android:drawableLeft="@drawable/ic_place"
+            android:drawableTint="@color/colorGenDark"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/maven_pro_medium"
+            android:text="  Access Location"
+            android:textColor="@color/colorGenDark"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvPermContacts" />
+
+        <TextView
+            android:id="@+id/tvPermSMS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textSize="14sp"
+            android:padding="8dp"
+            android:drawableLeft="@drawable/ic_message"
+            android:drawableTint="@color/colorGenDark"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/maven_pro_medium"
+            android:text="  Send SMS"
+            android:textColor="@color/colorGenDark"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvPermLocations" />
+
+        <Button
+            android:id="@+id/btnGrantPerm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/reg_background"
+            android:backgroundTint="@color/colorAccent"
+            android:fontFamily="@font/maven_pro_medium"
+            android:padding="12dp"
+            android:scaleX="0.80"
+            android:scaleY="0.80"
+            android:text="Allow"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvPermSMS"/>
+
+        <TextView
+            android:id="@+id/tvDNDAccess"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textSize="14sp"
+            android:padding="8dp"
+            android:drawableStart="@drawable/ic_timelapse"
+            android:drawableTint="@color/colorGenDark"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/maven_pro_medium"
+            android:text="  Access Do Not Disturb"
+            android:textColor="@color/colorGenDark"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnGrantPerm" />
+
+        <Button
+            android:id="@+id/btnGrantDND"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/reg_background"
+            android:backgroundTint="@color/colorAccent"
+            android:fontFamily="@font/maven_pro_medium"
+            android:padding="12dp"
+            android:scaleX="0.80"
+            android:scaleY="0.80"
+            android:text="Allow"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvDNDAccess"/>
+
+
+    </android.support.constraint.ConstraintLayout>
+
+    <Button
+        android:id="@+id/btnNext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/reg_background"
+        android:backgroundTint="@color/colorTextDisable"
+        android:drawableEnd="@drawable/ic_navigate_next"
+        android:fontFamily="@font/maven_pro_medium"
+        android:padding="12dp"
+        android:text="Next"
+        android:scaleY="0.85"
+        android:scaleX="0.85"
+        android:enabled="false"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+
+</android.support.constraint.ConstraintLayout>

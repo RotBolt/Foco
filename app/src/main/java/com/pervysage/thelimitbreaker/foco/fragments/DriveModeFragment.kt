@@ -2,6 +2,9 @@ package com.pervysage.thelimitbreaker.foco.fragments
 
 
 import android.content.Context
+import android.content.Intent
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -13,6 +16,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.actvities.MainActivity
+import com.pervysage.thelimitbreaker.foco.actvities.MyContactsActivity
 import com.pervysage.thelimitbreaker.foco.utils.DriveActivityRecogUtil
 import com.pervysage.thelimitbreaker.foco.utils.sendDriveModeNotification
 import kotlinx.android.synthetic.main.fragment_drive_mode.*
@@ -60,20 +64,22 @@ class DriveModeFragment : Fragment() {
                     when (position) {
                         0 -> {
                             tvInfoBox.text = "Receive calls from all contacts in your contact list"
+                            btnSeePriority.visibility = View.GONE
                             group = "All Contacts"
                         }
                         1 -> {
                             tvInfoBox.text = "Receive calls from Priority People only"
+                            btnSeePriority.visibility = View.VISIBLE
                             group = "Priority Contacts"
                         }
                         2 -> {
                             tvInfoBox.text = "Total Silence !"
-                            tvInfoBox.visibility = View.VISIBLE
+                            btnSeePriority.visibility = View.GONE
                             group = "None"
                         }
                     }
                     dmActiveGroup = group
-                    sharedPrefs?.edit()?.putString(context.getString(R.string.DM_ACTIVE_GROUP), group)?.apply()
+                    sharedPrefs?.edit()?.putString(context.getString(R.string.DM_ACTIVE_GROUP), group)?.commit()
                 }
             }
 
@@ -85,15 +91,12 @@ class DriveModeFragment : Fragment() {
             }
         }
 
-        isFragEnabled = sharedPrefs?.getInt(context?.resources?.getString(R.string.DRIVE_MODE_ENABLED), -1) ?: 0
-        if (isFragEnabled == 1) {
-            context?.run {
-                ivDriveMode.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_scooter))
-            }
-        } else {
-            applyState(false, true)
-
+        btnSeePriority.setOnClickListener {
+            startActivity(Intent(context, MyContactsActivity::class.java))
         }
+
+        isFragEnabled = sharedPrefs?.getInt(context?.resources?.getString(R.string.DRIVE_MODE_ENABLED), -1) ?: 0
+        applyState(isFragEnabled == 1, true)
 
         activity?.run {
             if (this is MainActivity) {
@@ -114,7 +117,17 @@ class DriveModeFragment : Fragment() {
 
                 val sharedPrefs = this.getSharedPreferences(this.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
 
-                sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), dmActiveGroup).apply()
+                sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), dmActiveGroup).commit()
+
+                btnSeePriority.isEnabled = true
+
+                val icSeePriority = ContextCompat.getDrawable(this, R.drawable.ic_person)
+
+                icSeePriority?.colorFilter = PorterDuffColorFilter(
+                        ContextCompat.getColor(this, R.color.colorGenDark),
+                        PorterDuff.Mode.MULTIPLY
+                )
+                btnSeePriority.setCompoundDrawablesWithIntrinsicBounds(icSeePriority, null, null, null)
 
                 ivDriveMode.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_scooter))
 
@@ -138,15 +151,28 @@ class DriveModeFragment : Fragment() {
 
                 val sharedPrefs = this.getSharedPreferences(this.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
 
-                sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), "").apply()
+                sharedPrefs.edit().putString(this.getString(R.string.DM_ACTIVE_GROUP), "").commit()
+
+                btnSeePriority.isEnabled = false
+
+
+                val icSeePriority = ContextCompat.getDrawable(this, R.drawable.ic_person)
+                icSeePriority?.colorFilter = PorterDuffColorFilter(
+                        ContextCompat.getColor(this, R.color.colorTextDisable),
+                        PorterDuff.Mode.MULTIPLY
+                )
+                btnSeePriority.setCompoundDrawablesWithIntrinsicBounds(icSeePriority, null, null, null)
 
                 val am = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
                 val dmStatus = sharedPrefs.getBoolean(this.getString(R.string.DM_STATUS), false)
-                val serviceStatus = sharedPrefs.getBoolean(this.getString(R.string.GEO_STATUS), false)
+                val geoStatus = sharedPrefs.getBoolean(this.getString(R.string.GEO_STATUS), false)
 
-                if (dmStatus && !serviceStatus) {
+                if (dmStatus) {
                     sendDriveModeNotification("Drive Mode Stopped", "Service Stopped", false, this)
+                    sharedPrefs.edit().putBoolean(getString(R.string.DM_STATUS), false).commit()
+                }
+                if (dmStatus && !geoStatus) {
                     am.ringerMode = AudioManager.RINGER_MODE_NORMAL
                     val maxVolume = (am.getStreamMaxVolume(AudioManager.STREAM_RING) * 0.90).toInt()
                     am.setStreamVolume(AudioManager.STREAM_RING, maxVolume, AudioManager.FLAG_PLAY_SOUND)

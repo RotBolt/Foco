@@ -1,19 +1,27 @@
 package com.pervysage.thelimitbreaker.foco.adapters
 
+import android.app.AlertDialog
 import android.app.Application
+import android.app.job.JobInfo
+import android.app.job.JobScheduler
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.location.LocationManager
 import android.media.AudioManager
 import android.support.v4.app.FragmentActivity
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.SwitchCompat
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.crashlytics.android.Crashlytics
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
@@ -22,6 +30,7 @@ import com.pervysage.thelimitbreaker.foco.dialogs.EditPlaceNameDialog
 import com.pervysage.thelimitbreaker.foco.dialogs.RadiusPickDialog
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.MyListView
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.ViewManager
+import com.pervysage.thelimitbreaker.foco.services.GeofenceReAddService
 import com.pervysage.thelimitbreaker.foco.utils.GeoWorkerUtil
 import com.pervysage.thelimitbreaker.foco.utils.sendGeofenceNotification
 
@@ -34,6 +43,8 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
     private var lastExpandPos = -1
 
     private var lastExpandName = ""
+
+    private var toExecuteGeo = true
 
     private lateinit var onListEmpty: (Boolean) -> Unit
 
@@ -75,6 +86,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
 
     fun refreshList(list: List<PlacePrefs>, newAdded: Boolean) {
         placePrefList = list
+
         notifyDataSetChanged()
         if (placePrefList.isEmpty()) {
             onListEmpty(true)
@@ -83,14 +95,24 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
             placePrefList[placePrefList.size - 1].isExpanded = true
             listView.setSelection(placePrefList.size - 1)
             geoWorkerUtil.addPlaceForMonitoring(placePrefs = placePrefList[placePrefList.size - 1])
+                    .addOnFailureListener {
+                        placePrefList[placePrefList.size - 1].active = 0
+
+                        Toast.makeText(context, "Oops !! GPS lost, Please check location settings", Toast.LENGTH_LONG).show()
+                        repository.updatePref(placePrefList[placePrefList.size - 1].copy(isExpanded = false, active = 0))
+                    }
+                    .addOnSuccessListener {
+                        Toast.makeText(context, "Service turned on for ${placePrefList[placePrefList.size - 1].name}", Toast.LENGTH_SHORT).show()
+                    }
         }
+
     }
 
     private fun revertPrefsForActivePlace(placePref: PlacePrefs) {
 
         val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
-        val lat = sharedPrefs.getString(context.getString(R.string.LAT), "")
-        val lng = sharedPrefs.getString(context.getString(R.string.LNG), "")
+        val lat = sharedPrefs.getString(context.getString(R.string.ACTIVE_LAT), "")
+        val lng = sharedPrefs.getString(context.getString(R.string.ACTIVE_LNG), "")
 
         if (lat == placePref.latitude.toString() && lng == placePref.longitude.toString()) {
             val notificationManagerCompat = NotificationManagerCompat.from(context)
@@ -98,22 +120,21 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
             sendGeofenceNotification("Service Stopped for ${placePref.name}", -1, context)
 
             val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            am.ringerMode = AudioManager.RINGER_MODE_NORMAL
-            am.setStreamVolume(AudioManager.STREAM_NOTIFICATION, am.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION), AudioManager.FLAG_PLAY_SOUND)
-
+                am.setStreamVolume(AudioManager.STREAM_RING, am.getStreamMaxVolume(AudioManager.STREAM_RING), AudioManager.FLAG_PLAY_SOUND)
             with(sharedPrefs.edit()) {
                 putString(context.getString(R.string.ACTIVE_NAME), "")
-                putString(context.getString(R.string.ACTIVE_CONTACT_GROUP), "")
+                putString(context.getString(R.string.GEO_ACTIVE_GROUP), "")
                 putBoolean(context.getString(R.string.GEO_STATUS), false)
-                putString(context.getString(R.string.LAT), "")
-                putString(context.getString(R.string.LNG), "")
-            }.apply()
+                putString(context.getString(R.string.ACTIVE_LAT), "")
+                putString(context.getString(R.string.ACTIVE_LNG), "")
+            }.commit()
         }
     }
 
     private fun manageView(itemView: View?, placePrefs: PlacePrefs, position: Int) {
 
         itemView?.run {
+
             if (placePrefs.isExpanded)
                 doWorkInExpand(this, placePrefs, position)
             else
@@ -128,7 +149,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
 
                 } else {
                     var viewToCollapse: View? = null
-                    var prevPrefs = if (lastExpandPos != -1) placePrefList[lastExpandPos] else null
+                    val prevPrefs = if (lastExpandPos != -1) placePrefList[lastExpandPos] else null
 
                     /*
                      Checking whether previous expanded card is currently on screen or not
@@ -185,37 +206,15 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
         }
         bodyHolder.extraContent.visibility = View.VISIBLE
 
+
+
+
         headHolder.bindData(placePrefs, position)
         bodyHolder.bindData(placePrefs)
 
-        headHolder.setOnNameChangeListener(
-                placePref = placePrefs,
-                fm = (context as FragmentActivity).supportFragmentManager,
-                onNameChange = {
-                    val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
-                    val lat = sharedPrefs.getString(context.getString(R.string.LAT), "")
-                    val lng = sharedPrefs.getString(context.getString(R.string.LNG), "")
-                    if (lat == placePrefs.latitude.toString() && lng == placePrefs.longitude.toString()) {
-                        sharedPrefs.edit().putString(context.getString(R.string.ACTIVE_NAME), placePrefs.name).commit()
-                    }
-                }
-        )
+        setPrefsListeners(headHolder, placePrefs, true)
 
-        headHolder.setOnSwitchChangeListener(
-                placePref = placePrefs,
-                onSwitchChange = { isOn, placePrefs ->
-                    placePrefs.active = if (isOn) 1 else 0
-                    headHolder.showEnabled(isOn, true, context)
-                    if (isOn)
-                        geoWorkerUtil.addPlaceForMonitoring(placePrefs)
-                    else {
-                        geoWorkerUtil.removePlaceFromMonitoring(placePrefs)
-                        revertPrefsForActivePlace(placePrefs)
-                    }
-                    val prefsTBU = placePrefs.copy(isExpanded = false)
-                    repository.updatePref(prefsTBU)
-                }
-        )
+        (context as FragmentActivity)
 
         bodyHolder.setOnContactGroupPickListener(placePrefs, context.supportFragmentManager) {
             placePrefs.contactGroup = it
@@ -223,19 +222,30 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
             val prefsTBU = placePrefs.copy(isExpanded = false)
 
             val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
-            val lat = sharedPrefs.getString(context.getString(R.string.LAT), "")
-            val lng = sharedPrefs.getString(context.getString(R.string.LNG), "")
+            val lat = sharedPrefs.getString(context.getString(R.string.ACTIVE_LAT), "")
+            val lng = sharedPrefs.getString(context.getString(R.string.ACTIVE_LNG), "")
             if (lat == placePrefs.latitude.toString() && lng == placePrefs.longitude.toString()) {
-                sharedPrefs.edit().putString(context.getString(R.string.ACTIVE_CONTACT_GROUP), it).commit()
+                sharedPrefs.edit().putString(context.getString(R.string.GEO_ACTIVE_GROUP), it).commit()
             }
             repository.updatePref(prefsTBU)
         }
 
-        bodyHolder.setOnRadiusPickListeners(placePrefs, context.supportFragmentManager) {
-            placePrefs.radius = it
-            val prefsTBU = placePrefs.copy(isExpanded = false)
-            geoWorkerUtil.updatePlacePrefsForMonitoring(placePrefs)
-            repository.updatePref(prefsTBU)
+        bodyHolder.setOnRadiusPickListeners(placePrefs, context.supportFragmentManager) { radiusString, radiusInt ->
+
+            geoWorkerUtil.updatePlacePrefsForMonitoring(
+                    placePrefs,
+                    {
+                        Toast.makeText(context, "Radius Updated", Toast.LENGTH_SHORT).show()
+                        placePrefs.radius = radiusInt
+                        bodyHolder.tvRadius.text = radiusString
+                        val prefsTBU = placePrefs.copy(isExpanded = false)
+                        repository.updatePref(prefsTBU)
+                    },
+                    {
+                        showFailDialog(context, isGPSUnabled())
+                    }
+            )
+
         }
 
         bodyHolder.setWorkOnDelete(placePrefs) {
@@ -264,17 +274,31 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
             viewDivider.visibility = View.VISIBLE
             showEnabled(placePrefs.active == 1, false, context)
         }
+
         placePrefs.isExpanded = false
         bodyHolder.extraContent.visibility = View.GONE
         headHolder.bindData(placePrefs, position)
 
+        setPrefsListeners(headHolder, placePrefs, false)
+    }
+
+    private fun isGPSUnabled(): Boolean {
+        return (context.getSystemService(Context.LOCATION_SERVICE) as LocationManager).isProviderEnabled(LocationManager.GPS_PROVIDER)
+    }
+
+
+    private fun setPrefsListeners(headHolder: HeadHolder, placePrefs: PlacePrefs, isExpanding: Boolean) {
+
+        (context as FragmentActivity)
+
         headHolder.setOnNameChangeListener(
                 placePref = placePrefs,
-                fm = (context as FragmentActivity).supportFragmentManager,
+                fm = context.supportFragmentManager,
                 onNameChange = {
                     val sharedPrefs = context.getSharedPreferences(context.getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
-                    val lat = sharedPrefs.getString(context.getString(R.string.LAT), "")
-                    val lng = sharedPrefs.getString(context.getString(R.string.LNG), "")
+                    val lat = sharedPrefs.getString(context.getString(R.string.ACTIVE_LAT), "")
+                    val lng = sharedPrefs.getString(context.getString(R.string.ACTIVE_LNG), "")
+                    repository.updatePref(placePrefs.copy(name = placePrefs.name))
                     if (lat == placePrefs.latitude.toString() && lng == placePrefs.longitude.toString()) {
                         sharedPrefs.edit().putString(context.getString(R.string.ACTIVE_NAME), placePrefs.name).commit()
                     }
@@ -285,19 +309,65 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
                 placePref = placePrefs,
                 onSwitchChange = { isOn, placePrefs ->
 
-                    placePrefs.active = if (isOn) 1 else 0
-                    headHolder.showEnabled(isOn, false, context)
-                    if (isOn)
+                    if (isOn && toExecuteGeo) {
                         geoWorkerUtil.addPlaceForMonitoring(placePrefs)
-                    else {
+                                .addOnSuccessListener {
+                                    Toast.makeText(context, "Service turned on for ${placePrefs.name}", Toast.LENGTH_SHORT).show()
+                                    placePrefs.active = 1
+                                    if (!isExpanding)
+                                        headHolder.showEnabled(true, false, context)
+                                    repository.updatePref(placePrefs.copy(isExpanded = false))
+                                }.addOnFailureListener {
+                                    Crashlytics.logException(it)
+                                    showFailDialog(context, isGPSUnabled())
+                                    toExecuteGeo = false
+                                    headHolder.serviceSwitch.isChecked = false
+                                }
+
+                    } else if (toExecuteGeo) {
                         geoWorkerUtil.removePlaceFromMonitoring(placePrefs)
-                        revertPrefsForActivePlace(placePrefs)
+                                .addOnSuccessListener {
+                                    Toast.makeText(context, "Service turned off for ${placePrefs.name}", Toast.LENGTH_SHORT).show()
+                                    placePrefs.active = 0
+                                    if (!isExpanding)
+                                        headHolder.showEnabled(false, false, context)
+                                    revertPrefsForActivePlace(placePrefs)
+                                    repository.updatePref(placePrefs.copy(active = 0, isExpanded = false))
+                                }
+                                .addOnFailureListener {
+                                    Crashlytics.logException(it)
+                                    showFailDialog(context, isGPSUnabled())
+                                    toExecuteGeo = false
+                                    headHolder.serviceSwitch.isChecked = false
+                                }
                     }
-                    val prefsTBU = placePrefs.copy(isExpanded = false)
-                    repository.updatePref(prefsTBU)
+                    toExecuteGeo = true
                 }
         )
+    }
 
+    private fun showFailDialog(context: Context, isGpsEnabled: Boolean) {
+        val contextThemeWrapper = ContextThemeWrapper(context, R.style.DialogStyle)
+        val builder = AlertDialog.Builder(contextThemeWrapper)
+                .setTitle("Oops")
+        if (!isGpsEnabled) {
+            builder.setMessage("Please Turn on location ")
+                    .setPositiveButton("Turn On") { dialog, _ ->
+                        dialog.dismiss()
+                        context.startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                    }
+                    .setNegativeButton("Cancel") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+        } else {
+            builder.setMessage("GPS Not working. Please try again later")
+                    .setPositiveButton("Ok") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+        }
+        val dialog = builder.create()
+        dialog?.window?.setBackgroundDrawableResource(R.drawable.dialog_background)
+        dialog.show()
     }
 
     private class HeadHolder(itemView: View) {
@@ -388,10 +458,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
                 }
                 dialog.show(fm, "EditPlaceName")
             }
-
         }
-
-
     }
 
     private class BodyHolder(itemView: View) {
@@ -412,7 +479,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
             }
         }
 
-        fun setOnRadiusPickListeners(placePref: PlacePrefs, fm: FragmentManager, onRadiusChange: (Int) -> Unit) {
+        fun setOnRadiusPickListeners(placePref: PlacePrefs, fm: FragmentManager, onRadiusChange: (String, Int) -> Unit) {
             tvRadius.setOnClickListener {
 
                 val dialog = RadiusPickDialog()
@@ -426,9 +493,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
                         }
                 )
                 dialog.setOnRadiusPickListener { radiusString, radiusInt ->
-                    tvRadius.text = radiusString
-                    placePref.radius = radiusInt
-                    onRadiusChange(radiusInt)
+                    onRadiusChange(radiusString, radiusInt)
                 }
                 dialog.show(fm, "RadiusPick")
             }

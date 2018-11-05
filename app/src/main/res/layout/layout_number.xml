@@ -8,8 +8,8 @@
         android:text="+919999748821"
         android:textColor="@color/colorTextDark"
         android:fontFamily="@font/maven_pro_medium"
-        android:padding="16dp"
-        android:textSize="16sp"
+        android:padding="12dp"
+        android:textSize="12sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

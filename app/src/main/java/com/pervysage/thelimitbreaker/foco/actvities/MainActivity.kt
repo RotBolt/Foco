@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.location.LocationManager
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v7.app.AppCompatActivity
@@ -45,18 +46,36 @@ class MainActivity : AppCompatActivity() {
         onAddNewPlace = l
     }
 
+    private fun showFailDialog() {
+        val contextThemeWrapper = ContextThemeWrapper(this, R.style.DialogStyle)
+        val builder = AlertDialog.Builder(contextThemeWrapper)
+                .setTitle("Oops")
+                .setMessage("Please Turn on location ")
+                .setPositiveButton("Turn On") { dialog, _ ->
+                    dialog.dismiss()
+                    this.startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+
+        val dialog = builder.create()
+        dialog?.window?.setBackgroundDrawableResource(R.drawable.dialog_background)
+        dialog.show()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         with(tabLayout) {
             addTab(newTab().setIcon(R.drawable.ic_place))
             addTab(newTab().setIcon(R.drawable.ic_motorcycle))
         }
 
+
         Fabric.with(Fabric.Builder(this)
                 .kits(Crashlytics())
-                .debuggable(true)  // Enables Crashlytics debugger
+                .debuggable(false)  // Enables Crashlytics debugger
                 .build())
 
         val pagerAdapter = PagerAdapter(supportFragmentManager, tabLayout.tabCount)
@@ -82,8 +101,14 @@ class MainActivity : AppCompatActivity() {
         switchDriveMode.isChecked = isDriveSwitchEnabled == 1
 
         ivAction.setOnClickListener {
-            it.setOnTouchListener { _, _ -> true }
-            pickPlace()
+            val gpsEnabled = (getSystemService(Context.LOCATION_SERVICE) as LocationManager)
+                    .isProviderEnabled(LocationManager.GPS_PROVIDER)
+            if (gpsEnabled) {
+                it.setOnTouchListener { _, _ -> true }
+                pickPlace()
+            } else {
+                showFailDialog()
+            }
         }
 
         ivOptions.setOnClickListener { _ ->
@@ -170,7 +195,11 @@ class MainActivity : AppCompatActivity() {
             val nameDialog = EditPlaceNameDialog()
             nameDialog.iniName = place.name.toString()
 
+
             nameDialog.setOnNameConfirm {
+                val gpsEnabled = (getSystemService(Context.LOCATION_SERVICE) as LocationManager)
+                        .isProviderEnabled(LocationManager.GPS_PROVIDER)
+
                 val placePrefs = PlacePrefs(
                         name = it,
                         address = place.address.toString(),
@@ -178,7 +207,7 @@ class MainActivity : AppCompatActivity() {
                         longitude = place.latLng.longitude,
                         geoKey = generateGeoKey(),
                         radius = 500,
-                        active = 1,
+                        active = if (gpsEnabled) 1 else 0,
                         contactGroup = "All Contacts"
 
                 )

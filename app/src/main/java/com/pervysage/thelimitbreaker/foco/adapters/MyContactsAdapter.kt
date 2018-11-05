@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.pervysage.thelimitbreaker.foco.R
-import com.pervysage.thelimitbreaker.foco.actvities.MyContactsActivity
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import java.util.*
 

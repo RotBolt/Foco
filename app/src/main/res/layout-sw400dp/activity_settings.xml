@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.pervysage.thelimitbreaker.foco.actvities.SettingsActivity">
+
+
+    <LinearLayout
+        android:id="@+id/titleBar"
+        android:elevation="7dp"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:background="@color/colorPrimaryDark"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:id="@+id/ivBack"
+            android:layout_weight="1"
+            android:padding="7dp"
+            android:scaleX="0.80"
+            android:scaleY="0.80"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_arrow_back"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tvSettingsHeader"
+            android:layout_width="0dp"
+            android:layout_weight="7"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/maven_pro_medium"
+            android:text="Settings"
+            android:padding="7dp"
+            android:textSize="25sp"
+            android:layout_gravity="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </LinearLayout>
+
+
+    <ScrollView
+        app:layout_constraintTop_toBottomOf="@id/titleBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/AllowCallerContainer"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:padding="8dp"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_weight="5"
+                    android:padding="8dp"
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:fontFamily="@font/maven_pro_medium"
+                        android:text="Allow Callers within 15 minutes"
+                        android:textSize="16sp"
+                        android:padding="4dp"
+                        android:textColor="@color/colorGenDark"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                    <TextView
+                        android:fontFamily="@font/maven_pro"
+                        android:padding="4dp"
+                        android:text="@string/ALLOW_CALLER_INFO"
+                        android:textColor="@color/colorTextDisable"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/switchAllowCaller"
+                    android:padding="8dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_gravity="center"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/SMSToCallerContainer"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:padding="8dp"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_weight="5"
+                    android:padding="8dp"
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:fontFamily="@font/maven_pro_medium"
+                        android:text="Send SMS to rejected callers"
+                        android:textSize="16sp"
+                        android:padding="4dp"
+                        android:textColor="@color/colorGenDark"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                    <TextView
+                        android:fontFamily="@font/maven_pro"
+                        android:padding="4dp"
+                        android:text="@string/SEND_SMS_INFO"
+                        android:textColor="@color/colorTextDisable"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/switchSMSToCaller"
+                    android:padding="8dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_gravity="center"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/flipToEndContainer"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:padding="8dp"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_weight="5"
+                    android:padding="8dp"
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:fontFamily="@font/maven_pro_medium"
+                        android:text="Flip to end call"
+                        android:textSize="16sp"
+                        android:padding="4dp"
+                        android:textColor="@color/colorGenDark"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                    <TextView
+                        android:fontFamily="@font/maven_pro"
+                        android:padding="4dp"
+                        android:text="Just flip the phone to hang up the phone"
+                        android:textColor="@color/colorTextDisable"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/switchFlipToEnd"
+                    android:padding="8dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_gravity="center"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/shakeToMuteContainer"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:padding="8dp"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_weight="5"
+                    android:padding="8dp"
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:fontFamily="@font/maven_pro_medium"
+                        android:text="Shake to mute the caller name"
+                        android:textSize="16sp"
+                        android:padding="4dp"
+                        android:textColor="@color/colorGenDark"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                    <TextView
+                        android:fontFamily="@font/maven_pro"
+                        android:padding="4dp"
+                        android:text="@string/SHAKE_TO_MUTE_INFO"
+                        android:textColor="@color/colorTextDisable"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/switchShakeToMute"
+                    android:padding="8dp"
+                    android:checked="false"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_gravity="center"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/privacyPolicy"
+                android:padding="21dp"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_weight="5"
+                    android:text="Privacy Policy"
+                    android:textColor="@color/colorGenDark"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/maven_pro_medium"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <ImageView
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_navigate_next"
+                    android:tint="@color/colorGenDark"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </ScrollView>
+
+
+
+</android.support.constraint.ConstraintLayout>
