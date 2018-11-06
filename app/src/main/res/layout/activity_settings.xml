@@ -255,7 +255,6 @@
                     android:layout_weight="1"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_navigate_next"
-                    android:tint="@color/colorGenDark"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content" />
             </LinearLayout>
