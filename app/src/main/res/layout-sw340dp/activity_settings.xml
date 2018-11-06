@@ -68,7 +68,7 @@
                 android:id="@+id/AllowCallerContainer"
                 android:layout_width="match_parent"
                 android:orientation="horizontal"
-                android:padding="8dp"
+                android:padding="4dp"
                 android:layout_height="wrap_content">
 
                 <LinearLayout
@@ -107,7 +107,7 @@
                 android:id="@+id/SMSToCallerContainer"
                 android:layout_width="match_parent"
                 android:orientation="horizontal"
-                android:padding="8dp"
+                android:padding="4dp"
                 android:layout_height="wrap_content">
 
                 <LinearLayout
@@ -142,12 +142,50 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/SayCallerNameContainer"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:padding="4dp"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_weight="5"
+                    android:padding="8dp"
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:fontFamily="@font/maven_pro_medium"
+                        android:text="Speak Caller Name"
+                        android:textSize="16sp"
+                        android:padding="4dp"
+                        android:textColor="@color/colorGenDark"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                    <TextView
+                        android:fontFamily="@font/maven_pro"
+                        android:padding="4dp"
+                        android:text="Caller Name will be spoken"
+                        android:textColor="@color/colorTextDisable"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/switchSayCallerName"
+                    android:padding="8dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_gravity="center"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/flipToEndContainer"
                 android:layout_width="match_parent"
                 android:orientation="horizontal"
-                android:padding="8dp"
+                android:padding="4dp"
                 android:layout_height="wrap_content">
 
                 <LinearLayout
@@ -187,7 +225,7 @@
                 android:id="@+id/shakeToMuteContainer"
                 android:layout_width="match_parent"
                 android:orientation="horizontal"
-                android:padding="8dp"
+                android:padding="4dp"
                 android:layout_height="wrap_content">
 
                 <LinearLayout
@@ -225,7 +263,8 @@
 
             <LinearLayout
                 android:id="@+id/privacyPolicy"
-                android:padding="21dp"
+                android:padding="18dp"
+                android:background="?attr/selectableItemBackground"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">

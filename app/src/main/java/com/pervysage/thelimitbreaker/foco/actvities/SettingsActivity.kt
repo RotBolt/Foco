@@ -33,27 +33,32 @@ class SettingsActivity : AppCompatActivity() {
             sharedPrefs.edit().putBoolean(getString(R.string.SMS_TO_CALLER), isChecked).commit()
         }
 
+        val sayCallerNameStatus = sharedPrefs.getBoolean(getString(R.string.SAY_CALLER_NAME), true)
+        switchSayCallerName.isChecked = sayCallerNameStatus
+        switchSayCallerName.setOnCheckedChangeListener { _, isChecked ->
+            sharedPrefs.edit().putBoolean(getString(R.string.SAY_CALLER_NAME), isChecked).commit()
+        }
 
-        privacyPolicy.setOnClickListener{
+        privacyPolicy.setOnClickListener {
             startActivity(Intent(this, PrivacyPolicyActivity::class.java))
         }
-        if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.O_MR1) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1) {
             val flipToEnd = sharedPrefs.getBoolean(getString(R.string.FLIP_TO_END_STATUS), true)
             switchFlipToEnd.isChecked = flipToEnd
             switchFlipToEnd.setOnCheckedChangeListener { _, isChecked ->
                 sharedPrefs.edit().putBoolean(getString(R.string.FLIP_TO_END_STATUS), isChecked).commit()
             }
 
-            val shakeToMuteStatus = sharedPrefs.getBoolean(getString(R.string.SHAKE_STATUS),true)
-            switchShakeToMute.isChecked=shakeToMuteStatus
+            val shakeToMuteStatus = sharedPrefs.getBoolean(getString(R.string.SHAKE_STATUS), true)
+            switchShakeToMute.isChecked = shakeToMuteStatus
             switchShakeToMute.setOnCheckedChangeListener { _, isChecked ->
-                sharedPrefs.edit().putBoolean(getString(R.string.SHAKE_STATUS),isChecked).commit()
+                sharedPrefs.edit().putBoolean(getString(R.string.SHAKE_STATUS), isChecked).commit()
             }
-        }else{
-            flipToEndContainer.visibility= View.GONE
-            shakeToMuteContainer.visibility=View.GONE
-            sharedPrefs.edit().putBoolean(getString(R.string.FLIP_TO_END_STATUS),false).commit()
-            sharedPrefs.edit().putBoolean(getString(R.string.SHAKE_STATUS),false).commit()
+        } else {
+            flipToEndContainer.visibility = View.GONE
+            shakeToMuteContainer.visibility = View.GONE
+            sharedPrefs.edit().putBoolean(getString(R.string.FLIP_TO_END_STATUS), false).commit()
+            sharedPrefs.edit().putBoolean(getString(R.string.SHAKE_STATUS), false).commit()
         }
     }
 }
