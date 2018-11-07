@@ -1,6 +1,7 @@
 package com.pervysage.thelimitbreaker.foco.actvities
 
 import android.app.NotificationManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -108,7 +109,31 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
         btnNext.isEnabled = false
         btnGrantPerm.setOnClickListener(this)
         btnGrantDND.setOnClickListener(this)
+        setAutoStart()
+    }
 
+
+    private fun setAutoStart() {
+        try {
+            val autoStartIntent = Intent()
+            val manufacturer = android.os.Build.MANUFACTURER
+            when {
+                "xiaomi".equals(manufacturer, ignoreCase = true) -> autoStartIntent.component = ComponentName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity")
+                "oppo".equals(manufacturer, ignoreCase = true) -> autoStartIntent.component = ComponentName("com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity")
+                "vivo".equals(manufacturer, ignoreCase = true) -> autoStartIntent.component = ComponentName("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity")
+                "Letv".equals(manufacturer, ignoreCase = true) -> autoStartIntent.component = ComponentName("com.letv.android.letvsafe", "com.letv.android.letvsafe.AutobootManageActivity")
+                "Honor".equals(manufacturer, ignoreCase = true) -> autoStartIntent.component = ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity")
+            }
+
+            val list = packageManager.queryIntentActivities(autoStartIntent, PackageManager.MATCH_DEFAULT_ONLY)
+            if (list.size > 0) {
+                btnAutoStart.setOnClickListener { startActivity(autoStartIntent) }
+            } else {
+                btnAutoStart.visibility = View.GONE
+            }
+        } catch (e: Exception) {
+            btnAutoStart.visibility = View.GONE
+        }
     }
 
     override fun onResume() {

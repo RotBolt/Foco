@@ -5,10 +5,6 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.provider.Telephony
-import android.telecom.TelecomManager
-import android.telephony.TelephonyManager
-import java.lang.reflect.Method
 
 class DeviceMotionUtil(context: Context) : SensorEventListener {
 

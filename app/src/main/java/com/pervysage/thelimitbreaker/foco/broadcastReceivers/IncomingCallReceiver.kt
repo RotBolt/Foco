@@ -106,12 +106,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 tm.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE)
                 receivedOnce = false
 
-                val sharedPref = context.getSharedPreferences(
-                        context.getString(R.string.SHARED_PREF_KEY),
-                        Context.MODE_PRIVATE
-                )
-                val sayCallerStatus = sharedPref.getBoolean(context.getString(R.string.SAY_CALLER_NAME), true)
-                if (sayCallerStatus)
+                if (getSayCallerStatus())
                     decreaseVolume()
                 motionUtil.stopMotionListener()
                 tts.stop()
@@ -148,14 +143,18 @@ class IncomingCallReceiver : BroadcastReceiver() {
             motionUtil.startMotionListener()
         }
 
-        private fun speak() {
-            gainAudioFocus()
+
+        private fun getSayCallerStatus(): Boolean {
             val sharedPref = context.getSharedPreferences(
                     context.getString(R.string.SHARED_PREF_KEY),
                     Context.MODE_PRIVATE
             )
-            val sayCallerStatus = sharedPref.getBoolean(context.getString(R.string.SAY_CALLER_NAME), true)
-            if (sayCallerStatus)
+            return sharedPref.getBoolean(context.getString(R.string.SAY_CALLER_NAME), true)
+        }
+
+        private fun speak() {
+            gainAudioFocus()
+            if (getSayCallerStatus())
                 increaseVolume()
             tts.apply {
                 language = when (Locale.getDefault().country) {
@@ -251,32 +250,12 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     context.getString(R.string.SHARED_PREF_KEY),
                     Context.MODE_PRIVATE
             )
-
-            val allowCallerStatus = sharedPref.getBoolean(context.getString(R.string.ALLOW_CALLER_STATUS), true)
-            val smsToCallerStatus = sharedPref.getBoolean(context.getString(R.string.SMS_TO_CALLER), false)
-            val flipToEnd = sharedPref.getBoolean(context.getString(R.string.FLIP_TO_END_STATUS), true)
-            val shakeToMuteStatus = sharedPref.getBoolean(context.getString(R.string.SHAKE_STATUS), true)
-            val sayCallerStatus = sharedPref.getBoolean(context.getString(R.string.SAY_CALLER_NAME), true)
-
-
             volumeLevel = am.getStreamVolume(AudioManager.STREAM_MUSIC)
+
             name = executeCheckNumber(phoneNumber)
             // exist in contacts or not
             if (name.isEmpty()) {
-                if (allowCallerStatus && executeIsUnder15Min(phoneNumber)) {
-                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
-                        startMotionUtil(phoneNumber, shakeToMuteStatus, smsToCallerStatus, flipToEnd)
-
-                    speakCallerName(sayCallerStatus, "This might be important call")
-                } else {
-                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
-                        methodEndCall.invoke(iTelephony)
-                    else
-                        telecomManager.endCall()
-
-                    if (smsToCallerStatus)
-                        sendSMS(phoneNumber)
-                }
+                takeCallerAction(phoneNumber,false)
             } else {
                 // check contact group
                 val activeContactGroup = if (!isDriveMode)
@@ -285,53 +264,61 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     sharedPref.getString(context.getString(R.string.DM_ACTIVE_GROUP), "All Contacts")
 
                 when (activeContactGroup) {
-                    "All Contacts" -> {
-                        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
-                            startMotionUtil(phoneNumber, shakeToMuteStatus, smsToCallerStatus, flipToEnd)
+                    "All Contacts" -> takeCallerAction(phoneNumber,true)
 
-                        speakCallerName(sayCallerStatus, "Call from $name ")
-                    }
                     "Priority Contacts" -> {
                         val repo = Repository.getInstance((context.applicationContext) as Application)
                         val numberParam = "%${phoneNumber.substring(3)}"
                         val contactInfo = repo.getInfoFromNumber(numberParam)
-                        if (contactInfo != null) {
-                            this@MyPhoneStateListener.name = name
-                            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
-                                startMotionUtil(phoneNumber, shakeToMuteStatus, smsToCallerStatus, flipToEnd)
-                            speakCallerName(sayCallerStatus, "Call from $name")
-
-                        } else {
-                            if (allowCallerStatus && executeIsUnder15Min(phoneNumber)) {
-                                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
-                                    startMotionUtil(phoneNumber, shakeToMuteStatus, smsToCallerStatus, flipToEnd)
-                                speakCallerName(sayCallerStatus, "This might be important call. Call from $name")
-
-                            } else {
-                                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
-                                    methodEndCall.invoke(iTelephony)
-                                else
-                                    telecomManager.endCall()
-                                if (smsToCallerStatus)
-                                    sendSMS(phoneNumber)
-                            }
-                        }
+                        takeCallerAction(phoneNumber, contactInfo!=null)
 
                     }
-                    "None" -> {
-                        if (allowCallerStatus && executeIsUnder15Min(phoneNumber)) {
-                            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
-                                startMotionUtil(phoneNumber, shakeToMuteStatus, smsToCallerStatus, flipToEnd)
-                            speakCallerName(sayCallerStatus, "This might be important call. Call from $name")
-                        } else {
-                            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
-                                methodEndCall.invoke(iTelephony)
-                            else
-                                telecomManager.endCall()
-                        }
-                    }
+
+                    "None" -> takeCallerAction(phoneNumber, true)
                 }
             }
+        }
+
+        private fun takeCallerAction(phoneNumber: String, allowedByDefault: Boolean = false) {
+
+            val sharedPref = context.getSharedPreferences(
+                    context.getString(R.string.SHARED_PREF_KEY),
+                    Context.MODE_PRIVATE
+            )
+
+            val repeatCallerStatus = sharedPref.getBoolean(context.getString(R.string.ALLOW_CALLER_STATUS), true)
+            val smsToCallerStatus = sharedPref.getBoolean(context.getString(R.string.SMS_TO_CALLER), false)
+            val flipToEnd = sharedPref.getBoolean(context.getString(R.string.FLIP_TO_END_STATUS), false)
+            val shakeToMuteStatus = sharedPref.getBoolean(context.getString(R.string.SHAKE_STATUS), false)
+            val sayCallerStatus = sharedPref.getBoolean(context.getString(R.string.SAY_CALLER_NAME), true)
+
+
+            val msg = when {
+                allowedByDefault -> "Call from $name"
+                else -> "This might be important call. ${if (name.isNotEmpty()) "Call from $name" else ""}"
+            }
+
+            fun takeAllowCallerActions(msg: String) {
+                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
+                    startMotionUtil(phoneNumber, shakeToMuteStatus, smsToCallerStatus, flipToEnd)
+                speakCallerName(sayCallerStatus, msg)
+            }
+
+            fun takeRejectCallerActions() {
+                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
+                    methodEndCall.invoke(iTelephony)
+                else
+                    telecomManager.endCall()
+                if (smsToCallerStatus)
+                    sendSMS(phoneNumber)
+            }
+
+            when {
+                allowedByDefault -> takeAllowCallerActions(msg)
+                !allowedByDefault && repeatCallerStatus && executeIsUnder15Min(phoneNumber) -> takeAllowCallerActions(msg)
+                !allowedByDefault -> takeRejectCallerActions()
+            }
+
         }
 
         private fun executeCheckNumber(phoneNumber: String): String {
@@ -354,10 +341,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 cursor?.run {
                     if (count > 0) {
                         moveToNext()
-                        name = getString(
-                                getColumnIndexOrThrow(
-                                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
-                                ))
+                        name = getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
                     }
                     close()
                 }

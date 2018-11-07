@@ -192,50 +192,6 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
-
-            <LinearLayout
-                android:id="@+id/flipToEndContainer"
-                android:layout_width="match_parent"
-                android:orientation="horizontal"
-                android:padding="2dp"
-                android:layout_height="wrap_content">
-
-                <LinearLayout
-                    android:layout_weight="5"
-                    android:padding="8dp"
-                    android:orientation="vertical"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:fontFamily="@font/maven_pro_medium"
-                        android:text="Flip to end call"
-                        android:textSize="12sp"
-                        android:padding="4dp"
-                        android:textColor="@color/colorGenDark"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                    <TextView
-                        android:fontFamily="@font/maven_pro"
-                        android:padding="4dp"
-                        android:textSize="12sp"
-                        android:text="Just flip the phone to hang up the phone"
-                        android:textColor="@color/colorTextDisable"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-                <android.support.v7.widget.SwitchCompat
-                    android:id="@+id/switchFlipToEnd"
-                    android:padding="8dp"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
-                    android:scaleY="0.85"
-                    android:scaleX="0.85"
-                    android:layout_gravity="center"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-
             <LinearLayout
                 android:id="@+id/shakeToMuteContainer"
                 android:layout_width="match_parent"
@@ -251,8 +207,9 @@
                     android:layout_height="wrap_content">
 
                     <TextView
+                        android:id="@+id/tvShakeToMute"
                         android:fontFamily="@font/maven_pro_medium"
-                        android:text="Shake to mute the caller name"
+                        android:text="Shake to mute the caller name (Experimental)"
                         android:textSize="12sp"
                         android:padding="4dp"
                         android:textColor="@color/colorGenDark"
@@ -280,6 +237,73 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/flipToEndContainer"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:padding="2dp"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_weight="5"
+                    android:padding="8dp"
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:fontFamily="@font/maven_pro_medium"
+                        android:text="Flip to end call (Experimental)"
+                        android:textSize="12sp"
+                        android:padding="4dp"
+                        android:textColor="@color/colorGenDark"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                    <TextView
+                        android:fontFamily="@font/maven_pro"
+                        android:padding="4dp"
+                        android:textSize="12sp"
+                        android:text="Just flip the phone to hang up the phone"
+                        android:textColor="@color/colorTextDisable"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/switchFlipToEnd"
+                    android:padding="8dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:scaleY="0.85"
+                    android:scaleX="0.85"
+                    android:layout_gravity="center"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/enableAutoStart"
+                android:padding="14dp"
+                android:background="?attr/selectableItemBackground"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_weight="5"
+                    android:text="Enable Auto Start for MIUI"
+                    android:textColor="@color/colorGenDark"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/maven_pro_medium"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <ImageView
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_navigate_next"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/privacyPolicy"
                 android:padding="14dp"
                 android:background="?attr/selectableItemBackground"
@@ -291,7 +315,7 @@
                     android:layout_weight="5"
                     android:text="Privacy Policy"
                     android:textColor="@color/colorGenDark"
-                    android:textSize="14sp"
+                    android:textSize="12sp"
                     android:fontFamily="@font/maven_pro_medium"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content" />

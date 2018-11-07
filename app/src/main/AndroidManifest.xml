@@ -95,12 +95,17 @@
             android:screenOrientation="portrait" />
 
         <service
-            android:name=".services.GeofenceReAddService"
+            android:name=".services.GeofenceReAddJob"
             android:enabled="true"
             android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE"></service>
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
-        <activity android:name=".actvities.PrivacyPolicyActivity"></activity>
+        <activity android:name=".actvities.PrivacyPolicyActivity" />
+
+        <service
+            android:name=".services.GeofenceReAddService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

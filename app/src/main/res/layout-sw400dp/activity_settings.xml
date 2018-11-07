@@ -181,6 +181,46 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/shakeToMuteContainer"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:padding="8dp"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_weight="5"
+                    android:padding="8dp"
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/tvShakeToMute"
+                        android:fontFamily="@font/maven_pro_medium"
+                        android:text="Shake to mute the caller name (Experimental)"
+                        android:textSize="16sp"
+                        android:padding="4dp"
+                        android:textColor="@color/colorGenDark"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                    <TextView
+                        android:fontFamily="@font/maven_pro"
+                        android:padding="4dp"
+                        android:text="@string/SHAKE_TO_MUTE_INFO"
+                        android:textColor="@color/colorTextDisable"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/switchShakeToMute"
+                    android:padding="8dp"
+                    android:checked="false"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_gravity="center"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/flipToEndContainer"
@@ -198,7 +238,7 @@
 
                     <TextView
                         android:fontFamily="@font/maven_pro_medium"
-                        android:text="Flip to end call"
+                        android:text="Flip to end call (Experimental)"
                         android:textSize="16sp"
                         android:padding="4dp"
                         android:textColor="@color/colorGenDark"
@@ -221,44 +261,28 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
-
             <LinearLayout
-                android:id="@+id/shakeToMuteContainer"
-                android:layout_width="match_parent"
+                android:id="@+id/enableAutoStart"
+                android:padding="21dp"
+                android:background="?attr/selectableItemBackground"
                 android:orientation="horizontal"
-                android:padding="8dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <LinearLayout
+                <TextView
                     android:layout_weight="5"
-                    android:padding="8dp"
-                    android:orientation="vertical"
+                    android:text="Enable Auto Start for MIUI"
+                    android:textColor="@color/colorGenDark"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/maven_pro_medium"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content" />
 
-                    <TextView
-                        android:fontFamily="@font/maven_pro_medium"
-                        android:text="Shake to mute the caller name"
-                        android:textSize="16sp"
-                        android:padding="4dp"
-                        android:textColor="@color/colorGenDark"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                    <TextView
-                        android:fontFamily="@font/maven_pro"
-                        android:padding="4dp"
-                        android:text="@string/SHAKE_TO_MUTE_INFO"
-                        android:textColor="@color/colorTextDisable"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-                <android.support.v7.widget.SwitchCompat
-                    android:id="@+id/switchShakeToMute"
-                    android:padding="8dp"
-                    android:checked="false"
+                <ImageView
                     android:layout_weight="1"
-                    android:layout_width="0dp"
                     android:layout_gravity="center"
+                    android:src="@drawable/ic_navigate_next"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
