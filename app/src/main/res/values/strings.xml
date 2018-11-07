@@ -14,6 +14,7 @@
     <string name="ALLOW_CALLER_STATUS">under_15_min</string>
     <string name="SMS_TO_CALLER">send_sms_caller</string>
     <string name="FLIP_TO_END_STATUS">flipToEnd</string>
+    <string name="SAY_CALLER_NAME">SAY_CALLER_NAME</string>
     <string name="ALLOW_CALLER_INFO">If the same person calls second time within 15-minute period, allow it</string>
     <string name="SEND_SMS_INFO">A SMS will be sent to rejected callers whenever you are driving or at work place</string>
     <string name="SHAKE_TO_MUTE_INFO">Just shake the phone to stop speaking the caller name when a call comes</string>

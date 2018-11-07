@@ -144,7 +144,6 @@
             android:textSize="18sp"
             android:padding="8dp"
             android:drawableStart="@drawable/ic_timelapse"
-            android:layout_marginTop="8dp"
             android:fontFamily="@font/maven_pro_medium"
             android:text="  Access Do Not Disturb"
             android:textColor="@color/colorGenDark"
@@ -170,6 +169,24 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvDNDAccess"/>
 
+        <Button
+            android:id="@+id/btnAutoStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/reg_background"
+            android:fontFamily="@font/maven_pro_medium"
+            android:padding="16dp"
+            android:scaleX="0.90"
+            android:scaleY="0.90"
+            android:text="Enable AutoStart"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnGrantDND"/>
 
     </android.support.constraint.ConstraintLayout>
 

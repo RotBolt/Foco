@@ -2,9 +2,6 @@ package com.pervysage.thelimitbreaker.foco.adapters
 
 import android.app.AlertDialog
 import android.app.Application
-import android.app.job.JobInfo
-import android.app.job.JobScheduler
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.PorterDuff
@@ -30,7 +27,6 @@ import com.pervysage.thelimitbreaker.foco.dialogs.EditPlaceNameDialog
 import com.pervysage.thelimitbreaker.foco.dialogs.RadiusPickDialog
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.MyListView
 import com.pervysage.thelimitbreaker.foco.expandCollapseController.ViewManager
-import com.pervysage.thelimitbreaker.foco.services.GeofenceReAddService
 import com.pervysage.thelimitbreaker.foco.utils.GeoWorkerUtil
 import com.pervysage.thelimitbreaker.foco.utils.sendGeofenceNotification
 

@@ -1,31 +1,18 @@
 package com.pervysage.thelimitbreaker.foco.services
 
 import android.app.Application
-import android.app.job.JobInfo
-import android.app.job.JobParameters
-import android.app.job.JobScheduler
-import android.app.job.JobService
-import android.content.ComponentName
+import android.app.Service
 import android.content.Context
+import android.content.Intent
 import android.location.LocationManager
+import android.os.IBinder
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.utils.GeoWorkerUtil
 
-class GeofenceReAddService : JobService() {
-    private val JOB_ID=2528
-    override fun onStopJob(params: JobParameters?): Boolean {
-        return true
-    }
-    private fun startNewJob(){
-        val component = ComponentName(baseContext,GeofenceReAddService::class.java)
-        val builder = JobInfo.Builder(JOB_ID,component)
-                .setBackoffCriteria(1000, JobInfo.BACKOFF_POLICY_LINEAR)
-                .setMinimumLatency(30*1000)
-        val scheduler=baseContext.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-        scheduler.cancel(JOB_ID)
-        scheduler.schedule(builder.build())
-    }
-    override fun onStartJob(params: JobParameters?): Boolean {
+class GeofenceReAddService : Service() {
+
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val gpsEnabled = (baseContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager).isProviderEnabled(LocationManager.GPS_PROVIDER)
         if (gpsEnabled){
             val repo = Repository.getInstance((applicationContext) as Application)
@@ -35,18 +22,20 @@ class GeofenceReAddService : JobService() {
                 if (pref.active == 1){
                     geoWorker.addPlaceForMonitoring(pref)
                             .addOnFailureListener {
-                                jobFinished(params,false)
-                                startNewJob()
+                                stopSelf()
+                                baseContext.startService(intent)
                             }
                 }
             }
-            jobFinished(params,false)
+            stopSelf()
         }else{
-            jobFinished(params,false)
-            startNewJob()
+            stopSelf()
+            baseContext.startService(intent)
         }
-        return false
+        return START_NOT_STICKY
     }
 
-
+    override fun onBind(intent: Intent): IBinder? {
+        return null
+    }
 }
