@@ -108,10 +108,30 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
         sharedPrefs.edit().clear().commit()
         btnNext.isEnabled = false
         btnGrantPerm.setOnClickListener(this)
-        btnGrantDND.setOnClickListener(this)
+        setGrantDND()
         setAutoStart()
     }
 
+    private fun setGrantDND() {
+        if (isDNDExist()) {
+            btnGrantDND.setOnClickListener(this)
+        } else {
+            dndAccess = true
+            btnGrantDND.visibility = View.GONE
+            tvDNDAccess.visibility = View.GONE
+        }
+    }
+
+    private fun isDNDExist(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val dndIntent = Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+            val list = packageManager.queryIntentActivities(dndIntent, PackageManager.MATCH_DEFAULT_ONLY)
+            list.size > 0
+        } else {
+            false
+        }
+
+    }
 
     private fun setAutoStart() {
         try {
@@ -140,13 +160,12 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
         super.onResume()
 
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        dndAccess = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) notificationManager.isNotificationPolicyAccessGranted
-        else true
-
-        if (Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
-            tvDNDAccess.visibility=View.GONE
-            btnGrantDND.visibility=View.GONE
+        dndAccess = if (isDNDExist()) {
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) notificationManager.isNotificationPolicyAccessGranted
+            else true
+        }else{
+            true
         }
 
         permResult =
@@ -167,7 +186,7 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
             btnGrantPerm.setOnClickListener(null)
         }
 
-        if (dndAccess) {
+        if (isDNDExist() && dndAccess) {
             val drawable = ContextCompat.getDrawable(this, R.drawable.reg_background)!!.mutate()
             drawable.colorFilter = PorterDuffColorFilter(
                     ContextCompat.getColor(this, R.color.colorActive),

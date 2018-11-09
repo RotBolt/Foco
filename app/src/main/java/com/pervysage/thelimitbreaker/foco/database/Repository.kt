@@ -5,7 +5,6 @@ import android.app.Application
 import android.arch.lifecycle.LiveData
 import com.pervysage.thelimitbreaker.foco.database.entities.ContactInfo
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
-import java.lang.Exception
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
@@ -114,8 +113,6 @@ class Repository private constructor(application: Application) {
         val deleteContact = Callable { contactsDao.delete(*contactInfo) }
         val future = executor.submit(deleteContact)
         return future.get()
-
-
     }
 
     init {
@@ -125,11 +122,4 @@ class Repository private constructor(application: Application) {
         allContactsLive=contactsDao.getAllContactsLive()
 
     }
-
-    enum class QUERY_TYPE {
-        INSERT, UPDATE, DELETE
-    }
-
-
-
 }
