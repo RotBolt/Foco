@@ -63,7 +63,7 @@ fun sendGeofenceNotification(notifyMsg: String, transitionType: Int, context: Co
     when (transitionType) {
         Geofence.GEOFENCE_TRANSITION_ENTER -> builder.setOngoing(true)
                 .setContentTitle(notifyMsg)
-                .setContentText("tranquillo at your service")
+                .setContentText("foco at your service")
         Geofence.GEOFENCE_TRANSITION_EXIT -> builder.setAutoCancel(true)
                 .setContentTitle(notifyMsg)
                 .setContentText("Service finished for now")
