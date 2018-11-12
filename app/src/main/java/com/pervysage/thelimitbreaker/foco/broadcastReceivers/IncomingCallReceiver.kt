@@ -8,6 +8,7 @@ import android.content.Intent
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
+import android.os.RemoteException
 import android.provider.CallLog
 import android.provider.ContactsContract
 import android.speech.tts.TextToSpeech
@@ -16,9 +17,13 @@ import android.telecom.TelecomManager
 import android.telephony.PhoneStateListener
 import android.telephony.SmsManager
 import android.telephony.TelephonyManager
+import android.util.Log
+import com.crashlytics.android.Crashlytics
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.utils.DeviceMotionUtil
+import io.fabric.sdk.android.Fabric
+import java.lang.RuntimeException
 import java.lang.reflect.Method
 import java.util.*
 import java.util.concurrent.*
@@ -36,6 +41,13 @@ class IncomingCallReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (!receivedOnce) {
             receivedOnce = true
+
+            Fabric.with(Fabric.Builder(context)
+                    .kits(Crashlytics())
+                    .debuggable(false)  // Enables Crashlytics debugger
+                    .build())
+
+
             val sharedPref = context.getSharedPreferences(
                     context.getString(R.string.SHARED_PREF_KEY),
                     Context.MODE_PRIVATE
@@ -193,6 +205,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
         private fun increaseVolume() {
             val executor = Executors.newSingleThreadExecutor()
+
             val increaseVolumeTask = Callable {
                 while (am.getStreamVolume(AudioManager.STREAM_MUSIC) != am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)) {
                     am.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND)
@@ -203,15 +216,26 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 return futureTask.get(2, TimeUnit.SECONDS)
             } catch (te: TimeoutException) {
             } catch (ie: InterruptedException) {
+            }catch (re:RemoteException){
+                Crashlytics.logException(re)
+            }catch (e:Exception){
+                Crashlytics.logException(e)
             }
         }
 
         private fun decreaseVolume() {
             val executor = Executors.newSingleThreadExecutor()
             val decreaseVolumeTask = Callable {
-                while (am.getStreamVolume(AudioManager.STREAM_MUSIC) > volumeLevel) {
-                    am.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND)
+                try {
+                    while (am.getStreamVolume(AudioManager.STREAM_MUSIC) > volumeLevel) {
+                        am.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND)
+                    }
+                }catch (re:RemoteException){
+                    Crashlytics.logException(re)
+                }catch (e:Exception){
+                    Crashlytics.logException(e)
                 }
+
 
             }
             val futureTask = executor.submit(decreaseVolumeTask)

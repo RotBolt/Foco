@@ -4,11 +4,15 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import android.os.RemoteException
+import com.crashlytics.android.Crashlytics
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionResult
 import com.google.android.gms.location.DetectedActivity
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.utils.sendDriveModeNotification
+import io.fabric.sdk.android.Fabric
+import java.lang.Exception
 
 class DriveModeRecogReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -17,6 +21,10 @@ class DriveModeRecogReceiver : BroadcastReceiver() {
         if (ActivityTransitionResult.hasResult(intent)) {
             val result = ActivityTransitionResult.extractResult(intent)
             if (result != null) {
+                Fabric.with(Fabric.Builder(context)
+                        .kits(Crashlytics())
+                        .debuggable(false)  // Enables Crashlytics debugger
+                        .build())
                 for (event in result.transitionEvents) {
                     if (event.activityType == DetectedActivity.ON_BICYCLE || event.activityType == DetectedActivity.IN_VEHICLE) {
 
@@ -35,7 +43,14 @@ class DriveModeRecogReceiver : BroadcastReceiver() {
                                         true
                                 )?.commit()
 
-                                am.setStreamVolume(AudioManager.STREAM_RING, 0, AudioManager.FLAG_PLAY_SOUND)
+                                try {
+                                    am.setStreamVolume(AudioManager.STREAM_RING, 0, AudioManager.FLAG_PLAY_SOUND)
+                                }catch (re:RemoteException){
+                                    Crashlytics.logException(re)
+                                }catch (e:Exception){
+                                    Crashlytics.logException(e)
+                                }
+
 
                                 val notifyMsg = "DriveMode Started"
                                 val contentText = "Blocking Unwanted Calls"
@@ -52,7 +67,13 @@ class DriveModeRecogReceiver : BroadcastReceiver() {
                                 val geoStatus = sharedPrefs?.getBoolean(context.getString(R.string.GEO_STATUS), false)
                                         ?: false
                                 if (!geoStatus) {
-                                    am.setStreamVolume(AudioManager.STREAM_RING, am.getStreamMaxVolume(AudioManager.STREAM_RING), AudioManager.FLAG_PLAY_SOUND)
+                                    try {
+                                        am.setStreamVolume(AudioManager.STREAM_RING, am.getStreamMaxVolume(AudioManager.STREAM_RING), AudioManager.FLAG_PLAY_SOUND)
+                                    }catch (re:RemoteException){
+                                        Crashlytics.logException(re)
+                                    }catch (e:Exception){
+                                        Crashlytics.logException(e)
+                                    }
                                 }
                                 val notifyMsg = "DriveMode Stopped"
                                 sendDriveModeNotification(notifyMsg, "Service Stopped", false, context)
