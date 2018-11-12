@@ -3,7 +3,9 @@ package com.pervysage.thelimitbreaker.foco.services
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import android.os.RemoteException
 import android.support.v4.app.JobIntentService
+import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
@@ -12,6 +14,7 @@ import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.utils.sendGeofenceNotification
+import io.fabric.sdk.android.Fabric
 
 
 class GeoActionsIntentService : JobIntentService() {
@@ -26,6 +29,12 @@ class GeoActionsIntentService : JobIntentService() {
 
 
     override fun onHandleWork(intent: Intent) {
+
+        Fabric.with(Fabric.Builder(baseContext)
+                .kits(Crashlytics())
+                .debuggable(false)  // Enables Crashlytics debugger
+                .build())
+
         val geofenceEvent = GeofencingEvent.fromIntent(intent)
         if (geofenceEvent.hasError()) {
 
@@ -75,11 +84,18 @@ class GeoActionsIntentService : JobIntentService() {
         val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val sharedPref = baseContext.getSharedPreferences(getString(R.string.SHARED_PREF_KEY),Context.MODE_PRIVATE)
         val dmStatus = sharedPref.getBoolean(baseContext.getString(R.string.DM_STATUS),false)
-        if (doStart){
-            am.setStreamVolume(AudioManager.STREAM_RING,0,AudioManager.FLAG_PLAY_SOUND)
-        }else if (!dmStatus){
-            am.setStreamVolume(AudioManager.STREAM_RING,am.getStreamMaxVolume(AudioManager.STREAM_RING),AudioManager.FLAG_PLAY_SOUND)
+        try {
+            if (doStart){
+                am.setStreamVolume(AudioManager.STREAM_RING,0,AudioManager.FLAG_PLAY_SOUND)
+            }else if (!dmStatus){
+                am.setStreamVolume(AudioManager.STREAM_RING,am.getStreamMaxVolume(AudioManager.STREAM_RING),AudioManager.FLAG_PLAY_SOUND)
+            }
+        }catch (re:RemoteException){
+            Crashlytics.logException(re)
+        }catch (e:Exception){
+            Crashlytics.logException(e)
         }
+
 
         with(sharedPref.edit()){
             putBoolean(getString(R.string.GEO_STATUS),doStart)

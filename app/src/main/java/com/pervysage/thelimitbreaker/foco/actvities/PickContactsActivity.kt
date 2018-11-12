@@ -60,37 +60,44 @@ class PickContactsActivity : AppCompatActivity() {
         }
         ivDone.setOnClickListener {
 
-            val projection = arrayOf(
-                    ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER
-            )
-            val selection = "${ContactsContract.Contacts.LOOKUP_KEY} = ? AND ${ContactsContract.Contacts.DISPLAY_NAME} = ? AND ${ContactsContract.Data.MIMETYPE} = ?"
-            for (obj in marked) {
-                val cursor = contentResolver.query(
-                        ContactsContract.Data.CONTENT_URI,
-                        projection,
-                        selection,
-                        arrayOf(obj.lookUpKey, obj.name, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE),
-                        null
-                )
-                cursor?.run {
-                    if (cursor.count > 0) {
+            addMarkedToPriority()
+            setResult(Activity.RESULT_OK)
+            finish()
+        }
+    }
 
-                        val list = ArrayList<ContactInfo>()
-                        while (cursor.moveToNext()) {
-                            val number = getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER))
+    private fun addMarkedToPriority() {
+        val projection = arrayOf(
+                ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER
+        )
+        val list = ArrayList<ContactInfo>()
+        val selection = "${ContactsContract.Contacts.LOOKUP_KEY} = ? AND ${ContactsContract.Contacts.DISPLAY_NAME} = ? AND ${ContactsContract.Data.MIMETYPE} = ?"
+        for (obj in marked) {
+            val cursor = contentResolver.query(
+                    ContactsContract.Data.CONTENT_URI,
+                    projection,
+                    selection,
+                    arrayOf(obj.lookUpKey, obj.name, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE),
+                    null
+            )
+            cursor?.run {
+                if (cursor.count > 0) {
+                    while (cursor.moveToNext()) {
+                        val number = getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER))
+                        number?.run {
                             val info = ContactInfo(obj.name, number)
                             list.add(info)
                         }
-                        repository.insertContact(*list.toTypedArray())
-                    } else {
-                        Toast.makeText(this@PickContactsActivity, "No Number found for ${obj.name}", Toast.LENGTH_SHORT).show()
+                                ?: Toast.makeText(this@PickContactsActivity, "No Number found for ${obj.name}", Toast.LENGTH_SHORT).show()
                     }
-                    close()
+                } else {
+                    Toast.makeText(this@PickContactsActivity, "No Number found for ${obj.name}", Toast.LENGTH_SHORT).show()
                 }
+                close()
             }
-
-            setResult(Activity.RESULT_OK)
-            finish()
+        }
+        if (list.size > 0) {
+            repository.insertContact(*list.toTypedArray())
         }
     }
 
