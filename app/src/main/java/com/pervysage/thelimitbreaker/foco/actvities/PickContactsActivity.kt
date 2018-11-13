@@ -109,6 +109,8 @@ class PickContactsActivity : AppCompatActivity() {
     private fun getAllContacts(): List<ContactModel> {
         val contactList = ArrayList<ContactModel>()
         val contactMap = HashMap<String, String>()
+
+        // old Map to check whether the contact is in Priority Contacts or not
         val oldMap = getOrderedContactMap()
 
         val cursor = contentResolver.query(
@@ -150,8 +152,7 @@ class PickContactsActivity : AppCompatActivity() {
         val list = repository.getAllContacts()
         val orderedMap = HashMap<String, ArrayList<String>>()
         for (info in list) {
-            var numbers = orderedMap[info.name]
-            if (numbers == null) numbers = ArrayList()
+            val numbers = orderedMap.getOrPut(info.name){ArrayList()}
             numbers.add(info.number)
             orderedMap[info.name] = numbers
         }
