@@ -90,6 +90,9 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
         }
         if (newAdded) {
             placePrefList[placePrefList.size - 1].isExpanded = true
+            lastExpandPos=placePrefList.size-1
+            lastExpandName=placePrefList[placePrefList.size-1].name
+
             listView.setSelection(placePrefList.size - 1)
             geoWorkerUtil.addPlaceForMonitoring(placePrefs = placePrefList[placePrefList.size - 1])
                     .addOnFailureListener {
@@ -104,6 +107,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
         }
 
     }
+
 
     private fun revertPrefsForActivePlace(placePref: PlacePrefs) {
 
