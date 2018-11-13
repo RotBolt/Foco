@@ -17,13 +17,11 @@ import android.telecom.TelecomManager
 import android.telephony.PhoneStateListener
 import android.telephony.SmsManager
 import android.telephony.TelephonyManager
-import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.utils.DeviceMotionUtil
-import io.fabric.sdk.android.Fabric
-import java.lang.RuntimeException
+import com.pervysage.thelimitbreaker.foco.utils.initCrashlytics
 import java.lang.reflect.Method
 import java.util.*
 import java.util.concurrent.*
@@ -42,11 +40,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
         if (!receivedOnce) {
             receivedOnce = true
 
-            Fabric.with(Fabric.Builder(context)
-                    .kits(Crashlytics())
-                    .debuggable(false)  // Enables Crashlytics debugger
-                    .build())
-
+            initCrashlytics(context)
 
             val sharedPref = context.getSharedPreferences(
                     context.getString(R.string.SHARED_PREF_KEY),
@@ -108,9 +102,10 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     try {
                         futureTask.get()
                     } catch (ie: InterruptedException) {
+                        Crashlytics.logException(ie)
 
                     } catch (e: Exception) {
-
+                        Crashlytics.logException(e)
                     }
                 }
             }
@@ -216,9 +211,9 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 return futureTask.get(2, TimeUnit.SECONDS)
             } catch (te: TimeoutException) {
             } catch (ie: InterruptedException) {
-            }catch (re:RemoteException){
+            } catch (re: RemoteException) {
                 Crashlytics.logException(re)
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 Crashlytics.logException(e)
             }
         }
@@ -230,9 +225,9 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     while (am.getStreamVolume(AudioManager.STREAM_MUSIC) > volumeLevel) {
                         am.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND)
                     }
-                }catch (re:RemoteException){
+                } catch (re: RemoteException) {
                     Crashlytics.logException(re)
-                }catch (e:Exception){
+                } catch (e: Exception) {
                     Crashlytics.logException(e)
                 }
 
@@ -279,7 +274,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
             name = executeCheckNumber(phoneNumber)
             // exist in contacts or not
             if (name.isEmpty()) {
-                takeCallerAction(phoneNumber,false)
+                takeCallerAction(phoneNumber, false)
             } else {
                 // check contact group
                 val activeContactGroup = if (!isDriveMode)
@@ -288,13 +283,13 @@ class IncomingCallReceiver : BroadcastReceiver() {
                     sharedPref.getString(context.getString(R.string.DM_ACTIVE_GROUP), "All Contacts")
 
                 when (activeContactGroup) {
-                    "All Contacts" -> takeCallerAction(phoneNumber,true)
+                    "All Contacts" -> takeCallerAction(phoneNumber, true)
 
                     "Priority Contacts" -> {
                         val repo = Repository.getInstance((context.applicationContext) as Application)
                         val numberParam = "%${phoneNumber.substring(3)}"
                         val contactInfo = repo.getInfoFromNumber(numberParam)
-                        takeCallerAction(phoneNumber, contactInfo!=null)
+                        takeCallerAction(phoneNumber, contactInfo != null)
 
                     }
 
@@ -347,30 +342,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
         private fun executeCheckNumber(phoneNumber: String): String {
             val exceutor = Executors.newSingleThreadExecutor()
-            val checkNumberTask = Callable {
-                var number = phoneNumber
-                var name = ""
-                if (phoneNumber.contains("+91"))
-                    number = phoneNumber.substring(3)
-
-                val cursor = context.contentResolver.query(
-                        ContactsContract.Data.CONTENT_URI,
-                        arrayOf(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER),
-                        "${ContactsContract.Data.MIMETYPE} = ? " +
-                                "AND ${ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER} LIKE ?",
-                        arrayOf(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE, "%$number"),
-                        null
-                )
-
-                cursor?.run {
-                    if (count > 0) {
-                        moveToNext()
-                        name = getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
-                    }
-                    close()
-                }
-                name
-            }
+            val checkNumberTask = Callable { checkNumber(phoneNumber) }
             val futureTask = exceutor.submit(Callable { checkNumberTask })
             return try {
                 futureTask.get().call()
@@ -379,37 +351,39 @@ class IncomingCallReceiver : BroadcastReceiver() {
             }
         }
 
-        @SuppressLint("MissingPermission")
+        private fun checkNumber(phoneNumber: String): String {
+            var number = phoneNumber
+            var name = ""
+            if (phoneNumber.contains("+91"))
+                number = phoneNumber.substring(3)
+
+            val cursor = context.contentResolver.query(
+                    ContactsContract.Data.CONTENT_URI,
+                    arrayOf(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER),
+                    "${ContactsContract.Data.MIMETYPE} = ? " +
+                            "AND ${ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER} LIKE ?",
+                    arrayOf(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE, "%$number"),
+                    null
+            )
+
+            cursor?.run {
+                if (count > 0) {
+                    moveToNext()
+                    name = try {
+                        getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
+                    } catch (ie: IllegalArgumentException) {
+                        Crashlytics.logException(ie)
+                        ""
+                    }
+                }
+                close()
+            }
+            return name
+        }
+
         private fun executeIsUnder15Min(phoneNumber: String): Boolean {
             val executor = Executors.newSingleThreadExecutor()
-            val under15MinTask = Callable {
-                var result = false
-                val cursor = context.contentResolver.query(
-                        CallLog.Calls.CONTENT_URI,
-                        arrayOf(
-                                CallLog.Calls.NUMBER,
-                                CallLog.Calls.DATE
-                        ),
-                        "${CallLog.Calls.TYPE} != ? AND ${CallLog.Calls.NUMBER} LIKE ?",
-                        arrayOf("${CallLog.Calls.OUTGOING_TYPE}", phoneNumber),
-                        CallLog.Calls.DEFAULT_SORT_ORDER
-                )
-
-                cursor?.run {
-                    if (count > 0) {
-                        val currentTime = System.currentTimeMillis()
-                        while (moveToNext()) {
-                            val time = getLong(getColumnIndexOrThrow(CallLog.Calls.DATE))
-                            if (currentTime - time <= (15 * 60 * 1000)) {
-                                result = true
-                                break
-                            }
-                        }
-                    }
-                    close()
-                }
-                result
-            }
+            val under15MinTask = Callable { checkIsUnder15Min(phoneNumber) }
             val futureTask = executor.submit(under15MinTask)
             return try {
                 futureTask.get()
@@ -418,6 +392,41 @@ class IncomingCallReceiver : BroadcastReceiver() {
             } catch (ie: InterruptedException) {
                 false
             }
+        }
+
+        @SuppressLint("MissingPermission")
+        private fun checkIsUnder15Min(phoneNumber: String): Boolean {
+            var result = false
+            val cursor = context.contentResolver.query(
+                    CallLog.Calls.CONTENT_URI,
+                    arrayOf(
+                            CallLog.Calls.NUMBER,
+                            CallLog.Calls.DATE
+                    ),
+                    "${CallLog.Calls.TYPE} != ? AND ${CallLog.Calls.NUMBER} LIKE ?",
+                    arrayOf("${CallLog.Calls.OUTGOING_TYPE}", phoneNumber),
+                    CallLog.Calls.DEFAULT_SORT_ORDER
+            )
+
+            cursor?.run {
+                if (count > 0) {
+                    val currentTime = System.currentTimeMillis()
+                    while (moveToNext()) {
+                        try {
+                            val time = getLong(getColumnIndexOrThrow(CallLog.Calls.DATE))
+                            if (currentTime - time <= (15 * 60 * 1000)) {
+                                result = true
+                                break
+                            }
+                        } catch (ie: IllegalArgumentException) {
+                            Crashlytics.logException(ie)
+                            result = false
+                        }
+                    }
+                }
+                close()
+            }
+            return result
         }
     }
 

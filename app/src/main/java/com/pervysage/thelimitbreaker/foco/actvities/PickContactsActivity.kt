@@ -5,8 +5,8 @@ import android.os.Bundle
 import android.provider.ContactsContract
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.widget.Toast
+import com.crashlytics.android.Crashlytics
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.adapters.ContactAdapter
 import com.pervysage.thelimitbreaker.foco.database.Repository
@@ -59,7 +59,6 @@ class PickContactsActivity : AppCompatActivity() {
             }
         }
         ivDone.setOnClickListener {
-
             addMarkedToPriority()
             setResult(Activity.RESULT_OK)
             finish()
@@ -83,12 +82,18 @@ class PickContactsActivity : AppCompatActivity() {
             cursor?.run {
                 if (cursor.count > 0) {
                     while (cursor.moveToNext()) {
-                        val number = getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER))
-                        number?.run {
+                        val number = try {
+                            getString(getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER))
+                        } catch (ie: IllegalArgumentException) {
+                            Crashlytics.logException(ie)
+                            ""
+                        }
+                        if (number != null && number != "") {
                             val info = ContactInfo(obj.name, number)
                             list.add(info)
+                        } else {
+                            Toast.makeText(this@PickContactsActivity, "No Number found for ${obj.name}", Toast.LENGTH_SHORT).show()
                         }
-                                ?: Toast.makeText(this@PickContactsActivity, "No Number found for ${obj.name}", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     Toast.makeText(this@PickContactsActivity, "No Number found for ${obj.name}", Toast.LENGTH_SHORT).show()
@@ -118,14 +123,19 @@ class PickContactsActivity : AppCompatActivity() {
         )
         cursor?.run {
             while (cursor.moveToNext()) {
-                val name = getString(getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
-                val lookUpKey = getString(getColumnIndexOrThrow(ContactsContract.Contacts.LOOKUP_KEY))
-                if (oldMap.isNotEmpty() && !oldMap.containsKey(name))
-                    contactMap[name] = lookUpKey
-                else if (oldMap.isEmpty()) {
-                    contactMap[name] = lookUpKey
+
+                try {
+                    val name = getString(getColumnIndexOrThrow(ContactsContract.Contacts.DISPLAY_NAME))
+                    val lookUpKey = getString(getColumnIndexOrThrow(ContactsContract.Contacts.LOOKUP_KEY))
+                    when {
+                        name != null && lookUpKey != null && oldMap.isNotEmpty() && !oldMap.containsKey(name) -> contactMap[name] = lookUpKey
+                        name != null && lookUpKey != null && oldMap.isEmpty() -> contactMap[name] = lookUpKey
+                    }
+                } catch (ie: IllegalArgumentException) {
+                    Crashlytics.logException(ie)
                 }
             }
+            close()
         }
         contactMap.mapTo(contactList) {
             ContactModel(it.key, it.value, false)
