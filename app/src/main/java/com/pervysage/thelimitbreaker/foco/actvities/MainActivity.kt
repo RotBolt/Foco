@@ -11,7 +11,6 @@ import android.support.v7.app.AppCompatActivity
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.PopupMenu
-import com.crashlytics.android.Crashlytics
 import com.google.android.gms.location.places.ui.PlacePicker
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.adapters.PagerAdapter
@@ -19,7 +18,7 @@ import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.entities.generateGeoKey
 import com.pervysage.thelimitbreaker.foco.dialogs.EditPlaceNameDialog
-import io.fabric.sdk.android.Fabric
+import com.pervysage.thelimitbreaker.foco.utils.initCrashlytics
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -72,11 +71,7 @@ class MainActivity : AppCompatActivity() {
             addTab(newTab().setIcon(R.drawable.ic_motorcycle))
         }
 
-
-        Fabric.with(Fabric.Builder(this)
-                .kits(Crashlytics())
-                .debuggable(false)  // Enables Crashlytics debugger
-                .build())
+        initCrashlytics(this)
 
         val pagerAdapter = PagerAdapter(supportFragmentManager, tabLayout.tabCount)
 

@@ -8,6 +8,7 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.location.LocationManager
 import android.media.AudioManager
+import android.os.RemoteException
 import android.support.v4.app.FragmentActivity
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.NotificationManagerCompat
@@ -114,9 +115,7 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
             val notificationManagerCompat = NotificationManagerCompat.from(context)
             notificationManagerCompat.cancel(0)
             sendGeofenceNotification("Service Stopped for ${placePref.name}", -1, context)
-
-            val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                am.setStreamVolume(AudioManager.STREAM_RING, am.getStreamMaxVolume(AudioManager.STREAM_RING), AudioManager.FLAG_PLAY_SOUND)
+            revertRingerVolume()
             with(sharedPrefs.edit()) {
                 putString(context.getString(R.string.ACTIVE_NAME), "")
                 putString(context.getString(R.string.GEO_ACTIVE_GROUP), "")
@@ -124,6 +123,17 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
                 putString(context.getString(R.string.ACTIVE_LAT), "")
                 putString(context.getString(R.string.ACTIVE_LNG), "")
             }.commit()
+        }
+    }
+
+    private fun revertRingerVolume(){
+        val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        try {
+            am.setStreamVolume(AudioManager.STREAM_RING, am.getStreamMaxVolume(AudioManager.STREAM_RING), AudioManager.FLAG_PLAY_SOUND)
+        }catch (re:RemoteException){
+            Crashlytics.logException(re)
+        }catch (e:Exception){
+            Crashlytics.logException(e)
         }
     }
 
@@ -138,7 +148,6 @@ class PlacePrefsAdapter(private val context: Context, private var placePrefList:
 
             setOnClickListener {
                 if (placePrefs.isExpanded) {
-
                     viewManager.collapse(this) {
                         doWorkInCollapse(this, placePrefs, position)
                     }
