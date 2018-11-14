@@ -293,7 +293,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
                     }
 
-                    "None" -> takeCallerAction(phoneNumber, true)
+                    "None" -> takeCallerAction(phoneNumber, false)
                 }
             }
         }
