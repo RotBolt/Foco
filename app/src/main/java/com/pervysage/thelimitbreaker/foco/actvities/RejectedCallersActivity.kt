@@ -1,19 +1,16 @@
 package com.pervysage.thelimitbreaker.foco.actvities
 
-import android.app.NotificationManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.pervysage.thelimitbreaker.foco.R
-import com.pervysage.thelimitbreaker.foco.utils.MESSAGE_NOTIFY_ID
 import kotlinx.android.synthetic.main.activity_rejected_callers.*
 
 class RejectedCallersActivity : AppCompatActivity() {
@@ -42,13 +39,9 @@ class RejectedCallersActivity : AppCompatActivity() {
         val listRejectedNumbers = rejectedNumbers.split(";").filter { it != "" }
         val listRejectedTime = rejectedTime.split(";").filter { it != "" }
 
-
-        val notificanManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificanManager.cancel(MESSAGE_NOTIFY_ID)
-        Log.i("Ichi", """
-            name : $listRejectedCallers
-            numbers : $listRejectedNumbers
-        """.trimIndent())
+        ivCloseRejected.setOnClickListener {
+            finish()
+        }
         if (listRejectedCallers.isEmpty() && listRejectedNumbers.isEmpty()) {
             tvNoRejectedCallsLabel.visibility = View.VISIBLE
             rvRejectedCallers.visibility = View.GONE
@@ -64,15 +57,6 @@ class RejectedCallersActivity : AppCompatActivity() {
                         listRejectedTime[i]
                 ))
             }
-
-            ivCloseRejected.setOnClickListener {
-                sharedPrefs.edit().apply {
-                    putString(getString(R.string.REJECTED_CALLERS_KEY),"")
-                    putString(getString(R.string.REJECTED_NUMBERS_KEY),"")
-                    putString(getString(R.string.REJECTED_TIME),"")
-                }.commit()
-                finish()
-            }
             val adapter = RejectedCallerAdapter(listRejected, this, smsStatus)
             rvRejectedCallers.adapter = adapter
             rvRejectedCallers.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
@@ -80,14 +64,6 @@ class RejectedCallersActivity : AppCompatActivity() {
 
     }
 
-    override fun onDestroy() {
-        sharedPrefs.edit().apply {
-            putString(getString(R.string.REJECTED_CALLERS_KEY),"")
-            putString(getString(R.string.REJECTED_NUMBERS_KEY),"")
-            putString(getString(R.string.REJECTED_TIME),"")
-        }.commit()
-        super.onDestroy()
-    }
 
     class RejectedCallerAdapter(private val callersList: List<RejectedCallerInfo>,
                                 private val context: Context,

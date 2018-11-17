@@ -5,6 +5,10 @@
         android:title="Priority Contacts">
     </item>
     <item
+        android:title="Rejected Callers"
+        android:id="@+id/action_rejected">
+    </item>
+    <item
         android:title="Settings"
         android:id="@+id/action_settings">
     </item>
