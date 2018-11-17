@@ -108,7 +108,7 @@
             android:exported="true" />
 
         <receiver
-            android:name=".broadcastReceivers.NotificationDismissedReceiver"
+            android:name=".broadcastReceivers.DeleteOldRejectedReceiver"
             android:enabled="true"
             android:exported="true" />
 
