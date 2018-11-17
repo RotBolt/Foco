@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:background="@drawable/info_box_background"
+    android:padding="8dp"
+    android:layout_marginTop="16dp"
+    android:orientation="vertical"
+    android:layout_marginBottom="8dp"
+    android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/tvRejectedName"
+        android:padding="8dp"
+        android:text="Name : "
+        android:fontFamily="@font/maven_pro_medium"
+        android:textColor="@color/colorGenDark"
+        android:textSize="14sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/tvRejectedNumber"
+        android:padding="8dp"
+        android:text="Number : "
+        android:fontFamily="@font/maven_pro"
+        android:textColor="@color/colorGenDark"
+        android:textSize="12sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/tvRejectedTime"
+        android:padding="8dp"
+        android:text=" Time "
+        android:gravity="right"
+        android:fontFamily="@font/maven_pro"
+        android:textColor="@color/colorGenDark"
+        android:textSize="12sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
+    <TextView
+        android:id="@+id/tvMessageSentLabel"
+        android:padding="8dp"
+        android:text="Message Sent : You were busy "
+        android:fontFamily="@font/maven_pro_medium"
+        android:textColor="@color/colorGenDark"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>

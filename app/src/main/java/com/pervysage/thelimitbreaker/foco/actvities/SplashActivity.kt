@@ -5,10 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AppCompatActivity
 import com.pervysage.thelimitbreaker.foco.R
 
 class SplashActivity : AppCompatActivity() {
@@ -32,7 +32,7 @@ class SplashActivity : AppCompatActivity() {
                     if (permResult && dndAccess) {
                         startActivity(Intent(this, MainActivity::class.java))
                     } else {
-                        startActivity(Intent(this, PermissionsActivity::class.java))
+                        startActivity(Intent(this, DisclaimerActivity::class.java))
                     }
                 }, 1500
         )

@@ -5,11 +5,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.view.ContextThemeWrapper
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.EditText
+import android.widget.TextView
 import com.pervysage.thelimitbreaker.foco.R
 import kotlinx.android.synthetic.main.activity_settings.*
 
@@ -66,7 +73,9 @@ class SettingsActivity : AppCompatActivity() {
     private fun setSMSToCallerStatus(sharedPrefs: SharedPreferences) {
         val smsToCallerStatus = sharedPrefs.getBoolean(getString(R.string.SMS_TO_CALLER), false)
         switchSMSToCaller.isChecked = smsToCallerStatus
+        setCustomizeMessage(smsToCallerStatus,sharedPrefs)
         switchSMSToCaller.setOnCheckedChangeListener { _, isChecked ->
+            setCustomizeMessage(isChecked,sharedPrefs)
             sharedPrefs.edit().putBoolean(getString(R.string.SMS_TO_CALLER), isChecked).commit()
         }
     }
@@ -124,5 +133,55 @@ class SettingsActivity : AppCompatActivity() {
         privacyPolicy.setOnClickListener {
             startActivity(Intent(this, PrivacyPolicyActivity::class.java))
         }
+    }
+
+    private fun setCustomizeMessage(isEnabled:Boolean,sharedPrefs: SharedPreferences){
+        if (isEnabled){
+            customizeMsg.setOnClickListener {
+                showDialogCustomizeMessage(sharedPrefs)
+            }
+            tvCustomSms.setTextColor(ContextCompat.getColor(this,R.color.colorGenDark))
+            ivNextSms.colorFilter=PorterDuffColorFilter(ContextCompat.getColor(this,R.color.colorGenDark),PorterDuff.Mode.SRC_ATOP)
+        }else{
+            customizeMsg.setOnClickListener(null)
+            tvCustomSms.setTextColor(ContextCompat.getColor(this,R.color.colorTextDisable))
+            ivNextSms.colorFilter=PorterDuffColorFilter(ContextCompat.getColor(this,R.color.colorTextDisable),PorterDuff.Mode.SRC_ATOP)
+        }
+    }
+    private fun showDialogCustomizeMessage(sharedPrefs: SharedPreferences){
+        val theme = ContextThemeWrapper(this,R.style.DialogStyle)
+        val li = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val itemView = li.inflate(R.layout.layout_custom_message,null)
+        val etDriveModeMsg = itemView.findViewById<EditText>(R.id.etDriveModeMsg)
+        val etWorkPlaceMsg = itemView.findViewById<EditText>(R.id.etWorkPlaceMsg)
+        val defaultDmMsg = sharedPrefs.getString(getString(R.string.DRIVE_MODE_MSG),getString(R.string.DEFAULT_DM_MSG))?:getString(R.string.DEFAULT_DM_MSG)
+        val defaultWpMsg = sharedPrefs.getString(getString(R.string.WORK_PLACE_MSG),getString(R.string.DEFAULT_WP_MSG))?:getString(R.string.DEFAULT_WP_MSG)
+
+        etDriveModeMsg.setText(defaultDmMsg,TextView.BufferType.EDITABLE)
+        etWorkPlaceMsg.setText(defaultWpMsg,TextView.BufferType.EDITABLE)
+
+
+        val builder = AlertDialog.Builder(theme)
+                .setView(itemView)
+                .setPositiveButton("Ok"){ dialog, _ ->
+                   val dmMsg = etDriveModeMsg.text
+                    val wpMsg = etWorkPlaceMsg.text
+                    when {
+                        dmMsg.isEmpty() -> etDriveModeMsg.hint="Message Cannot be empty"
+                        wpMsg.isEmpty() -> etDriveModeMsg.hint="Message Cannot be empty"
+                        else -> {
+                            sharedPrefs.edit().apply {
+                                putString(getString(R.string.DRIVE_MODE_MSG),dmMsg.toString())
+                                putString(getString(R.string.WORK_PLACE_MSG),wpMsg.toString())
+                            }.commit()
+                            dialog.dismiss()
+                        }
+                    }
+                }.setNegativeButton("Cancel"){ dialog, _ ->
+                    dialog.dismiss()
+                }
+        val dialog = builder.create()
+        dialog.window.setBackgroundDrawableResource(R.drawable.dialog_background)
+        dialog.show()
     }
 }
