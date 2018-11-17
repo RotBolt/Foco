@@ -120,6 +120,10 @@ class MainActivity : AppCompatActivity() {
                         startActivity(Intent(this@MainActivity, MyContactsActivity::class.java))
                         true
                     }
+                    R.id.action_rejected -> {
+                        startActivity(Intent(this@MainActivity, RejectedCallersActivity::class.java))
+                        true
+                    }
                     else -> {
                         false
                     }
@@ -212,4 +216,5 @@ class MainActivity : AppCompatActivity() {
             nameDialog.show(supportFragmentManager, "EditPlaceName")
         }
     }
+
 }

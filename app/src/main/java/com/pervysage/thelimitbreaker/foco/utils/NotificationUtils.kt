@@ -14,7 +14,6 @@ import com.google.android.gms.location.Geofence
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.actvities.MainActivity
 import com.pervysage.thelimitbreaker.foco.actvities.RejectedCallersActivity
-import com.pervysage.thelimitbreaker.foco.broadcastReceivers.NotificationDismissedReceiver
 
 
 const val MESSAGE_NOTIFY_ID=2
@@ -175,12 +174,6 @@ fun sendRejectCallerNotification(context: Context,smsStatus:Boolean) {
     // Get a notification builder that's compatible with platform versions >= 4
     val builder = NotificationCompat.Builder(context)
 
-
-    val dismissIntent = Intent(context, NotificationDismissedReceiver::class.java).apply {
-        putExtra(MESSAGE_NOTIFY_KEY, MESSAGE_NOTIFY_ID)
-    }
-    val pendingDismissIntent = PendingIntent.getBroadcast(context.applicationContext, MESSAGE_NOTIFY_ID,dismissIntent,PendingIntent.FLAG_UPDATE_CURRENT)
-
     // Define the notification settings.
     builder.setSmallIcon(R.drawable.ic_notification)
             // In a real app, you may want to use a library like Volley
@@ -189,10 +182,10 @@ fun sendRejectCallerNotification(context: Context,smsStatus:Boolean) {
                     R.drawable.ic_notification))
             .setColor(ContextCompat.getColor(context, R.color.colorPrimaryDark))
             .setColorized(true)
-            .setDeleteIntent(pendingDismissIntent)
             .setContentTitle("${if (smsStatus) "Message sent to rejected callers" else "Calls rejected by foco on your behalf"}")
             .setContentText("Tap to see the callers")
             .setContentIntent(notificationPendingIntent)
+            .setAutoCancel(true)
 
     // Set the Channel ID for Android O.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

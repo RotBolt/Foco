@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.Toast
 import com.pervysage.thelimitbreaker.foco.R
+import com.pervysage.thelimitbreaker.foco.utils.scheduleDeleteOldRejectedCallers
 import kotlinx.android.synthetic.main.activity_permissions.*
 
 class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
@@ -62,10 +63,13 @@ class PermissionsActivity : AppCompatActivity(), View.OnClickListener {
                 }
             }
 
-            R.id.btnNext -> startActivity(Intent(this, MainActivity::class.java)
-                    .apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                    })
+            R.id.btnNext -> {
+                scheduleDeleteOldRejectedCallers(this)
+                startActivity(Intent(this, MainActivity::class.java)
+                        .apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        })
+            }
             R.id.btnGrantDND -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     val intent = Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)

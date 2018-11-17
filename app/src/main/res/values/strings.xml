@@ -20,7 +20,6 @@
         \nNOTE : Carrier Charges May apply</string>
     <string name="SHAKE_TO_MUTE_INFO">Just shake the phone to stop speaking the caller name when a call comes</string>
 
-
     <string name="REJECTED_CALLERS_KEY">rejected_callers</string>
     <string name="REJECTED_NUMBERS_KEY">rejected_numbers</string>
     <string name="REJECTED_TIME">rejected_time</string>
@@ -95,5 +94,6 @@
                       Privacy Policy Generator</a></p>
         ]]>
     </string>
+    <string name="FLIP_TO_END_INFO">Just flip the phone to hang up the phone (When Driving or At Important Location)</string>
 
 </resources>

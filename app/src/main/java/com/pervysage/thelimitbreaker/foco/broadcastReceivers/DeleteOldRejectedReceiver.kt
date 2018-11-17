@@ -6,8 +6,9 @@ import android.content.Intent
 import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.utils.MESSAGE_NOTIFY_ID
 import com.pervysage.thelimitbreaker.foco.utils.MESSAGE_NOTIFY_KEY
+import com.pervysage.thelimitbreaker.foco.utils.scheduleDeleteOldRejectedCallers
 
-class NotificationDismissedReceiver : BroadcastReceiver() {
+class DeleteOldRejectedReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val notificationId = intent.extras?.getInt(MESSAGE_NOTIFY_KEY)?:0
@@ -19,6 +20,8 @@ class NotificationDismissedReceiver : BroadcastReceiver() {
                 putString(context.getString(R.string.REJECTED_NUMBERS_KEY),"")
                 putString(context.getString(R.string.REJECTED_TIME),"")
             }.commit()
+
+            scheduleDeleteOldRejectedCallers(context)
         }
     }
 }
