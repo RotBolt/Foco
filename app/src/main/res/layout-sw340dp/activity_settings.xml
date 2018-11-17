@@ -144,6 +144,37 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
+
+            <LinearLayout
+                android:id="@+id/customizeMsg"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="7dp"
+                android:background="?attr/selectableItemBackground"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_weight="5"
+                    android:id="@+id/tvCustomSms"
+                    android:text="Customize Rejected CallerMessage"
+                    android:textColor="@color/colorGenDark"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/maven_pro_medium"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <ImageView
+                    android:id="@+id/ivNextSms"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_navigate_next"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/SayCallerNameContainer"
                 android:layout_width="match_parent"

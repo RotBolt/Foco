@@ -22,6 +22,7 @@ import com.pervysage.thelimitbreaker.foco.R
 import com.pervysage.thelimitbreaker.foco.database.Repository
 import com.pervysage.thelimitbreaker.foco.utils.DeviceMotionUtil
 import com.pervysage.thelimitbreaker.foco.utils.initCrashlytics
+import com.pervysage.thelimitbreaker.foco.utils.sendRejectCallerNotification
 import java.lang.reflect.Method
 import java.util.*
 import java.util.concurrent.*
@@ -133,13 +134,13 @@ class IncomingCallReceiver : BroadcastReceiver() {
             }
         }
 
-        private fun startMotionUtil(phoneNumber: String, shakeToMuteStatus: Boolean, smsToCallerStatus: Boolean, flipToEnd: Boolean) {
+        private fun startMotionUtil(phoneNumber: String,msg: String ,shakeToMuteStatus: Boolean, smsToCallerStatus: Boolean, flipToEnd: Boolean) {
             motionUtil.setAction {
                 if (flipToEnd) {
                     methodEndCall.invoke(iTelephony)
 
                     if (smsToCallerStatus) {
-                        sendSMS(phoneNumber)
+                        sendSMS(phoneNumber,msg)
                     }
                 }
             }
@@ -241,13 +242,8 @@ class IncomingCallReceiver : BroadcastReceiver() {
             }
         }
 
-        private fun sendSMS(phoneNumber: String) {
+        private fun sendSMS(phoneNumber: String,msg: String) {
             val smsManager = SmsManager.getDefault()
-            val msg = if (isDriveMode)
-                "Heya!! I am driving at the moment. Please Call me later if not important"
-            else
-                "Heya!! I am quite busy at the moment. Please Call me later if not important"
-
             smsManager.sendTextMessage(
                     phoneNumber,
                     null,
@@ -293,7 +289,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
                     }
 
-                    "None" -> takeCallerAction(phoneNumber, true)
+                    "None" -> takeCallerAction(phoneNumber, false)
                 }
             }
         }
@@ -317,9 +313,14 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 else -> "This might be important call. ${if (name.isNotEmpty()) "Call from $name" else ""}"
             }
 
+            val smsMsg = if (isDriveMode){
+                sharedPref.getString(context.getString(R.string.DRIVE_MODE_MSG),context.getString(R.string.DEFAULT_DM_MSG))?:context.getString(R.string.DEFAULT_DM_MSG)
+            }else{
+                sharedPref.getString(context.getString(R.string.WORK_PLACE_MSG),context.getString(R.string.DEFAULT_WP_MSG))?:context.getString(R.string.DEFAULT_WP_MSG)
+            }
             fun takeAllowCallerActions(msg: String) {
                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1)
-                    startMotionUtil(phoneNumber, shakeToMuteStatus, smsToCallerStatus, flipToEnd)
+                    startMotionUtil(phoneNumber,smsMsg ,shakeToMuteStatus, smsToCallerStatus, flipToEnd)
                 speakCallerName(sayCallerStatus, msg)
             }
 
@@ -329,7 +330,30 @@ class IncomingCallReceiver : BroadcastReceiver() {
                 else
                     telecomManager.endCall()
                 if (smsToCallerStatus)
-                    sendSMS(phoneNumber)
+                    sendSMS(phoneNumber,smsMsg)
+
+                val calendar = Calendar.getInstance()
+                val hour = calendar.get(Calendar.HOUR_OF_DAY)
+                val min = calendar.get(Calendar.MINUTE)
+
+                var rejectedCallers = sharedPref.getString(context.getString(R.string.REJECTED_CALLERS_KEY),"")?:""
+                var rejectedNumbers = sharedPref.getString(context.getString(R.string.REJECTED_NUMBERS_KEY),"")?:""
+                var rejectedTime = sharedPref.getString(context.getString(R.string.REJECTED_TIME),"")?:""
+
+
+                rejectedCallers+="${if (name!="") name else "Unknown Caller"};"
+                rejectedNumbers+="$phoneNumber;"
+                rejectedTime+="$hour:$min;"
+
+                sharedPref.edit().apply {
+                    putString(context.getString(R.string.REJECTED_CALLERS_KEY),rejectedCallers)
+                    putString(context.getString(R.string.REJECTED_NUMBERS_KEY),rejectedNumbers)
+                    putString(context.getString(R.string.REJECTED_TIME),rejectedTime)
+                }.commit()
+
+
+                sendRejectCallerNotification(context,smsToCallerStatus)
+
             }
 
             when {
@@ -341,9 +365,9 @@ class IncomingCallReceiver : BroadcastReceiver() {
         }
 
         private fun executeCheckNumber(phoneNumber: String): String {
-            val exceutor = Executors.newSingleThreadExecutor()
+            val executor = Executors.newSingleThreadExecutor()
             val checkNumberTask = Callable { checkNumber(phoneNumber) }
-            val futureTask = exceutor.submit(Callable { checkNumberTask })
+            val futureTask = executor.submit(Callable { checkNumberTask })
             return try {
                 futureTask.get().call()
             } catch (e: Exception) {

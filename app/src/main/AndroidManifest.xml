@@ -105,7 +105,15 @@
         <service
             android:name=".services.GeofenceReAddService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
+        <receiver
+            android:name=".broadcastReceivers.NotificationDismissedReceiver"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity android:name=".actvities.RejectedCallersActivity" />
+        <activity android:name=".actvities.DisclaimerActivity"></activity>
     </application>
 
 </manifest>

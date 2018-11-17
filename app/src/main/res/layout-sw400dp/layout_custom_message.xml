@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Work Place Message"
+        android:padding="8dp"
+        android:textSize="16sp"
+        android:fontFamily="@font/maven_pro_medium"
+        android:textColor="@color/colorGenDark"/>
+    <EditText
+        android:id="@+id/etWorkPlaceMsg"
+        android:padding="8dp"
+        android:textSize="15sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Drive Mode Message"
+        android:padding="8dp"
+        android:textSize="16sp"
+        android:fontFamily="@font/maven_pro_medium"
+        android:textColor="@color/colorGenDark"/>
+    <EditText
+        android:id="@+id/etDriveModeMsg"
+        android:padding="8dp"
+        android:textSize="15sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

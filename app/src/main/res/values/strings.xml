@@ -16,9 +16,27 @@
     <string name="FLIP_TO_END_STATUS">flipToEnd</string>
     <string name="SAY_CALLER_NAME">SAY_CALLER_NAME</string>
     <string name="ALLOW_CALLER_INFO">If the same person calls second time within 15-minute period, allow it</string>
-    <string name="SEND_SMS_INFO">A SMS will be sent to rejected callers whenever you are driving or at work place</string>
+    <string name="SEND_SMS_INFO">A SMS will be sent to rejected callers whenever you are driving or at work place.
+        \nNOTE : Carrier Charges May apply</string>
     <string name="SHAKE_TO_MUTE_INFO">Just shake the phone to stop speaking the caller name when a call comes</string>
 
+
+    <string name="REJECTED_CALLERS_KEY">rejected_callers</string>
+    <string name="REJECTED_NUMBERS_KEY">rejected_numbers</string>
+    <string name="REJECTED_TIME">rejected_time</string>
+
+    <string name="DRIVE_MODE_MSG">drive_mode_msg</string>
+    <string name="WORK_PLACE_MSG">work_place_message</string>
+
+    <string name="DEFAULT_DM_MSG">Heya!! I am driving at the moment. Please Call me later if not important</string>
+    <string name="DEFAULT_WP_MSG">Heya!! I am quite busy at the moment. Please Call me later if not important</string>
+
+
+    <string name="DISCLAIMER">
+        foco will request you to grant READ CALL LOGS and ACCESS CALLS so that it can determine unwanted calls or calls from unknown numbers
+        \n\nfoco will request you to grant permission SEND SMS. So that it can send SMS on your behalf to rejected callers (if Enabled in Settings)
+        \n\nfoco will request you to access your LOCATION, to determine you entered or exit your Work Place and function accordingly
+    </string>
     <string name="PRIVACY_POLICY">
         <![CDATA[
 <h2>Privacy Policy</h2> <p> Rohan Maity built the foco app as a Free app. This SERVICE is provided by
