@@ -95,5 +95,6 @@
         ]]>
     </string>
     <string name="FLIP_TO_END_INFO">Just flip the phone to hang up the phone (When Driving or At Important Location)</string>
+    <string name="REJECTED_INFO">Rejected calls will get deleted after 24 hours automatically</string>
 
 </resources>

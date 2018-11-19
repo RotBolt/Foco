@@ -343,7 +343,7 @@ class IncomingCallReceiver : BroadcastReceiver() {
 
                 rejectedCallers+="${if (name!="") name else "Unknown Caller"};"
                 rejectedNumbers+="$phoneNumber;"
-                rejectedTime+="$hour:$min;"
+                rejectedTime+="$hour:${String.format("%02d",min)};"
 
                 sharedPref.edit().apply {
                     putString(context.getString(R.string.REJECTED_CALLERS_KEY),rejectedCallers)

@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.pervysage.thelimitbreaker.foco.R
+import com.pervysage.thelimitbreaker.foco.utils.scheduleDeleteOldRejectedCallers
 import kotlinx.android.synthetic.main.activity_rejected_callers.*
 
 class RejectedCallersActivity : AppCompatActivity() {
@@ -18,14 +19,17 @@ class RejectedCallersActivity : AppCompatActivity() {
     data class RejectedCallerInfo(
             val name: String,
             val number: String,
-            val time:String
+            val time: String
     )
 
-    private lateinit var sharedPrefs:SharedPreferences
+    private lateinit var sharedPrefs: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_rejected_callers)
+
+        scheduleDeleteOldRejectedCallers(this)
+
         sharedPrefs = getSharedPreferences(getString(R.string.SHARED_PREF_KEY), Context.MODE_PRIVATE)
         val smsStatus = sharedPrefs.getBoolean(getString(R.string.SMS_TO_CALLER), false)
         val rejectedCallers = sharedPrefs.getString(getString(R.string.REJECTED_CALLERS_KEY), "")
@@ -42,13 +46,25 @@ class RejectedCallersActivity : AppCompatActivity() {
         ivCloseRejected.setOnClickListener {
             finish()
         }
+
+        ivDeleteRejected.setOnClickListener {
+            with(sharedPrefs.edit()) {
+                putString(getString(R.string.REJECTED_TIME), "")
+                putString(getString(R.string.REJECTED_NUMBERS_KEY), "")
+                putString(getString(R.string.REJECTED_CALLERS_KEY), "")
+            }.commit()
+            rvRejectedCallers.visibility=View.GONE
+            tvNoRejectedCallsLabel.visibility=View.VISIBLE
+            tvRejectedInfo.visibility=View.GONE
+        }
         if (listRejectedCallers.isEmpty() && listRejectedNumbers.isEmpty()) {
             tvNoRejectedCallsLabel.visibility = View.VISIBLE
             rvRejectedCallers.visibility = View.GONE
+            tvRejectedInfo.visibility=View.GONE
         } else {
             tvNoRejectedCallsLabel.visibility = View.GONE
             rvRejectedCallers.visibility = View.VISIBLE
-
+            tvRejectedInfo.visibility=View.VISIBLE
             val listRejected = ArrayList<RejectedCallerInfo>()
             for (i in listRejectedCallers.indices) {
                 listRejected.add(RejectedCallerInfo(
@@ -89,7 +105,7 @@ class RejectedCallersActivity : AppCompatActivity() {
             fun bind(info: RejectedCallerInfo, smsStatus: Boolean) {
                 tvRejectedName.text = "Name : ${info.name}"
                 tvRejectedNumber.text = "Number : ${info.number}"
-                tvRejectedTime.text=info.time
+                tvRejectedTime.text = info.time
 
                 if (!smsStatus)
                     tvMessageSentLabel.visibility = View.GONE

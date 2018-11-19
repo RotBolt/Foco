@@ -15,15 +15,16 @@ fun scheduleDeleteOldRejectedCallers(context: Context) {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     val calendar: Calendar = Calendar.getInstance().apply {
-        timeInMillis = System.currentTimeMillis()
-        set(Calendar.HOUR_OF_DAY, 18)
-        set(Calendar.MINUTE,31)
+        set(Calendar.HOUR_OF_DAY, 23)
+        set(Calendar.MINUTE,45)
     }
-    alarmManager.setInexactRepeating(
-            AlarmManager.RTC_WAKEUP,
-            calendar.timeInMillis,
-            AlarmManager.INTERVAL_DAY,
-            deleteOldIntent
-    )
+    if (calendar.timeInMillis>System.currentTimeMillis()) {
+        alarmManager.setInexactRepeating(
+                AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                AlarmManager.INTERVAL_DAY,
+                deleteOldIntent
+        )
+    }
 
 }

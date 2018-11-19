@@ -19,6 +19,7 @@ import com.pervysage.thelimitbreaker.foco.database.entities.PlacePrefs
 import com.pervysage.thelimitbreaker.foco.database.entities.generateGeoKey
 import com.pervysage.thelimitbreaker.foco.dialogs.EditPlaceNameDialog
 import com.pervysage.thelimitbreaker.foco.utils.initCrashlytics
+import com.pervysage.thelimitbreaker.foco.utils.scheduleDeleteOldRejectedCallers
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -66,6 +67,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        scheduleDeleteOldRejectedCallers(this)
         with(tabLayout) {
             addTab(newTab().setIcon(R.drawable.ic_place))
             addTab(newTab().setIcon(R.drawable.ic_motorcycle))
